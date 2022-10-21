@@ -1,8 +1,8 @@
-import os
 from fastapi import FastAPI
-import motor.motor_asyncio
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from app.mongo_db import Database
+
 
 load_dotenv()
 
@@ -13,9 +13,6 @@ app = FastAPI(
 )
 
 origins = ["*"]
-
-client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
-db = client.college
 
 app.add_middleware(
     CORSMiddleware,
