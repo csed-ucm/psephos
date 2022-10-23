@@ -11,6 +11,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
     DATABASE_URL, uuidRepresentation="standard"
 )
 Accounts_DB = client.accounts
+Groups_DB = client.groups
 
 async def get_user_db():
     yield BeanieUserDatabase(User)
