@@ -3,10 +3,11 @@ from beanie import init_beanie
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from app.mongo_db import Accounts_DB
-from app.routes import user
+from app.routes import group
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user_manager import auth_backend, current_active_user, fastapi_users
 from app.models.user import User
+from app.models.group import Group
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# app.include_router(user.router)
+app.include_router(group.router)
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
