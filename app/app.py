@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from beanie import init_beanie
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-from app.mongo_db import Accounts_DB
+from app.mongo_db import mainDB
 from app.routes import group
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user_manager import auth_backend, current_active_user, fastapi_users
@@ -60,8 +60,9 @@ async def authenticated_route(user: User = Depends(current_active_user)):
 @app.on_event("startup")
 async def on_startup():
     await init_beanie(
-        database=Accounts_DB,
+        database=mainDB,
         document_models=[
             User,
+            Group
         ],
     )

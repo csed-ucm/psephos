@@ -10,8 +10,8 @@ DATABASE_URL = os.environ["MONGODB_URL"]
 client = motor.motor_asyncio.AsyncIOMotorClient(
     DATABASE_URL, uuidRepresentation="standard"
 )
-Accounts_DB = client.accounts
-Groups_DB = client.groups
+mainDB = client.app
+
 
 async def get_user_db():
     yield BeanieUserDatabase(User)
