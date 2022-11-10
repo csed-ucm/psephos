@@ -7,7 +7,8 @@ from app.mongo_db import mainDB as Database
 from app.models.group import Group
 from app.models.user import User as userModel 
 from app.models.user_manager import auth_backend, current_active_user, fastapi_users
-
+from beanie.operators import In
+from beanie import PydanticObjectId
 
 #APIRouter creates path operations for user module
 router = APIRouter(
@@ -16,6 +17,8 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+# TODO: Add api callbaks for group creation, deletion, and modification
+# TODO: Add api callbaks for group membership management: add, remove, change role
 
 # List all groups that a user is a member of
 @router.get("/", response_description="List all groups", response_model=List[Group])
@@ -32,10 +35,16 @@ async def list_groups(owner_only: bool, user: userModel = Depends(current_active
 # Create a new group with user as the owner
 @router.post("/", response_description="Create new group", response_model=Group)
 async def create_group(name: str, user: userModel = Depends(current_active_user)):
+    # Todo: Check if group name is unique
+    # if (await Group.find({"name": name})):
+    #     return 400
+
+
+    # Add groupto user's groups list
     new_group = await Group(name=name, owner=user.id, admins=[user.id], users=[user.id]).insert()
+    user.groups.append(new_group.id)
     # created_group = await Group.get(new_group.id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(new_group))
-
 
 # @router.get("/{id}", response_description="Get a single group", response_model=groupModel)
 # async def show_group(id: str):
@@ -72,3 +81,27 @@ async def create_group(name: str, user: userModel = Depends(current_active_user)
 #         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 #     raise HTTPException(status_code=404, detail=f"group {id} not found")
+
+# Add a user to a group
+@router.post("/{group_id}/add_user", response_description="Add a user to a group")
+async def add_user_to_group(group_id: PydanticObjectId, email: str, user: userModel = Depends(current_active_user)):
+    # Check if user is an admin of the group
+    if (group := await Group.get(group_id)) is not None:
+        if user.id not in group.admins:
+            raise HTTPException(status_code=403, detail="User is not an admin of the group")
+    else:
+        raise HTTPException(status_code=404, detail=f"group {group_id} not found")
+
+    # Check if user exists
+    if (new_user := await userModel.find_one({"email": email})) is not None:
+        # Check if user is already in the group
+        if new_user.id in group.users:
+            raise HTTPException(status_code=400, detail="User is already in the group")
+        else:
+            group.users.append(new_user.id)
+            new_user.groups.append(group.id)
+            await group.save()
+            await new_user.save()
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+    else:
+        raise HTTPException(status_code=404, detail=f"user {email} not found")
