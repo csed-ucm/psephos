@@ -21,15 +21,25 @@ router = APIRouter(
 # TODO: Add api callbaks for group membership management: add, remove, change role
 
 # List all groups that a user is a member of
-@router.get("/", response_description="List all groups", response_model=List[Group])
+# TODO: Add response model
+@router.get("/", response_description="List all groups")  # response_model=List[Group]
 async def list_groups(owner_only: bool, user: userModel = Depends(current_active_user)):
-    user_id = user.id
-    if owner_only:
-        groups = await Group.find({"owner": user_id}).to_list()
-        # groups = await Group.find(Group.owner == user_id).to_list()
-    else:
-        groups = await Group.find({"$or": [{"owner": user_id}, {"users": user.id}, {"admins": user.id}]}).to_list()
-    return groups
+    groups = await Group.find(In(Group.id, user.groups)).to_list()
+    
+    owner_groups = []
+    admin_groups = []
+    user_groups = []
+    
+    use_id = user.id
+    for group in groups:
+        if use_id == group.owner:
+            owner_groups.append(group.name)
+        if use_id in group.admins:
+            admin_groups.append(group.name)
+        if use_id in group.users:
+            user_groups.append(group.name)
+        # groups = await Group.find({"$or": [{"owner": user_id}, {"users": user.id}, {"admins": user.id}]}).to_list()
+    return {"owner_groups": owner_groups, "admin_groups": admin_groups, "user_groups": user_groups}
 
 
 # Create a new group with user as the owner
@@ -89,6 +99,7 @@ async def add_user_to_group(group_id: PydanticObjectId, email: str, user: userMo
     if (group := await Group.get(group_id)) is not None:
         if user.id not in group.admins:
             raise HTTPException(status_code=403, detail="User is not an admin of the group")
+        pass
     else:
         raise HTTPException(status_code=404, detail=f"group {group_id} not found")
 
