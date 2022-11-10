@@ -17,16 +17,18 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
 
-    async def on_after_forgot_password(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
+    async def on_after_forgot_password(self, user: User, token: str, request: Optional[Request] = None):
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(
-            f"Verification requested for user {user.id}. Verification token: {token}")
+    async def on_after_request_verify(self, user: User, token: str, request: Optional[Request] = None):
+        print(f"Verification requested for user {user.id}. Verification token: {token}")
+    
+    async def on_before_delete(self, user: User, request: Optional[Request] = None):
+        print(f"User {user.id} is going to be deleted, cleaning up their data.")
+        # TODO: Delete all groups that the user owns
+        # for group in user.groups:
+            # await group.delete()
+
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
