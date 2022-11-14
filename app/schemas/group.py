@@ -10,13 +10,20 @@ class GroupList(BaseModel):
 
 class GroupRead(BaseModel):
     name: str
-    role: str
-    # owner: str
+    description: str
+    owner: str
 
-
+    class Config:
+            schema_extra = {
+                "example": {
+                    "name": "Foo",
+                    "description": "A very nice Group"
+                }
+            }
+            
 class GroupCreate(BaseModel):
     name: str = Field(default="", min_length=3, max_length=50, regex=r'^[A-Z][A-Za-z]{2,}(\s(\d+|[A-Z][A-Za-z]*))*$')
-    # description: str 
+    description: str = Field(default="", title="Description", max_length=300)
     
 # class groupUpdate(BaseModel):
 #     name: str
