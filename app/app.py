@@ -14,7 +14,7 @@ load_dotenv()
 app = FastAPI(
     title="Polling App",
     description="A REST API to manage users and polls",
-    version="1.0.0",
+    version="0.0.3",
 )
 
 app.include_router(routes.group.router)
