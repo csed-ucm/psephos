@@ -1,20 +1,20 @@
 from fastapi import FastAPI, Depends
 from beanie import init_beanie
-from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from app.mongo_db import mainDB
 from app import routes
+from app.config import get_settings
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user_manager import auth_backend, current_active_user, fastapi_users
 from app.models.user import User
 from app.models.group import Group
 
-load_dotenv()
-
+settings = get_settings()
+    
 app = FastAPI(
-    title="Polling App",
+    title=settings.app_name,
     description="A REST API to manage users and polls",
-    version="0.0.3",
+    version=settings.app_version,
 )
 
 app.include_router(routes.group.router)
