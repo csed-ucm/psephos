@@ -21,8 +21,8 @@ async def get_user_groups(user: User):
             result.append({"group_name": group.name, "role": "owner"})
         elif user.id in group.admins:
             result.append({"group_name": group.name, "role": "admin"})
-        elif user.id in group.users:
+        elif user.id in group.members:
             result.append({"group_name": group.name, "role": "user"})
 
-        # groups = await Group.find({"$or": [{"owner": user_id}, {"users": user.id}, {"admins": user.id}]}).to_list()
+        # groups = await Group.find({"$or": [{"owner": user_id}, {"members": user.id}, {"admins": user.id}]}).to_list()
     return result
