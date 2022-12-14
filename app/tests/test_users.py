@@ -16,6 +16,7 @@ client = TestClient(app)
 
 pytestmark = pytest.mark.asyncio
 
+# NOTE: Add logout test
 
 # Test User class
 @pytest.mark.skip()
@@ -40,8 +41,7 @@ new_user = TestUser()
 # Test to see if the user can create an account
 # Check if the response is 201(Success)
 # Check if the user information is correct
-async def test_register(client_test: AsyncClient):
-    global new_user
+async def test_register(client_test: AsyncClient, new_user: TestUser = new_user):
     # response = await client_test.get("/groups/")#, json={"email": "example@tmail.com", "password": "1234"})
     response = await client_test.post("/auth/register", json=new_user.dict())
     assert response.status_code == 201
@@ -51,6 +51,7 @@ async def test_register(client_test: AsyncClient):
     assert response.get("first_name") == new_user.first_name
     assert response.get("last_name") == new_user.last_name
     new_user.id = response.get("id") 
+    return new_user
 
 # Test to see if the user can register with an existing email
 async def test_register_existing_email(client_test: AsyncClient):
@@ -60,7 +61,7 @@ async def test_register_existing_email(client_test: AsyncClient):
     assert response.get("detail") == "REGISTER_USER_ALREADY_EXISTS"
 
 # Test to see if the new user can login with the correct credentials
-async def test_login(client_test: AsyncClient):
+async def test_login(client_test: AsyncClient, new_user: TestUser = new_user):
     response = await client_test.post("/auth/jwt/login", data={"username": new_user.email, "password": new_user.password})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
@@ -113,6 +114,6 @@ async def test_delete_account(client_test: AsyncClient):
     # assert response.status_code == status.HTTP_403_FORBIDDEN
     
 
-# TODO:Update the user's information
+# TODO: Update the user's information
 
     

@@ -10,6 +10,7 @@ from pydantic import BaseSettings
 from app.app import app
 from beanie import PydanticObjectId
 
+from app.tests import test_users
 
 fake = Faker()
 client = TestClient(app)
@@ -62,17 +63,17 @@ pytestmark = pytest.mark.asyncio
 
     ## Test 5: Test deleting a group
 '''
-@pytest.mark.skip()
-class TestUser(BaseModel):
-    first_name: str = fake.first_name()
-    last_name: str = fake.last_name()
-    email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
-    password: str = fake.password()
-    id: PydanticObjectId | None = None
-    token: str = ""
-    is_active: bool = True
-    is_superuser: bool = False
-    is_verified: bool = False
+# @pytest.mark.skip()
+# class TestUser(BaseModel):
+#     first_name: str = fake.first_name()
+#     last_name: str = fake.last_name()
+#     email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
+#     password: str = fake.password()
+#     id: PydanticObjectId | None = None
+#     token: str = ""
+#     is_active: bool = True
+#     is_superuser: bool = False
+#     is_verified: bool = False
 
 @pytest.mark.skip()
 class TestGroup(BaseModel):
@@ -85,47 +86,33 @@ class TestGroup(BaseModel):
     
 
 global owner, admins, members, group
-owner = TestUser()
-admins = [TestUser() for i in range(3)]
-users = [TestUser() for i in range(10)]
+owner = test_users.TestUser()
+# admins = [TestUser() for i in range(3)]
+# users = [TestUser() for i in range(10)]
 group = TestGroup()
 
 
 async def test_create_group(client_test: AsyncClient): 
-    # Create a temporary owner for test
-    response = await client_test.post("/auth/register", json=owner.dict())
-    assert response.status_code == 201
-    response = response.json()
-    owner.id = response.get("id")
-    assert owner.id is not None 
-    
-    # Login the owner
-    response = await client_test.post("/auth/jwt/login", data={"username": owner.email, "password": owner.password})
-    assert response.status_code == status.HTTP_200_OK
-    response = response.json()
-    assert response.get("token_type") == "bearer"
-    assert response.get("access_token") is not None
-    owner.token = response.get("access_token")
+    global owner, admins, members, group
+    # Register new user who will be the owner of the group
+    owner = await test_users.test_register(client_test, owner)
+    await test_users.test_login(client_test, owner)  # Login the user
 
     # Create a group
     response = await client_test.post("/groups", json={"name": group.name, "description": group.description} , headers={"Authorization": f"Bearer {owner.token}"})
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_201_CREATED
 
-# async def test_add_user_to_group(client_test: AsyncClient):
-#     # Create a temporary user for test
-#     for i in range(len(users)):
-#         response = await client_test.post("/auth/register", json=[users[i].dict(),])
-#         assert response.status_code == 201
-#         response = response.json()
-#         users[i].id = response.get("id")
-#         assert users[i].id is not None 
+async def test_add_user_to_group(client_test: AsyncClient):
+    # Create a temporary user for test
+    for i in range(len(users)):
+        user_add
 
-#         # Add user to group
-#         response = await client_test.post("/groups/{}",
-#                                           json={"group_id": group.id,
-#                                                 "user_id": users[0].id},
-#                                           headers={"Authorization": f"Bearer {owner.token}"})
-#         assert response.status_code == status.HTTP_200_OK
+        # Add user to group
+        response = await client_test.post("/groups/{}",
+                                          json={"group_id": group.id,
+                                                "user_id": users[0].id},
+                                          headers={"Authorization": f"Bearer {owner.token}"})
+        assert response.status_code == status.HTTP_200_OK
 
 
         
