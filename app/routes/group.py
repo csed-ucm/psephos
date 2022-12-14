@@ -222,9 +222,6 @@ async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMemb
     # TODO: Check if only one email is provided
     
     
-    # Check if user is joining a group or adding members
-    if 
-    
     
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
