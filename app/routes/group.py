@@ -58,17 +58,20 @@ async def list_groups(user: User = Depends(current_active_user),
             
         query.append({"owner": member_id})
         # TODO: Add member search for other roles
+    # NOTE: Users can only see groups they are a member of
+    # NOTE: Superusers can see all groups
     if user.is_superuser == False:
-        query.append({"member": user.id})
+        query.append({"members": user.id})
          
     search = {"$and": query} if query else {}
     all_groups = await Group.find(search).to_list()
-    search_result = []
+    # search_result = []
     
-    for group in all_groups:
-        search_result.append(group)
+    # for group in all_groups:
+    #     search_result.append(group)
 
-    return search_result
+    # return search_result
+    return all_groups
 
 
 # Create a new group with user as the owner
@@ -86,7 +89,7 @@ async def create_group(group: GroupCreateIn = Body(...),
     creator = await User.get(user.id)
     if creator:
         # Add group to user's groups list
-        new_group = await Group(name=group.name, owner=user.id, admins=[user.id], members=[user.id]).insert()
+        new_group = await Group(name=group.name, description=group.description, owner=user.id, admins=[user.id], members=[user.id]).insert()
         # if not new_group:
         #     raise group_exceptions.GroupCreationError(group.name)
         creator.groups.append(new_group.id)
@@ -159,7 +162,7 @@ async def get_group_owner(group_id: PydanticObjectId, user: User = Depends(curre
     
     group = await Group.get(group_id)
     if group:
-        if user.id not in group.members or user.is_superuser == False:
+        if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
         
         owner = await User.get(group.owner)
@@ -177,10 +180,10 @@ async def get_group_admins(group_id: PydanticObjectId, user: User = Depends(curr
     group = await Group.get(group_id)
     admins = []
     if group:
-        if user.id not in group.members or user.is_superuser == False:
+        if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
         admins = await User.find({"_id": {"$in": group.admins}}).to_list()
-    else :
+    else:
         raise group_exceptions.GroupNotFound(group_id)
     # Return list of admins or empty list
     return GroupReadMembers(members=admins)
@@ -192,7 +195,7 @@ async def get_group_members(group_id: PydanticObjectId, user: User = Depends(cur
     group = await Group.get(group_id)
     members = []
     if group:
-        if user.id not in group.members or user.is_superuser == False:
+        if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
         filter = [_user for _user in group.members if _user not in group.admins]
         members = await User.find({"_id": {"$in": filter}}).to_list()
@@ -220,7 +223,7 @@ async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMemb
     """
     
     # TODO: Check if only one email is provided
-    
+
     
     
     # Check if user is an admin of the group
