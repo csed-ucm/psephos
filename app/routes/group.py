@@ -79,9 +79,20 @@ async def create_group(group: GroupCreateIn = Body(...),
     # if (await Group.find({"name": name})):
     #     return 400
 
-    # Add group to user's groups list
-    new_group = await Group(name=group.name, owner=user.id, admins=[user.id], members=[user.id]).insert()
-    await User.update({"_id": user.id}, {"$push": {"groups": new_group.id}})
+    # NOTE: The update method is not working for some reason
+    # await User.update({"_id": user.id}, {"$push": {"groups": new_group.id}})
+
+    # HACK: Thus, find, update, and save user manually instead
+    creator = await User.get(user.id)
+    if creator:
+        # Add group to user's groups list
+        new_group = await Group(name=group.name, owner=user.id, admins=[user.id], members=[user.id]).insert()
+        # if not new_group:
+        #     raise group_exceptions.GroupCreationError(group.name)
+        creator.groups.append(new_group.id)
+        await creator.save()
+    else:
+        raise user_exceptions.UserNotFound(user.id)
     created_group = await Group.get(new_group.id)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=jsonable_encoder(created_group))
 
@@ -209,6 +220,11 @@ async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMemb
     """
     
     # TODO: Check if only one email is provided
+    
+    
+    # Check if user is joining a group or adding members
+    if 
+    
     
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
