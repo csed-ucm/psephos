@@ -9,11 +9,24 @@ from httpx import AsyncClient
 from pydantic import BaseSettings
 from app.app import app
 from beanie import PydanticObjectId
+import random
 
 from app.tests import test_users
 
 fake = Faker()
 client = TestClient(app)
+
+@pytest.mark.skip()
+class TestUser(BaseModel):
+    first_name: str = fake.first_name()
+    last_name: str = fake.last_name()
+    email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
+    password: str = fake.password()
+    id: PydanticObjectId | None = None
+    token: str = ""
+    is_active: bool = True
+    is_superuser: bool = False
+    is_verified: bool = False
 
 pytestmark = pytest.mark.asyncio
 
@@ -75,10 +88,15 @@ pytestmark = pytest.mark.asyncio
 #     is_superuser: bool = False
 #     is_verified: bool = False
 
+
+# TODO: Add a superuser test 
+# TODO: Creating a large number of groups and users
+# TODO: assert that a superuser can see all groups and users
+
 @pytest.mark.skip()
 class TestGroup(BaseModel):
     id: PydanticObjectId | None = None
-    name: str = fake.company()
+    name: str = "Group " + fake.aba()
     description: str = fake.sentence()
     owner: PydanticObjectId | None = None
     admins: list[PydanticObjectId] = []
@@ -87,8 +105,8 @@ class TestGroup(BaseModel):
 
 global owner, admins, members, group
 owner = test_users.TestUser()
-# admins = [TestUser() for i in range(3)]
-# users = [TestUser() for i in range(10)]
+admins = [test_users.TestUser() for i in range(3)]
+users = [test_users.TestUser() for i in range(10)]
 group = TestGroup()
 
 
@@ -101,18 +119,62 @@ async def test_create_group(client_test: AsyncClient):
     # Create a group
     response = await client_test.post("/groups", json={"name": group.name, "description": group.description} , headers={"Authorization": f"Bearer {owner.token}"})
     assert response.status_code == status.HTTP_201_CREATED
+    response = response.json()
+    assert response["name"] == group.name
+    
+    # Find group
+    response = await client_test.get("/groups/", params={"name": group.name}, headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()[0]  # Get the first group(should be the only group)
+    assert response["name"] == group.name
+    assert response["description"] == group.description
+    assert response["owner"] == owner.id
+    assert response["admins"] == [owner.id]
+    assert response["members"] == [owner.id] 
+    
+    # Set the group id
+    group.id = response["_id"]
+    
+    # Get the group
+    response = await client_test.get("/groups/{}", headers={"Authorization": f"Bearer {owner.token}"})
+    # TODO: Finish
+    
+    # Get the owner of the group
+    response = await client_test.get(f"/groups/{group.id}/owner", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["email"] == owner.email
+    assert response["first_name"] == owner.first_name
+    assert response["last_name"] == owner.last_name
+    
 
-async def test_add_user_to_group(client_test: AsyncClient):
-    # Create a temporary user for test
-    for i in range(len(users)):
-        user_add
 
-        # Add user to group
-        response = await client_test.post("/groups/{}",
-                                          json={"group_id": group.id,
-                                                "user_id": users[0].id},
-                                          headers={"Authorization": f"Bearer {owner.token}"})
-        assert response.status_code == status.HTTP_200_OK
+# @pytest.fixture(scope='session', autouse=True)
+# async def test_add_user_to_group(client_test: AsyncClient):
+#     # Create a temporary user for test
+#     members = []
+#     admins = []
+    
+
+#     for i in range(len(users)):
+#         response = await test_users.test_register(client_test, test_users.TestUser())
+#         print(response)
+#         # members.append({"email": users[i].email, "role": "user"})
+
+#     assert False
+
+#     # for i in range(len(users)):
+#     #     admins[i] = await test_users.test_register(client_test, users[i])
+#     #     members.append({"email": users[i].email, "role": "admin"})    
+
+#     # Get 
+
+#     # Add user to group
+#     response = await client_test.post("/groups/{}", 
+#                                       json={"group_id": group.id, "user_id": users[0].id},
+#                                       headers={"Authorization": f"Bearer {owner.token}"})
+
+#     assert response.status_code == status.HTTP_200_OK
 
 
         

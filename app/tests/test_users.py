@@ -42,6 +42,8 @@ new_user = TestUser()
 # Check if the response is 201(Success)
 # Check if the user information is correct
 async def test_register(client_test: AsyncClient, new_user: TestUser = new_user):
+    Faker.seed(0)
+    new_user = TestUser()
     # response = await client_test.get("/groups/")#, json={"email": "example@tmail.com", "password": "1234"})
     response = await client_test.post("/auth/register", json=new_user.dict())
     assert response.status_code == 201
@@ -50,7 +52,7 @@ async def test_register(client_test: AsyncClient, new_user: TestUser = new_user)
     assert response.get("email") == new_user.email
     assert response.get("first_name") == new_user.first_name
     assert response.get("last_name") == new_user.last_name
-    new_user.id = response.get("id") 
+    new_user.id= response.get("id") 
     return new_user
 
 # Test to see if the user can register with an existing email
