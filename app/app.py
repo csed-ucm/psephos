@@ -1,47 +1,46 @@
 from fastapi import FastAPI, Depends
 from beanie import init_beanie
-from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from app.mongo_db import mainDB
-from app.routes import group
+from app import routes
+from app.config import get_settings
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user_manager import auth_backend, current_active_user, fastapi_users
 from app.models.user import User
 from app.models.group import Group
 
-load_dotenv()
-
+settings = get_settings()
+    
 app = FastAPI(
-    title="Polling App",
+    title=settings.app_name,
     description="A REST API to manage users and polls",
-    version="1.0.0",
+    version=settings.app_version,
 )
 
-app.include_router(group.router)
-
-app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
-)
+app.include_router(routes.group.router)
+app.include_router(routes.user.router)
+app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["Auth"])
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",
-    tags=["auth"],
+    tags=["Auth"],
 )
 app.include_router(
     fastapi_users.get_reset_password_router(),
     prefix="/auth",
-    tags=["auth"],
+    tags=["Auth"],
 )
 app.include_router(
     fastapi_users.get_verify_router(UserRead),
     prefix="/auth",
-    tags=["auth"],
+    tags=["Auth"],
 )
 app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
-    tags=["users"],
+    tags=["Users"],
 )
+
 
 origins = ["*"]
 

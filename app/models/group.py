@@ -1,34 +1,20 @@
 from typing import List
-from beanie import PydanticObjectId, Document
+from beanie import PydanticObjectId, Document, before_event, after_event, Insert
 from pydantic import BaseModel, Field
 from app.models.user import User
+from devtools import debug
 
 class Group(Document):
-    # id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
-    name: str = Field(...)
-    # owner: User = Field(...)
-    owner: PydanticObjectId = Field(...)
-    users:  List[PydanticObjectId] = []
+    id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
+    # TODO: Add to documentation about the regex format
+    name: str = Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")   
+    description: str = Field(default="", title="Description", max_length=300)
+    owner: PydanticObjectId = Field(default_factory=PydanticObjectId, title="ownerID", description="Owner of the group")
+    members:  List[PydanticObjectId] = []
     admins: List[PydanticObjectId] = []
 
-    # Add user to group 
-    async def add_user(self, user_id: PydanticObjectId, role: str):
-        
-        # Check if user is already in group
-        if user_id in self.users:
-            # Return 400 with error message
-            raise 
-        
-        if role == "admin":
-            self.admins.append(user_id)
-        self.users.append(user_id)
-        await self.save()  
-    # Remove user from group
-
-    # Delete user from all groups
-    # def remove_user(self, user_id: PydanticObjectId):
-    #     if user_id in group.users:
-    #         group.users.remove(user_id)
-    #     if user_id in group.admins:
-    #         group.admins.remove(user_id)
-    #     group.save()
+    @after_event(Insert)
+    def update_groups(self):
+        # self.members.append(self.owner)
+        print("Group created", self.name)
+        # debug(self.name)

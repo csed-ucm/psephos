@@ -1,12 +1,13 @@
 import os
 import motor.motor_asyncio
-from dotenv import load_dotenv
 from fastapi_users.db import BeanieUserDatabase
 from app.models.user import User
+from app.config import get_settings
 
-load_dotenv()
 
-DATABASE_URL = os.environ["MONGODB_URL"]
+settings = get_settings()
+
+DATABASE_URL = settings.mongodb_url
 client = motor.motor_asyncio.AsyncIOMotorClient(
     DATABASE_URL, uuidRepresentation="standard"
 )
