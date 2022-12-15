@@ -5,6 +5,7 @@ import json
 import pytest
 from devtools import debug
 from httpx import AsyncClient
+from typing import Any
 from pydantic import BaseSettings, BaseModel, Field
 from app.app import app
 from app.models.user import User
@@ -42,8 +43,6 @@ new_user = TestUser()
 # Check if the response is 201(Success)
 # Check if the user information is correct
 async def test_register(client_test: AsyncClient, new_user: TestUser = new_user):
-    Faker.seed(0)
-    new_user = TestUser()
     # response = await client_test.get("/groups/")#, json={"email": "example@tmail.com", "password": "1234"})
     response = await client_test.post("/auth/register", json=new_user.dict())
     assert response.status_code == 201
@@ -119,3 +118,4 @@ async def test_delete_account(client_test: AsyncClient):
 # TODO: Update the user's information
 
     
+# TODO: Get user's group list
