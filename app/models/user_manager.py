@@ -7,6 +7,9 @@ from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from app.models.user import User
 from app.mongo_db import get_user_db
 
+from devtools import debug
+from app.utils import colored_dbg
+
 SECRET = "SECRET"
 
 
@@ -15,16 +18,17 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     verification_token_secret = SECRET
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
+        # print(f"User {user.id} has registered.")
+        colored_dbg.info(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(self, user: User, token: str, request: Optional[Request] = None):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        colored_dbg.info(f"User {user.id} has forgot their password. Reset token: {token}")
 
     async def on_after_request_verify(self, user: User, token: str, request: Optional[Request] = None):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        colored_dbg.info(f"Verification requested for user {user.id}. Verification token: {token}")
     
     async def on_before_delete(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} is going to be deleted, cleaning up their data.")
+        colored_dbg.info(f"User {user.id} is going to be deleted, cleaning up their data.")
         # TODO: Delete all groups that the user owns
         # for group in user.groups:
             # await group.delete()
