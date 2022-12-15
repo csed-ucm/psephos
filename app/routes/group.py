@@ -24,7 +24,7 @@ from app.schemas.user import *
 #APIRouter creates path operations for user module
 router = APIRouter(
     prefix="/groups",
-    tags=["Groups"],
+    # tags=["Groups"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -37,7 +37,7 @@ current_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 
 # List all groups can be used later for search queries
-@router.get("/", response_description="List all groups")  # response_model=List[Group]
+@router.get("/", response_description="List all groups", tags=["Groups"])  # response_model=List[Group]
 async def list_groups(user: User = Depends(current_active_user), 
                       group_name: str | None = None, 
                       member_data: PydanticObjectId | str | None = None):
@@ -75,7 +75,7 @@ async def list_groups(user: User = Depends(current_active_user),
 
 
 # Create a new group with user as the owner
-@router.post("/", response_description="Create new group", response_model=GroupCreateOut)
+@router.post("/", response_description="Create new group", response_model=GroupCreateOut, tags=["Groups"])
 async def create_group(group: GroupCreateIn = Body(...),
                        user: User = Depends(current_active_user)):
     # Todo: Check if group name is unique
@@ -85,7 +85,7 @@ async def create_group(group: GroupCreateIn = Body(...),
     # NOTE: The update method is not working for some reason
     # await User.update({"_id": user.id}, {"$push": {"groups": new_group.id}})
 
-    # HACK: Thus, find, update, and save user manually instead
+    # HACK: Find, update, and save user manually instead
     creator = await User.get(user.id)
     if creator:
         # Add group to user's groups list
@@ -101,7 +101,7 @@ async def create_group(group: GroupCreateIn = Body(...),
 
 
 # Get group by id
-@router.get("/{group_id}", response_description="Get group by id", response_model=GroupRead)
+@router.get("/{group_id}", response_description="Get group by id", response_model=GroupRead, tags=["Groups"])
 async def get_group(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     # find group by id
     group = await Group.get(group_id)
@@ -119,7 +119,7 @@ async def get_group(group_id: PydanticObjectId, user: User = Depends(current_act
     
 
 # Delete a group
-@router.delete("/{group_id}", response_description="Delete group")
+@router.delete("/{group_id}", response_description="Delete group", tags=["Groups"])
 async def delete_group(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     # Check if user is owner of group
     
@@ -137,7 +137,7 @@ async def delete_group(group_id: PydanticObjectId, user: User = Depends(current_
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # Update a group
-@router.put("/{id}", response_description="Update a group", response_class=GroupUpdateOut)
+@router.put("/{id}", response_description="Update a group", response_class=GroupUpdateOut, tags=["Groups"])
 async def update_group(id: str, group: GroupUpdateIn = Body(...)):
     new_group = {k: v for k, v in group.dict().items() if v is not None}
 
@@ -157,7 +157,7 @@ async def update_group(id: str, group: GroupUpdateIn = Body(...)):
 
 
 # Get the owner of a group
-@router.get("/{group_id}/owner", response_description="Get group owner", response_model=UserReadBasicInfo)
+@router.get("/{group_id}/owner", response_description="Get group owner", response_model=UserReadBasicInfo, tags=["Members"])
 async def get_group_owner(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     
     group = await Group.get(group_id)
@@ -175,7 +175,7 @@ async def get_group_owner(group_id: PydanticObjectId, user: User = Depends(curre
 
 
 # Get group admins
-@router.get("/{group_id}/admins/", response_description="Get list of group administrators", response_model=GroupReadMembers)
+@router.get("/{group_id}/admin/", response_description="Get list of group administrators", response_model=GroupReadMembers, tags=["Members"])
 async def get_group_admins(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     group = await Group.get(group_id)
     admins = []
@@ -188,10 +188,9 @@ async def get_group_admins(group_id: PydanticObjectId, user: User = Depends(curr
     # Return list of admins or empty list
     return GroupReadMembers(members=admins)
 
-
-# Get members of a group
-@router.get("/{group_id}/members", response_description="Get group members", response_model=GroupReadMembers)
-async def get_group_members(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
+# Get only members with user privileges
+@router.get("/{group_id}/users", response_description="Get group members", response_model=GroupReadMembers, tags=["Members"])
+async def get_group_users(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     group = await Group.get(group_id)
     members = []
     if group:
@@ -203,8 +202,22 @@ async def get_group_members(group_id: PydanticObjectId, user: User = Depends(cur
         raise group_exceptions.GroupNotFound(group_id)
     return GroupReadMembers(members=members)
 
-# Add user to group
-@router.post("/{group_id}/members", response_description="Add user(s) to a group")
+# Get all members of a group
+@router.get("/{group_id}/members", response_description="Get group members", response_model=GroupReadMembers, tags=["Members"])
+async def get_group_members(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
+    group = await Group.get(group_id)
+    members = []
+    if group:
+        if user.id not in group.members and user.is_superuser == False:
+            raise group_exceptions.UserNotAuthorized(user, group, "access in")
+        members = await User.find({"_id": {"$in": group.members}}).to_list()
+    else:
+        raise group_exceptions.GroupNotFound(group_id)
+    return GroupReadMembers(members=members)
+
+
+# Add user or multiple users to a group
+@router.post("/{group_id}/members", response_description="Add user(s) to a group", tags=["Members"])
 async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMembers, user: User = Depends(current_active_user)):
     """
     Add member(s) to a group. The front-end application must do validation to ensure 
@@ -240,11 +253,16 @@ async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMemb
     
     # Get the users from the database
     new_members = {}
+    new_admins = []
     email_list = list(email_dict.keys())
     async for user in User.find({"email": {"$in": email_list}}):
         if user:
-            email_list.remove(user.email)
             new_members[user.id] = user
+            if email_dict[user.email] == "admin":
+                new_admins.append(user.id)
+            email_list.remove(user.email)
+        else:
+            raise user_exceptions.UserNotFound(user.email)
      
     # Check if all emails are valid
     if email_list:
@@ -255,12 +273,12 @@ async def add_user_to_group(group_id: PydanticObjectId, InputModel: GroupAddMemb
         if new_user.id in group.members:
             raise group_exceptions.UserAlreadyExists(new_user, group)
     
-    await group.update({"$push": {"members": {"$each": list(new_members.keys())}}})
+    await group.update({"$push": {"members": {"$each": list(new_members.keys())}, "admins": {"$each": new_admins}}})
     await User.find({"_id": {"$in": list(new_members.keys())}}).update({"$push": {"groups": group_id}}) 
     
         
 # Remove a user from a group
-@router.delete("/{group_id}/member/{email}", response_description="Remove a user from a group")
+@router.delete("/{group_id}/member/{email}", response_description="Remove a user from a group", tags=["Members"])
 async def remove_user(group_id: PydanticObjectId, email: str, user: User = Depends(current_active_user)):
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
