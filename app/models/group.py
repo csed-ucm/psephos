@@ -3,6 +3,7 @@ from beanie import PydanticObjectId, Document, before_event, after_event, Insert
 from pydantic import BaseModel, Field
 from app.models.user import User
 from devtools import debug
+from app.utils import colored_dbg
 
 class Group(Document):
     id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
@@ -14,7 +15,6 @@ class Group(Document):
     admins: List[PydanticObjectId] = []
 
     @after_event(Insert)
-    def update_groups(self):
+    def create_group(self):
         # self.members.append(self.owner)
-        print("Group created", self.name)
-        # debug(self.name)
+        colored_dbg.info(f'New group "{self.id}" has been created')
