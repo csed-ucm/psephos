@@ -65,13 +65,22 @@ async def list_groups(user: User = Depends(current_active_user),
          
     search = {"$and": query} if query else {}
     all_groups = await Group.find(search).to_list()
-    # search_result = []
+    search_result = []
     
-    # for group in all_groups:
-    #     search_result.append(group)
+    # Convert Group to GroupReadSimple
+    for group in all_groups:
+        # Check role of user
+        if group.owner == user.id:
+            role = "owner"
+        elif user.id in group.admins:
+            role = "admin"
+        else:
+            role = "member"
+        
+        search_result.append(GroupReadSimple(name=group.name, role=role))
 
-    # return search_result
-    return all_groups
+    return JSONResponse(status_code=status.HTTP_200_OK, content=jsonable_encoder({"groups": search_result}))
+    # return all_groups
 
 
 # Create a new group with user as the owner
@@ -101,7 +110,7 @@ async def create_group(group: GroupCreateIn = Body(...),
 
 
 # Get group by id
-@router.get("/{group_id}", response_description="Get group by id", response_model=GroupRead, tags=["Groups"])
+@router.get("/{group_id}", response_description="Get group by id", response_model=GroupReadFull, tags=["Groups"])
 async def get_group(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     # find group by id
     group = await Group.get(group_id)
@@ -111,7 +120,7 @@ async def get_group(group_id: PydanticObjectId, user: User = Depends(current_act
             if owner:
                 email = owner.email
                 name = "{} {}".format(owner.first_name, owner.last_name)
-                return GroupRead(name=group.name, description=group.description, owner_name=name, owner_email=email)
+                return GroupReadFull(name=group.name, description=group.description, owner_name=name, owner_email=email)
         else:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
     else:
@@ -175,44 +184,66 @@ async def get_group_owner(group_id: PydanticObjectId, user: User = Depends(curre
 
 
 # Get group admins
-@router.get("/{group_id}/admin/", response_description="Get list of group administrators", response_model=GroupReadMembers, tags=["Members"])
+@router.get("/{group_id}/admins/", response_description="Get list of group administrators", response_model=GroupReadMembers, tags=["Members"])
 async def get_group_admins(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     group = await Group.get(group_id)
+    users = []
     admins = []
     if group:
         if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
-        admins = await User.find({"_id": {"$in": group.admins}}).to_list()
+        users = await User.find({"_id": {"$in": group.admins}}).to_list()
     else:
         raise group_exceptions.GroupNotFound(group_id)
     # Return list of admins or empty list
+    for user in users:
+        if user.id != group.owner:
+            admins.append(GroupMember(email=user.email, first_name=user.first_name, last_name=user.last_name, role="admin"))
+    
     return GroupReadMembers(members=admins)
 
 # Get only members with user privileges
 @router.get("/{group_id}/users", response_description="Get group members", response_model=GroupReadMembers, tags=["Members"])
 async def get_group_users(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     group = await Group.get(group_id)
+    users = []
     members = []
     if group:
         if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
         filter = [_user for _user in group.members if _user not in group.admins]
-        members = await User.find({"_id": {"$in": filter}}).to_list()
+        users = await User.find({"_id": {"$in": filter}}).to_list()
     else:
         raise group_exceptions.GroupNotFound(group_id)
+    
+    for user in users:
+        members.append(GroupMember(email=user.email, first_name=user.first_name, last_name=user.last_name, role="user"))
+    
     return GroupReadMembers(members=members)
 
 # Get all members of a group
 @router.get("/{group_id}/members", response_description="Get group members", response_model=GroupReadMembers, tags=["Members"])
 async def get_group_members(group_id: PydanticObjectId, user: User = Depends(current_active_user)):
     group = await Group.get(group_id)
+    users = []
     members = []
+    
     if group:
         if user.id not in group.members and user.is_superuser == False:
             raise group_exceptions.UserNotAuthorized(user, group, "access in")
-        members = await User.find({"_id": {"$in": group.members}}).to_list()
+        users = await User.find({"_id": {"$in": group.members}}).to_list()
     else:
         raise group_exceptions.GroupNotFound(group_id)
+    
+    for user in users:
+        if user.id == group.owner:
+            role = "owner"
+        elif user.id in group.admins:
+            role = "admin"
+        else:
+            role = "user"
+        members.append(GroupMember(email=user.email, first_name=user.first_name, last_name=user.last_name, role=role))
+    
     return GroupReadMembers(members=members)
 
 
