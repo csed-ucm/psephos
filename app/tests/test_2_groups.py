@@ -10,8 +10,9 @@ from pydantic import BaseSettings
 from app.app import app
 from beanie import PydanticObjectId
 import random
-
-from app.tests import test_users
+from app.utils.colored_dbg import info 
+from app.models.user import User
+from app.tests import test_1_users
 
 fake = Faker()
 client = TestClient(app)
@@ -84,10 +85,10 @@ pytestmark = pytest.mark.asyncio
 @pytest.mark.skip()
 def create_random_user():
     first_name = fake.first_name()
-    last_name = fake.last_name()
+    last_name = fake.unique.last_name()
     email = (first_name[0] + last_name + "@ucmerced.edu").lower()
     password = fake.password()
-    return test_users.TestUser(first_name=first_name, last_name=last_name, email=email, password=password)
+    return test_1_users.TestUser(first_name=first_name, last_name=last_name, email=email, password=password)
 
 @pytest.mark.skip()
 class TestGroup(BaseModel):
@@ -109,31 +110,73 @@ group = TestGroup()
 async def test_create_group(client_test: AsyncClient): 
     global owner, admins, members, group
     # Register new user who will be the owner of the group
-    owner = await test_users.test_register(client_test, owner)
-    await test_users.test_login(client_test, owner)  # Login the user
+    print("\n")
+    owner = await test_1_users.test_register(client_test, owner)
+    info("Created owner {} + {} ({})".format(owner.first_name, owner.last_name, owner.email))
+    await test_1_users.test_login(client_test, owner)  # Login the user
+    info("Logged in owner {} + {} ({})".format(owner.first_name, owner.last_name, owner.email))
+
+    # Get list of groups
+    response = await client_test.get("/groups", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["groups"] == []
+    info("Owner has no groups")
 
     # Create a group
     response = await client_test.post("/groups", json={"name": group.name, "description": group.description} , headers={"Authorization": f"Bearer {owner.token}"})
     assert response.status_code == status.HTTP_201_CREATED
     response = response.json()
     assert response["name"] == group.name
-    
-    # Find group
-    response = await client_test.get("/groups/", params={"name": group.name}, headers={"Authorization": f"Bearer {owner.token}"})
+    group.id = response["_id"]  # Set the group id
+    info("Created group {} with id {}".format(group.name, group.id))
+
+    # Find group in user's list of groups
+    response = await client_test.get("/groups", params={"name": group.name}, headers={"Authorization": f"Bearer {owner.token}"})
     assert response.status_code == status.HTTP_200_OK
-    response = response.json()[0]  # Get the first group(should be the only group)
+    response = response.json()
+    response = response["groups"][0]  # Get the first group(should be the only group)
     assert response["name"] == group.name
+    assert response["role"] == "owner"
+    info("Owner has group \"{}\" with id {}".format(group.name, group.id))
+    
+    # Get the group and and validate basic information
+    response = await client_test.get(f"/groups/{group.id}", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
     assert response["description"] == group.description
-    assert response["owner"] == owner.id
-    assert response["admins"] == [owner.id]
-    assert response["members"] == [owner.id] 
+    assert response["owner_name"] == owner.first_name + " " + owner.last_name
+    assert response["owner_email"] == owner.email
+    info("Group \"{}\" has correct name, description and owner".format(group.name))
     
-    # Set the group id
-    group.id = response["_id"]
+    # Check that there is no admins
+    # NOTE: Technically, the owner is an admin too, but this request returns members without strictly admin privilege
+    response = await client_test.get(f"/groups/{group.id}/admins", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert len(response["members"]) == 0
+    info("Group \"{}\" has no admins (except owner)".format(group.name))
     
-    # Get the group
-    response = await client_test.get("/groups/{}", headers={"Authorization": f"Bearer {owner.token}"})
-    # TODO: Finish
+    # Check that the owner is the only user
+    # NOTE: Technically, the owner is also a user, but this request returns members with user privileges
+    response = await client_test.get(f"/groups/{group.id}/users", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert len(response["members"]) == 0
+    # temp = response["members"][0]
+    # assert temp["email"] == owner.email
+    # assert temp["role"] == "admin"
+    info("Group \"{}\" has no users (except owner)".format(group.name))
+    
+    # Check that the owner is the only member
+    response = await client_test.get(f"/groups/{group.id}/members", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert len(response["members"]) == 1
+    temp = response["members"][0]
+    assert temp["email"] == owner.email
+    assert temp["role"] == "owner"
+    info("Group \"{}\" has one member: {} ({}) - ({})".format(group.name, owner.first_name, owner.email, temp["role"]))
     
     # Get the owner of the group
     response = await client_test.get(f"/groups/{group.id}/owner", headers={"Authorization": f"Bearer {owner.token}"})
@@ -142,31 +185,35 @@ async def test_create_group(client_test: AsyncClient):
     assert response["email"] == owner.email
     assert response["first_name"] == owner.first_name
     assert response["last_name"] == owner.last_name
+    info("Group \"{}\" owner information is correct".format(group.name))
     
 
 
-async def test_add_user_to_group(client_test: AsyncClient):
+async def test_add_members_to_group(client_test: AsyncClient):
+    print("\n")
+    info("Testing adding members to group \"{}\"".format(group.name))
     members = []  # List of members to add to the group
 
     for i in range(len(users)):
-        users[i] = await test_users.test_register(client_test, users[i])
+        users[i] = await test_1_users.test_register(client_test, users[i])
+        info("User {} + {} ({}) has registered".format(users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": users[i].email, "role": "user"})
+        info("User {} has been added to the group list as a member".format(users[i].first_name))
 
     for i in range(len(admins)):
-        admins[i] = await test_users.test_register(client_test, admins[i])
+        admins[i] = await test_1_users.test_register(client_test, admins[i])
+        info("User {} + {} ({}) has registered".format(users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": admins[i].email, "role": "admin"})    
+        info("User {} has been added to the group list as an admin".format(users[i].first_name))
 
     # Post the members to the group
     response = await client_test.post(f"/groups/{group.id}/members", json={"members": members}, 
                                       headers={"Authorization": f"Bearer {owner.token}"})
-
     assert response.status_code == status.HTTP_200_OK
+    info("Members have been successfully added to the group")
     
     # Add owner to the members list
     members.append({"email": owner.email, "role": "owner"})
-    users.extend(admins)
-    users.append(owner)
-    admins.append(owner)
     
     # Check that all users were added to the group as members
     response = await client_test.get(f"/groups/{group.id}/members", headers={"Authorization": f"Bearer {owner.token}"})
@@ -176,20 +223,59 @@ async def test_add_user_to_group(client_test: AsyncClient):
     email_list = [ member["email"] for member in response["members"]]
     for i in range(len(members)):
         assert members[i]["email"] in email_list
+    info(f"The group has {len(members)} members and returned the correct list of emails")
+    
+    # Check that all users were added to the group as users
+    response = await client_test.get(f"/groups/{group.id}/users", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert len(response["members"]) == len(users)
+    email_list = [ member["email"] for member in response["members"]]
+    for i in range(len(users)):
+        assert members[i]["email"] in email_list
+    info(f"The group has {len(users)} members and returned the correct list of emails")
+       
    
     # Check that all admins were added to the group as admins 
-    response = await client_test.get(f"/groups/{group.id}/admin", headers={"Authorization": f"Bearer {owner.token}"})
+    response = await client_test.get(f"/groups/{group.id}/admins", headers={"Authorization": f"Bearer {owner.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert len(response["members"]) == len(admins)
     email_list = [ admin["email"] for admin in response["members"]]
     for i in range(len(admins)):
         assert admins[i].email in email_list
+    info(f"The group has {len(admins)} admins and returned the correct list of emails")
 
+# TODO: Test editing the group
 
-# TODO: Delete the group and users 
+# TODO: Test removing members from the group
+
+# TODO: Test updating members roles
+
+# Delete the group and users 
 async def test_delete_group(client_test: AsyncClient):
-    # TODO: Check that the group is deleted
-    # TODO: Check that no users have the group in their groups list
+    print("\n")
+    info("Testing group deletion")
+    # Get the group
+    response = await client_test.get(f"/groups/{group.id}", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["name"] == group.name
+    info(f'Group "{group.name}" exists')
+    
+    # Delete the group
+    response = await client_test.delete(f"/groups/{group.id}", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    info(f'Group "{group.name}" has been successfully deleted')
+    
+    # Test to get the group
+    response = await client_test.get(f"/groups/{group.id}", headers={"Authorization": f"Bearer {owner.token}"})
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    info(f'Group "{group.name}" is not found')
 
-# TODO: Clean up 
+    # TODO: Check that no users have the group in their groups list
+    
+
+    # Delete the users by email
+    await User.find({"email": {"$in": [user.email for user in (users+admins+[owner])]}}).delete()
+    info("All users deleted")

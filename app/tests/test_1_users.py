@@ -112,7 +112,6 @@ async def test_delete_account(client_test: AsyncClient):
         await found_user.save()
     response = await client_test.delete(f"/users/{new_user.id}", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    # assert response.status_code == status.HTTP_403_FORBIDDEN
     
 
 # TODO: Update the user's information
