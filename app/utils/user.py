@@ -1,11 +1,11 @@
 from beanie.operators import In
 from app.models.group import Group
-from app.models.user  import User
+from app.models.user import User
 
 
 # Desc
-async def get_user_groups(user: User):
-    """Get all groups that a user is a member of. 
+async def get_user_groups(user: User) -> list[dict[str, str]]:
+    """Get all groups that a user is a member of.
     The function returns a list of dictionaries with role as a key and and a list of groups as a value.
 
     Args:
@@ -24,5 +24,6 @@ async def get_user_groups(user: User):
         elif user.id in group.members:
             result.append({"group_name": group.name, "role": "user"})
 
-        # groups = await Group.find({"$or": [{"owner": user_id}, {"members": user.id}, {"admins": user.id}]}).to_list()
+        # groups = await Group.find({"$or": [{"owner": user_id}, {"members":
+        # user.id}, {"admins": user.id}]}).to_list()
     return result
