@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polling_app_server"
+description = "My package description"
+authoor = "Michael Pisman"
+version = "0.5.0"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["one", "two"]
+license = {text = "BSD 3-Clause License"}
+classifiers = [
+    "Framework :: FastAPI",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    'fastapi[all]',
+    'uvicorn[all]',
+    'fastapi-users',
+    'beanie',
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+testings = [
+    'pytest',
+    'pytest-cov',
+    'faker',
+    'flake8',
+    'tox',
+    'mypy',
+]
+
+[optional.package_data]
+polling_app_server = [
+    "py.typed",
+]
+
+[tool.flake8]
+max-line-length = 88
+
+[tool.pytest.ini_options]
+addopts = "--cov=polling_app_server"
+testpaths = ["tests"]
+asyncio_mode="auto"
+filterwarnings = [
+    "ignore:'cgi' is deprecated:DeprecationWarning",
+    "ignore:'crypt' is deprecated:DeprecationWarning",
+    "ignore::pytest.PytestCollectionWarning"
+]
+
+[tool.mypy]
+mypy_path = "app"
+check_untyped_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unreachable = true
+no_implicit_reexport = true
