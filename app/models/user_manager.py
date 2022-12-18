@@ -9,12 +9,9 @@ from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from app.models.user import User
 from app.mongo_db import get_user_db
 
-<<<<<<< Updated upstream
-=======
 # from devtools import debug
 from app.utils import colored_dbg
 
->>>>>>> Stashed changes
 SECRET = "SECRET"
 
 
@@ -23,19 +20,6 @@ class UserManager(ObjectIDIDMixin,
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
-<<<<<<< Updated upstream
-    async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
-
-    async def on_after_forgot_password(self, user: User, token: str, request: Optional[Request] = None):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
-
-    async def on_after_request_verify(self, user: User, token: str, request: Optional[Request] = None):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
-    
-    async def on_before_delete(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} is going to be deleted, cleaning up their data.")
-=======
     async def on_after_register(self, user: User,
                                 request: Optional[Request] = None) -> None:
         # print(f"User {user.id} has registered.")
@@ -58,7 +42,6 @@ class UserManager(ObjectIDIDMixin,
                                request: Optional[Request] = None) -> None:
         colored_dbg.info(
             f"User {user.id} is going to be deleted, cleaning up their data.")
->>>>>>> Stashed changes
         # TODO: Delete all groups that the user owns
         # for group in user.groups:
         # await group.delete()
