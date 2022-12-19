@@ -2,7 +2,7 @@ from colorama import Fore
 from typing import List
 
 
-# Print colored messages 
+# Print colored messages
 def print_in_color(
     *message: List[str] | str,
     color: str,
