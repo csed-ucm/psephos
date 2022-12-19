@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: 'Create env file'
         run: |
-          echo "${{ secrets.MONGODB_URL }}" > .env
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" > .env
       - uses: actions/checkout@v2
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v2
