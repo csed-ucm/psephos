@@ -47,7 +47,6 @@ packaging==22.0
 passlib==1.7.4
 platformdirs==2.6.0
 pluggy==1.0.0
--e git+ssh://git@github.com/mike-pisman/PollingApp.git@3279770f0ad1c12089ff9e51fc5d78ac90a26148#egg=polling_app_server
 pycodestyle==2.10.0
 pycparser==2.21
 pydantic==1.10.2
