@@ -1,6 +1,7 @@
 name: Tests
 
 on:
+  - push
   - pull_request
 
 jobs:
@@ -22,6 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
       - name: Test with tox
-        env:
-          TOXENV: ${{matrix.toxenv}}
+        # env:
+        #   TOXENV: ${{matrix.toxenv}}
         run: tox
