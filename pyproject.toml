@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polling_app_server"
+# TODO: ADD version
+# version = "0.5.0"
 description = "My package description"
-authoor = "Michael Pisman"
-version = "0.5.0"
+authors = [{email = "mpisman@gmail.com"}, {name = "Michael Pisman"}]
 readme = "README.md"
 requires-python = ">=3.9"
 keywords = ["one", "two"]
