@@ -1,4 +1,4 @@
-import os
+from typing import AsyncGenerator
 import motor.motor_asyncio
 from fastapi_users.db import BeanieUserDatabase
 from app.models.user import User
@@ -14,5 +14,5 @@ client = motor.motor_asyncio.AsyncIOMotorClient(
 mainDB = client.app
 
 
-async def get_user_db():
+async def get_user_db() -> AsyncGenerator:
     yield BeanieUserDatabase(User)

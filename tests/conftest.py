@@ -5,6 +5,7 @@ from httpx import AsyncClient
 from app.app import app
 import asyncio
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     try:
@@ -13,6 +14,7 @@ def event_loop():
         loop = asyncio.new_event_loop()
     yield loop
     loop.close()
+
 
 # @pytest.fixture()
 # def event_loop():
@@ -26,6 +28,7 @@ def event_loop():
 
 #     loop.close()
 
+
 @pytest.fixture()
 async def client_test():
     """
@@ -35,4 +38,3 @@ async def client_test():
     async with LifespanManager(app):
         async with AsyncClient(app=app, base_url="http://test", follow_redirects=True) as ac:
             yield ac
-
