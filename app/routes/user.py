@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from app.models.user import User
 from app.models.user_manager import current_active_user
-from beanie import PydanticObjectId
+from app.schemas.user import UserID
+# from beanie import PydanticObjectId
 from app.exceptions import user as user_exceptions
 from app.utils.user import get_user_groups
 
@@ -18,7 +19,7 @@ router = APIRouter(
 # List all groups that a user is a member of
 @router.get("/groups",
             response_description="List all groups that a user is a member of")
-async def list_user_groups(user_id: PydanticObjectId | None = None,
+async def list_user_groups(user_id: UserID | None = None,
                            user: User = Depends(current_active_user)) -> JSONResponse:
     if user_id:
         search = await User.find_one({"_id": user_id})

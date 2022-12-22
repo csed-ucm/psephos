@@ -7,6 +7,15 @@ from pydantic import Field, EmailStr, BaseModel
 # class UserRead(schemas.BaseUser[PydanticObjectId]):
 
 
+class UserID(PydanticObjectId):
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(
+            type="string",
+            example="5eb7cf5a86d9755df3a6c593",
+        )
+
+
 class UserRead(schemas.BaseUser[PydanticObjectId]):
     # email: EmailStr
     email: EmailStr = Field(...)
