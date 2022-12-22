@@ -136,7 +136,7 @@ async def create_group(group: GroupCreateIn = Body(...),
 @router.get("/{group_id}", response_description="Get group by id",
             response_model=GroupReadFull, tags=["Groups"])
 async def get_group(group_id: GroupID,
-                    user: User = Depends(current_active_user)):
+                    user: User = Depends(current_active_user)) -> GroupReadFull | JSONResponse:
     # find group by id
     group = await Group.get(group_id)
     if group:

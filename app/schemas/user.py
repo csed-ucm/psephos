@@ -9,15 +9,15 @@ from pydantic import Field, EmailStr, BaseModel
 
 class UserID(PydanticObjectId):
     @classmethod
-    def __modify_schema__(cls, field_schema):
+    def __modify_schema__(cls, field_schema):  # type: ignore
         field_schema.update(
             type="string",
-            example="5eb7cf5a86d9755df3a6c593",
-        )
+            example="5eb7cf5a86d9755df3a6c593")
 
 
-class UserRead(schemas.BaseUser[PydanticObjectId]):
+class UserRead(schemas.BaseUser[UserID]):
     # email: EmailStr
+    id: UserID = Field(...)
     email: EmailStr = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)

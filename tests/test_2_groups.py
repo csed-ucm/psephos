@@ -8,10 +8,10 @@ from pydantic import BaseModel
 from httpx import AsyncClient
 # from pydantic import BaseSettings
 from app.app import app
-from beanie import PydanticObjectId
-# import random
 from app.utils import colored_dbg
 from app.models.user import User
+from app.schemas.user import UserID
+from app.schemas.group import GroupID
 # from app.exceptions.group import GroupNotFound
 from tests import test_1_users
 
@@ -69,22 +69,11 @@ pytestmark = pytest.mark.asyncio
 
     ## Test 5: Test deleting a group
 '''
-# @pytest.mark.skip()
-# class TestUser(BaseModel):
-#     first_name: str = fake.first_name()
-#     last_name: str = fake.last_name()
-#     email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
-#     password: str = fake.password()
-#     id: PydanticObjectId | None = None
-#     token: str = ""
-#     is_active: bool = True
-#     is_superuser: bool = False
-#     is_verified: bool = False
-
 
 # TODO: Add a superuser test
 # TODO: Creating a large number of groups and users
 # TODO: assert that a superuser can see all groups and users
+
 
 @pytest.mark.skip()
 def create_random_user():
@@ -97,12 +86,12 @@ def create_random_user():
 
 @pytest.mark.skip()
 class TestGroup(BaseModel):
-    id: PydanticObjectId | None = None
+    id: GroupID | None = None
     name: str = "Group " + fake.aba()
     description: str = fake.sentence()
-    owner: PydanticObjectId | None = None
-    admins: list[PydanticObjectId] = []
-    members: list[PydanticObjectId] = []
+    owner: UserID | None = None
+    admins: list[UserID] = []
+    members: list[UserID] = []
 
 
 global owner, admins, members, group
@@ -279,7 +268,7 @@ async def test_delete_group_no_owner(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Testing group deletion from non existing group")
 
-    random_group_id = PydanticObjectId()
+    random_group_id = GroupID()
 
     # Delete the group
     # NOTE: pytest.raises() does not work(with async functions?)

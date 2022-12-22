@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from app.models.user import User
 from app.models.user_manager import current_active_user
-from app.schemas.user import UserID
+from app.schemas.user import UserID, UserRead
 # from beanie import PydanticObjectId
 from app.exceptions import user as user_exceptions
 from app.utils.user import get_user_groups
@@ -31,3 +31,8 @@ async def list_user_groups(user_id: UserID | None = None,
     # TODO: Consider using a proper model
     groups = await get_user_groups(user)
     return JSONResponse(groups)
+
+
+@router.get("/me", response_description="Get current user")
+async def list_user(user: User = Depends(current_active_user)) -> UserRead:
+    return UserRead(**user.dict())
