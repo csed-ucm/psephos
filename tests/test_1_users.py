@@ -5,10 +5,10 @@ import pytest
 # from devtools import debug
 from httpx import AsyncClient
 from pydantic import BaseModel
-from beanie import PydanticObjectId
 from app.app import app
 from app.models.user import User
 from app.utils import colored_dbg
+from app.schemas.user import UserID
 
 
 fake = Faker()
@@ -26,7 +26,7 @@ class TestUser(BaseModel):
     last_name: str = fake.last_name()
     email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
     password: str = fake.password()
-    id: PydanticObjectId | None = None
+    id: UserID | None = None
     token: str = ""
     is_active: bool = True
     is_superuser: bool = False
@@ -54,6 +54,7 @@ async def test_register(client_test: AsyncClient, new_user: TestUser = new_user)
     assert response.get("email") == new_user.email
     assert response.get("first_name") == new_user.first_name
     assert response.get("last_name") == new_user.last_name
+    print(response)
     new_user.id = response.get("id")
     colored_dbg.test_success("New user has been registered: ", new_user.email, "with id: ", new_user.id)
     return new_user

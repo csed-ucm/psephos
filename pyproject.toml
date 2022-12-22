@@ -19,7 +19,7 @@ classifiers = [
 dependencies = [
     'fastapi[all]',
     'uvicorn[all]',
-    'fastapi-users',
+    'fastapi-users[beanie]',
     'beanie',
 ]
 dynamic = ["version"]
