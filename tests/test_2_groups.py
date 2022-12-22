@@ -13,7 +13,7 @@ from beanie import PydanticObjectId
 from app.utils import colored_dbg
 from app.models.user import User
 # from app.exceptions.group import GroupNotFound
-from tests import test_2_users
+from tests import test_1_users
 
 fake = Faker()
 client = TestClient(app)
@@ -92,7 +92,7 @@ def create_random_user():
     last_name = fake.unique.last_name()
     email = (first_name[0] + last_name + "@ucmerced.edu").lower()
     password = fake.password()
-    return test_2_users.TestUser(first_name=first_name, last_name=last_name, email=email, password=password)
+    return test_1_users.TestUser(first_name=first_name, last_name=last_name, email=email, password=password)
 
 
 @pytest.mark.skip()
@@ -116,10 +116,10 @@ async def test_create_group(client_test: AsyncClient):
     global owner, admins, members, group
     # Register new user who will be the owner of the group
     print("\n")
-    owner = await test_2_users.test_register(client_test, owner)
+    owner = await test_1_users.test_register(client_test, owner)
     colored_dbg.test_success("Created owner {} {} ({})".format(
         owner.first_name, owner.last_name, owner.email))
-    await test_2_users.test_login(client_test, owner)  # Login the user
+    await test_1_users.test_login(client_test, owner)  # Login the user
     colored_dbg.test_success("Logged in owner {} {} ({})".format(
         owner.first_name, owner.last_name, owner.email))
 
@@ -210,7 +210,7 @@ async def test_add_members_to_group(client_test: AsyncClient):
     members = []  # List of members to add to the group
 
     for i in range(len(users)):
-        users[i] = await test_2_users.test_register(client_test, users[i])
+        users[i] = await test_1_users.test_register(client_test, users[i])
         colored_dbg.test_info("User {} + {} ({}) has registered".format(
             users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": users[i].email, "role": "user"})
@@ -218,7 +218,7 @@ async def test_add_members_to_group(client_test: AsyncClient):
             users[i].first_name))
 
     for i in range(len(admins)):
-        admins[i] = await test_2_users.test_register(client_test, admins[i])
+        admins[i] = await test_1_users.test_register(client_test, admins[i])
         colored_dbg.test_info("User {} + {} ({}) has registered".format(
             users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": admins[i].email, "role": "admin"})
