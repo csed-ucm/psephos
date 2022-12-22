@@ -8,33 +8,44 @@ from fastapi import Response
 from app.schemas.user import UserAddToGroup
 
 
+class GroupID(PydanticObjectId):
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(
+            type="string",
+            example="5eb7cf5a86d9755df3a6c593",
+        )
+
+
 class GroupReadSimple(BaseModel):
-    name: str = Field(
-        default="No Name",
-        min_length=3,
-        max_length=50,
-        regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
-    role: str = Field(default="user", title="Role")
+    name: str = Field(example="Group 01", title="Name")
+    role: str = Field(example="user", title="Role")
 
     class Config:
         schema_extra = {
-            "user example": {
+            "example": {
                 "name": "Group 01",
                 "role": "user",
-            },
-            "admin example": {
-                "name": "Group 01",
-                "role": "admin",
             }
         }
 
 
 class GroupReadFull(BaseModel):
-    name: str
+    name: str = Field(example="Group 01", title="Name")
     description: str
     owner_name: str
     owner_email: EmailStr
     # TODO: Add list of members (emails with roles)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Example Group",
+                "description": "This is an example group",
+                "owner_name": "John Doe",
+                "owner_email": "jdoe@example.com",
+            }
+        }
 
 
 class GroupList(BaseModel):
@@ -42,17 +53,28 @@ class GroupList(BaseModel):
 
     class Config:
         schema_extra = {
-            "List of groups": {
+            "example": {
                 "groups": [
                     {"name": "Group 01", "role": "user"},
                     {"name": "Group 02", "role": "user"},
                     {"name": "Group 03", "role": "admin"},
                 ]
-            },
-            "Empty list of groups": {
-                "groups": []
             }
         }
+
+    # class Config:
+    #     schema_extra = {
+    #         "List of groups": {
+    #             "groups": [
+    #                 {"name": "Group 01", "role": "user"},
+    #                 {"name": "Group 02", "role": "user"},
+    #                 {"name": "Group 03", "role": "admin"},
+    #             ]
+    #         },
+    #         "Empty list of groups": {
+    #             "groups": []
+    #         }
+    #     }
 
 
 class GroupCreateIn(BaseModel):
@@ -74,7 +96,7 @@ class GroupCreateIn(BaseModel):
 
 class GroupCreateOut(BaseModel):
     message: str = "Group created successfully"
-    id: PydanticObjectId
+    id: GroupID
     name: str
     # description: str
 
