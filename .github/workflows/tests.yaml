@@ -2,7 +2,6 @@ name: Back-end Testing
 
 on:
   - push
-  - pull_request
 
 jobs:
   test:
