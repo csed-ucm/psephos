@@ -27,6 +27,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
       - name: Test with tox
-        # env:
-        #   TOXENV: ${{matrix.toxenv}}
         run: tox
+        env:
+          MONGODB_URL: ${{ secrets.MONGODB_URL }}
