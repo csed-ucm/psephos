@@ -26,7 +26,7 @@
             "isWholeLine": true,
         },
         {
-            "text": "FIXME:",
+            "text": "BUG:",
             "backgroundColor": "#ff9580",
             "color": "#414558",
             "isWholeLine": true,
