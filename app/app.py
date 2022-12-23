@@ -63,7 +63,8 @@ async def on_startup() -> None:
     await init_beanie(
         database=mainDB,
         document_models=[
-            User,
-            Group
+            # BUG: Incompatible type "Type[Group]"; expected "Union[Type[View], str]"
+            User,  # type: ignore
+            Group  # type: ignore
         ],
     )
