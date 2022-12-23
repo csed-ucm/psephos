@@ -1,0 +1,60 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "cSpell.words": [
+        "fastapi",
+        "httpx",
+        "IDID",
+        "jsonable",
+        "Pydantic",
+        "pytestmark",
+        "ucmerced",
+        "uvicorn"
+    ],
+    "editor.language.brackets": [],
+    "todohighlight.isEnable": true,
+    "todohighlight.isCaseSensitive": true,
+    "todohighlight.keywords": [
+        {
+            "text": "NOTE:",
+            "backgroundColor": "#9580ff",
+            // "overviewRulerColor": "grey"
+            "isWholeLine": true,
+        },
+        {
+            "text": "HACK:",
+            "backgroundColor": "#ff80ab",
+            "isWholeLine": true,
+        },
+        {
+            "text": "BUG:",
+            "backgroundColor": "#ff9580",
+            "color": "#414558",
+            "isWholeLine": true,
+        },
+        {
+            "text": "TODO(string):",
+            "backgroundColor": "#ffca80",
+            "color": "#414558",
+            "isWholeLine": true,
+        },
+        {
+            "text": "DEBUG:",
+            "backgroundColor": "#80ffab",
+            "isWholeLine": true,
+        },
+    ],
+    "todohighlight.defaultStyle": {
+        "color": "#414558",
+        "overviewRulerColor": "#ffab00",
+        "cursor": "pointer",
+        // "border": "1px solid #eee",
+        // "borderRadius": "2px",
+        "isWholeLine": true,
+    },
+    "flake8.args": [
+        "--max-line-length=120",
+        // "--ignore=E203,E501,W503",
+        // "--max-complexity=18",
+        // "--select=B,C,E,F,W,T4,B9",
+    ],
+}

@@ -19,7 +19,7 @@ class UserManager(ObjectIDIDMixin,
                   BaseUserManager[User, PydanticObjectId]):  # type: ignore
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
-    
+
     async def on_after_register(self, user: User,
                                 request: Optional[Request] = None) -> None:
         # print(f"User {user.id} has registered.")

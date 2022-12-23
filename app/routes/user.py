@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from app.models.user import User
 from app.models.user_manager import current_active_user
-from app.schemas.user import UserID
+from app.schemas.user import UserID, UserRead
 # from beanie import PydanticObjectId
 from app.exceptions import user as user_exceptions
 from app.utils.user import get_user_groups
