@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from app.models.user import User
 from app.models.user_manager import current_active_user
@@ -6,7 +6,7 @@ from app.schemas.user import UserID, UserRead
 # from beanie import PydanticObjectId
 from app.exceptions import user as user_exceptions
 from app.utils.user import get_user_groups
-
+from app.utils.colored_dbg import info
 
 # APIRouter creates path operations for user module
 router = APIRouter(
@@ -33,6 +33,11 @@ async def list_user_groups(user_id: UserID | None = None,
     return JSONResponse(groups)
 
 
-@router.get("/me", response_description="Get current user")
-async def list_user(user: User = Depends(current_active_user)) -> UserRead:
-    return UserRead(**user.dict())
+# Delete current user account
+@router.delete("/me",
+               status_code=status.HTTP_204_NO_CONTENT,
+               response_description="The account has been deleted")
+async def delete_user(user: User = Depends(current_active_user)) -> JSONResponse:
+    info(f"Account #{user.id} has been deleted")
+    await user.delete()
+    return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={})
