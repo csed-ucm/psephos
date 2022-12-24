@@ -43,11 +43,14 @@ async def check_user_exists(user: User | UserID | EmailStr) -> User:
         User: returns User object of found user, raises a HTTP exception otherwise
     """
     if isinstance(user, User):
-        found_user = await User.find_one({"_id": user.id})
+        found_user = await User.get(user.id)
     elif isinstance(user, UserID):
-        found_user = await User.find_one({"_id": user})
+        found_user = await User.get(user)
     elif isinstance(user, EmailStr):
         found_user = await User.find_one({"email": user})
+    else:
+        # Display error message with the type of the user object
+        raise TypeError("Invalid type for user", type(user))
 
     if not found_user:
         raise UserNotFound(str(user))
