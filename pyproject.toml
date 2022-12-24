@@ -2,10 +2,13 @@
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.dynamic]
+version = {attr = "app.config.VERSION"}
+
 [project]
 name = "polling_app_server"
-# TODO: ADD version
-version = "0.5.0"
+# version = "0.0.5"
+dynamic= ["version"]
 description = "My package description"
 authors = [{email = "mpisman@gmail.com"}, {name = "Michael Pisman"}]
 readme = "README.md"
@@ -22,7 +25,6 @@ dependencies = [
     'fastapi-users[beanie]',
     'beanie',
 ]
-dynamic = ["version"]
 
 [project.optional-dependencies]
 testings = [
@@ -40,7 +42,7 @@ polling_app_server = [
 ]
 
 [tool.flake8]
-max-line-length = 88
+max-line-length = 120
 
 [tool.pytest.ini_options]
 addopts = "--cov=polling_app_server"
