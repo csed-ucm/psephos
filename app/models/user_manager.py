@@ -15,8 +15,7 @@ from app.utils import colored_dbg
 SECRET = "SECRET"
 
 
-class UserManager(ObjectIDIDMixin,
-                  BaseUserManager[User, UserID]):  # type: ignore
+class UserManager(ObjectIDIDMixin, BaseUserManager[User, UserID]):  # type: ignore
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
@@ -47,12 +46,8 @@ class UserManager(ObjectIDIDMixin,
         # await group.delete()
 
 
-async def get_user_manager(user_db:
-                           BeanieUserDatabase[User, UserID]
-                           = Depends(get_user_db)) -> AsyncGenerator[
-                               BaseUserManager[User,  # type: ignore
-                                               UserID],
-                               None]:
+async def get_user_manager(user_db: BeanieUserDatabase[User, UserID] =
+                           Depends(get_user_db)) -> AsyncGenerator[BaseUserManager[User, UserID], None]:  # type: ignore
     yield UserManager(user_db)
 
 

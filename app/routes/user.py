@@ -32,7 +32,7 @@ async def list_my_groups(user: User = Depends(current_active_user)) -> GroupList
 
     """
     if not user:
-        raise user_exceptions.UserNotFound(user)
+        raise user_exceptions.UserNotFound(user.id)
     return await get_user_groups(user)
 
 
@@ -83,7 +83,8 @@ async def delete_user(user: User = Depends(current_active_user)) -> JSONResponse
         **204** - *The account has been deleted*
     """
     await user.delete()
-    if check_user_exists(user):
+    info(f"User {user.id} deleted")
+    found_user = await User.find_one({"_id": user.id})
+    if found_user:
         raise HTTPException(status_code=500, detail="User was not deleted")
-    info(f"Account #{user.id} has been deleted")
     return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={})
