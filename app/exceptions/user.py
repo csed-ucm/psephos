@@ -1,17 +1,17 @@
 from fastapi import HTTPException
 # from fastapi.logger import logger
-from beanie import PydanticObjectId
 # from pydantic import EmailStr, Field
 # from app.models.user import User
 # from app.models.group import Group
+from app.schemas.user import UserID
 from app.utils.colored_dbg import print_warning
 
 
 class UserNotFound(HTTPException):
-    def __init__(self, user: PydanticObjectId | str | None = None):
+    def __init__(self, user: UserID | str | None = None):
         message = "User not found"  # Default message
         if user:
-            if user.__class__ == PydanticObjectId:
+            if user.__class__ == UserID:
                 message = f"User with id {user} not found"
             elif user.__class__ == str:
                 message = f"User with email {user} not found"

@@ -4,7 +4,6 @@ from app.models.user import User
 from app.models.user_manager import current_active_user
 from app.schemas.user import UserID
 from app.schemas.group import GroupList
-# from beanie import PydanticObjectId
 from app.exceptions import user as user_exceptions
 from app.utils.user import get_user_groups, check_user_exists
 from app.utils.colored_dbg import info
