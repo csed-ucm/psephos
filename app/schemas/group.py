@@ -18,8 +18,8 @@ class GroupID(PydanticObjectId):
 
 
 class GroupReadSimple(BaseModel):
-    name: str = Field(example="Group 01", title="Name")
-    role: str = Field(example="user", title="Role")
+    name: str = Field(title="Name")
+    role: str = Field(title="Role")
 
     class Config:
         schema_extra = {
@@ -61,20 +61,6 @@ class GroupList(BaseModel):
                 ]
             }
         }
-
-    # class Config:
-    #     schema_extra = {
-    #         "List of groups": {
-    #             "groups": [
-    #                 {"name": "Group 01", "role": "user"},
-    #                 {"name": "Group 02", "role": "user"},
-    #                 {"name": "Group 03", "role": "admin"},
-    #             ]
-    #         },
-    #         "Empty list of groups": {
-    #             "groups": []
-    #         }
-    #     }
 
 
 class GroupCreateIn(BaseModel):
@@ -169,3 +155,7 @@ class GroupReadMembers(BaseModel):
                 ]
             }
         }
+
+
+class GroupMemberUpdateRole(BaseModel):
+    role: str = Field(example="admin", title="Role")
