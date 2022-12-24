@@ -8,7 +8,6 @@ from pydantic import EmailStr
 # Types
 from typing import Any, Dict, List
 # Beanie
-# from beanie import PydanticObjectId
 # Local imports
 from app.mongo_db import mainDB as Database
 from app.models.group import Group
@@ -432,21 +431,21 @@ async def promote_user(group_id: GroupID, user_id: UserID,
         raise group_exceptions.GroupNotFound(group_id)
 
     # Get the user from the database
-    found_user = await check_user_exists(user_id)
-
-    if found_user.id in group.members:
+    found_user = await check_user_exists(UserID(user_id))
+    if found_user.id not in group.members:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="User must be a member of the group to be promoted")
     if found_user.id == group.owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Owner cannot be demoted")
-    message = f"Member {user.first_name} {user.last_name} role has not been changed"
+
+    message = f"Member {found_user.first_name} {found_user.last_name} role has not been changed"
     if payload.role == "admin" and found_user.id not in group.admins:
-        await group.update({"$push": {"admins": user.id}})
-        message = f"Member {user.first_name} {user.last_name} has been promoted to admin"
-    elif payload.role == "user" and found_user.id not in group.admins:
-        await group.update({"$pull": {"admins": user.id}})
-        message = f"Member {user.first_name} {user.last_name} has been demoted to user"
+        await group.update({"$push": {"admins": found_user.id}})
+        message = f"Member {found_user.first_name} {found_user.last_name} has been promoted to admin"
+    elif payload.role == "user" and found_user.id in group.admins:
+        await group.update({"$pull": {"admins": found_user.id}})
+        message = f"Member {found_user.first_name} {found_user.last_name} has been demoted to found_user"
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail=message)
