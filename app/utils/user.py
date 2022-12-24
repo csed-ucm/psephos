@@ -1,10 +1,14 @@
 from beanie.operators import In
 from app.models.group import Group
 from app.models.user import User
+from pydantic import EmailStr
+from app.schemas.user import UserID
+from app.schemas.group import GroupReadSimple, GroupList
+from app.exceptions.user import UserNotFound
 
 
-# Desc
-async def get_user_groups(user: User) -> list[dict[str, str]]:
+# Get all groups that a user is a member of with the user's role in that group
+async def get_user_groups(user: User) -> GroupList:
     """Get all groups that a user is a member of.
     The function returns a list of dictionaries with role as a key and and a list of groups as a value.
 
@@ -12,18 +16,39 @@ async def get_user_groups(user: User) -> list[dict[str, str]]:
         user (User): User object with list of group ids
 
     Returns:
-        Dict(str, List[Group]): Dictionary with groups separated by role
+        GroupList: Model with the list of groups that user belongs to and the user's role in that group.
     """
     groups = await Group.find(In(Group.id, user.groups)).to_list()
     result = []
     for group in groups:
         if user.id == group.owner:
-            result.append({"group_name": group.name, "role": "owner"})
+            result.append(GroupReadSimple(name=group.name, role="owner"))
         elif user.id in group.admins:
-            result.append({"group_name": group.name, "role": "admin"})
+            result.append(GroupReadSimple(name=group.name, role="admin"))
         elif user.id in group.members:
-            result.append({"group_name": group.name, "role": "user"})
+            result.append(GroupReadSimple(name=group.name, role="user"))
 
-        # groups = await Group.find({"$or": [{"owner": user_id}, {"members":
-        # user.id}, {"admins": user.id}]}).to_list()
-    return result
+    group_list = GroupList(groups=result)
+    return group_list
+
+
+# Check if user exists in the database
+async def check_user_exists(user: User | UserID | EmailStr) -> User:
+    """Check if user exists in the database
+
+    Args:
+        user (User): User object
+
+    Returns:
+        User: returns User object of found user, raises a HTTP exception otherwise
+    """
+    if isinstance(user, User):
+        found_user = await User.find_one({"_id": user.id})
+    elif isinstance(user, UserID):
+        found_user = await User.find_one({"_id": user})
+    elif isinstance(user, EmailStr):
+        found_user = await User.find_one({"email": user})
+
+    if not found_user:
+        raise UserNotFound(str(user))
+    return found_user
