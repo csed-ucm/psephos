@@ -4,9 +4,8 @@ from pydantic import Field, EmailStr, BaseModel
 
 # TODO: Look into replacing email[str] with email[EmailStr]
 
+
 # class UserRead(schemas.BaseUser[PydanticObjectId]):
-
-
 class UserID(PydanticObjectId):
     @classmethod
     def __modify_schema__(cls, field_schema):  # type: ignore
