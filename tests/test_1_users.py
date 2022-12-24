@@ -138,7 +138,6 @@ async def test_delete_account(client_test: AsyncClient):
     #     found_user.is_superuser = True
     #     await found_user.save()
     response = await client_test.delete("/users/me", headers={"Authorization": "Bearer " + new_user.token})
-    print(response.json())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     colored_dbg.test_success("New user's account has been deleted")
 
