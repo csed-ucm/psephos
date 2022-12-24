@@ -44,6 +44,22 @@ current_superuser = fastapi_users.current_user(active=True, superuser=True)
 async def list_groups(user: User = Depends(current_active_user),
                       group_name: str | None = None,
                       member_data: UserID | EmailStr | None = None) -> GroupList:
+    """
+        ## List all groups that the user is a member of.
+        This endpoint can be used to search for groups by name or by member.
+        This might be replaces later with a more robust search endpoint combined \
+            with a simple GET endpoint for listing all groups from search.
+        Returns a list of groups that match the search criteria. If no groups are found, an empty list is returned.
+
+        ### Parameters
+        User can pass in a group name and/or a member's information to search for.
+        If no parameters are passed in, all groups that the user is a member of will be returned.
+        If user is a superuser, all groups in the database will be returned.
+
+        **group_name**: The name of the group to search for.
+        **member_data**: Either email or User id of the member to search for.
+
+    """
     query: List[Dict[str, Any]] = []
     if group_name:
         query.append({"name": group_name})
@@ -103,11 +119,24 @@ async def list_groups(user: User = Depends(current_active_user),
 async def create_group(group: GroupCreateIn = Body(...),
                        user: User = Depends(current_active_user)
                        ) -> GroupCreateOut | JSONResponse:
+    """
+        ## Create a new group
+        This endpoint creates a new group with the user as the owner, admin, and member.
+        If the group is successfully created, the group's information is returned.
+
+        ### Parameters
+        **name**: The name of the group. Must be unique(per user).
+        **description**: A short description of the group.
+
+    """
+
     # Todo: Check if group name is unique
-    # if (await Group.find({"name": name})):
-    #     return 400
+    if (await Group.find_one({"name": group.name})):
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
+                            content=jsonable_encoder({"detail": "Group name already exists"}))
 
     # NOTE: The update method is not working for some reason
+    # TODO: Fix update method
     # await User.update({"_id": user.id}, {"$push": {"groups": new_group.id}})
 
     # HACK: Find, update, and save user manually instead
@@ -136,6 +165,15 @@ async def create_group(group: GroupCreateIn = Body(...),
             response_model=GroupReadFull, tags=["Groups"])
 async def get_group(group_id: GroupID,
                     user: User = Depends(current_active_user)) -> GroupReadFull | JSONResponse:
+    """
+        ## Get group by id
+        This endpoint returns the group's information if the user is a member of the group:\
+            the group's name, description, and owner information.
+
+        ### Parameters
+        **group_id**: The id of the group to get.
+
+    """
     # find group by id
     group = await Group.get(group_id)
     if group:
@@ -157,15 +195,21 @@ async def get_group(group_id: GroupID,
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND,
                         content=jsonable_encoder({"error": "Group not found"}))
 
+
 # Delete a group
-
-
 @router.delete("/{group_id}",
                response_description="Delete group",
                tags=["Groups"])
 async def delete_group(group_id: GroupID, user: User = Depends(current_active_user)) -> Response:
-    # Check if user is owner of group
+    """
+        ## Delete a group
+        Deletes a group if the user is the owner of the group. The group is also removed from the user's groups list.
 
+        ### Parameters
+        **group_id**: The id of the group to delete.
+
+    """
+    # Check if user is owner of group
     group = await Group.get(group_id)
 
     if group is None:
@@ -179,27 +223,33 @@ async def delete_group(group_id: GroupID, user: User = Depends(current_active_us
     await group.delete()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+
 # Update a group
-
-
-@router.put("/{id}", response_description="Update a group",
+@router.put("/{group_id}", response_description="Update a group",
             response_class=GroupUpdateOut, tags=["Groups"])
-async def update_group(id: str, group: GroupUpdateIn = Body(...)) -> JSONResponse:
+async def update_group(group_id: str, group: GroupUpdateIn = Body(...)) -> JSONResponse:
+    """
+        ## Update a group
+        Updates a group's information if the user is the owner of the group.
+
+        ### Parameters
+        **group_id**: The id of the group to update.
+    """
     new_group = {k: v for k, v in group.dict().items() if v is not None}
 
     if len(new_group) >= 1:
-        update_result = await Database["groups"].update_one({"_id": id}, {"$set": group})
+        update_result = await Database["groups"].update_one({"_id": group_id}, {"$set": group})
 
         if update_result.modified_count == 1:
             if (
-                updated_group := await Database["groups"].find_one({"_id": id})
+                updated_group := await Database["groups"].find_one({"_id": group_id})
             ) is not None:
                 return JSONResponse(updated_group)
 
-    if (existing_group := await Database["groups"].find_one({"_id": id})) is not None:
+    if (existing_group := await Database["groups"].find_one({"_id": group_id})) is not None:
         return JSONResponse(existing_group)
 
-    raise HTTPException(status_code=404, detail=f"group {id} not found")
+    raise HTTPException(status_code=404, detail=f"group {group_id} not found")
 
 
 # Get the owner of a group
@@ -209,6 +259,13 @@ async def update_group(id: str, group: GroupUpdateIn = Body(...)) -> JSONRespons
             tags=["Members"])
 async def get_group_owner(group_id: GroupID,
                           user: User = Depends(current_active_user)) -> UserReadBasicInfo | None:
+    """
+        ## Get group owner
+        Returns the owner of the group if the user is a member of the group or a superuser.
+
+        ### Parameters
+        **group_id**: The id of the group to update.
+    """
     group = await Group.get(group_id)
     if group:
         if (user.id not in group.members) and (not user.is_superuser):
@@ -233,6 +290,14 @@ async def get_group_owner(group_id: GroupID,
             response_model=GroupReadMembers,
             tags=["Members"])
 async def get_group_admins(group_id: GroupID, user: User = Depends(current_active_user)) -> GroupReadMembers:
+    """
+        ## Get list of group admins
+        Returns the list of group members with admin privilege. 
+        The user must be a member of the group or a superuser.
+
+        ### Parameters
+        **group_id**: The id of the group to update.
+    """
     group = await Group.get(group_id)
     users = []
     admins = []
@@ -263,6 +328,14 @@ async def get_group_admins(group_id: GroupID, user: User = Depends(current_activ
             response_model=GroupReadMembers,
             tags=["Members"])
 async def get_group_users(group_id: GroupID, user: User = Depends(current_active_user)) -> GroupReadMembers:
+    """
+        ## Get list of group users
+        Returns the list of group members with user only privilege.
+        The user must be a member of the group or a superuser to access this endpoint.
+
+        ### Parameters
+        **group_id**: The id of the group to update.
+    """
     group = await Group.get(group_id)
     users = []
     members = []
@@ -293,6 +366,14 @@ async def get_group_users(group_id: GroupID, user: User = Depends(current_active
             response_model=GroupReadMembers,
             tags=["Members"])
 async def get_group_members(group_id: GroupID, user: User = Depends(current_active_user)) -> GroupReadMembers:
+    """
+        ## Get list of group users
+        Returns the list of group members with role.
+        The user must be a member of the group or a superuser to access this endpoint.
+
+        ### Body
+        **member**: list of members and their roles. Check the example for more details.
+    """
     group = await Group.get(group_id)
     users = []
     members = []
@@ -329,13 +410,19 @@ async def get_group_members(group_id: GroupID, user: User = Depends(current_acti
 async def add_user_to_group(group_id: GroupID, InputModel: GroupAddMembers,
                             user: User = Depends(current_active_user)) -> JSONResponse:
     """
-    Add member(s) to a group. The front-end application must do validation to ensure
-    that the user exists in the database and is not already a member of the group.
+    ## Add member(s) to a group.
+    This route adds a user or multiple users to a group with a specified role.
+    The front-end application must do validation to ensure that the user exists in the database\
+        and is not already a member of the group.
     This function also does the same validation checks; However, no users will be added
     if any error occurs.
 
+    ### Parameters
+    **group_id**: The id of the group to update.
+
+    ### Body
     The function takes a list of JSON objects(Models) with email of the new user and the
-    role(privilege level) in the group.
+    role(privilege level) in the group. Check the example for more details.
 
     Possible outcomes:
      - The function will return a list of emails of users that were not found in the database.
@@ -392,9 +479,14 @@ async def add_user_to_group(group_id: GroupID, InputModel: GroupAddMembers,
             tags=["Members"])
 async def get_member_details(group_id: GroupID, user_id: UserID,
                              user: User = Depends(current_active_user)) -> GroupMember:
+    """
+        ## Get member details
+        Returns the details of a member of a group.
+        The user must be a member of the group or a superuser to access this endpoint.
+    """
     # Check if user is a member of the group
     if (group := await Group.get(group_id)) is not None:
-        if user.id not in group.members:
+        if user.id not in group.members and (not user.is_superuser):
             raise group_exceptions.UserNotAuthorized(
                 user, group, "access members details")
     else:
@@ -422,6 +514,14 @@ async def get_member_details(group_id: GroupID, user_id: UserID,
 async def promote_user(group_id: GroupID, user_id: UserID,
                        payload: GroupMemberUpdateRole = Body(...),
                        user: User = Depends(current_active_user)) -> JSONResponse:
+    """
+    ## Promote or demote a group member
+    This route promotes a member with a user privilege to an admin or demotes an admin to a regular user.
+    The owner of the group cannot be demoted. The user must be an admin of the group to promote or demote a member.
+    If the user new role, specified in the body, is the same as the current role, \
+        the function will return success but will not change the role.
+
+    """
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
         if user.id not in group.admins and user.id != group.owner:
@@ -461,6 +561,12 @@ async def promote_user(group_id: GroupID, user_id: UserID,
                response_description="Remove a member from a group",
                tags=["Members"])
 async def remove_member(group_id: GroupID, user_id: UserID, user: User = Depends(current_active_user)) -> Response:
+    """
+    ## Remove a member from a group
+    This route removes a member from a group. The user must be an admin of the group to remove a member.
+    The owner of the group cannot be removed.
+    The user cannot remove themselves from the group. (subject to change in the future)
+    """
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
         # Check if user is an admin of the group
