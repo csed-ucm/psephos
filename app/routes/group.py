@@ -292,7 +292,7 @@ async def get_group_owner(group_id: GroupID,
 async def get_group_admins(group_id: GroupID, user: User = Depends(current_active_user)) -> GroupReadMembers:
     """
         ## Get list of group admins
-        Returns the list of group members with admin privilege. 
+        Returns the list of group members with admin privilege.
         The user must be a member of the group or a superuser.
 
         ### Parameters
