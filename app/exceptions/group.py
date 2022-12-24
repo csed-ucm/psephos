@@ -1,11 +1,10 @@
 # File to store all the custom exceptions
 
 from fastapi import HTTPException, status
-# from fastapi.logger import logger
-from beanie import PydanticObjectId
 from app.models.user import User
 from app.models.group import Group
 from app.utils.colored_dbg import print_warning
+from app.schemas.group import GroupID
 
 # If user already exists in the group
 
@@ -54,7 +53,7 @@ class UserNotAuthorized(HTTPException):
 
 
 class GroupNotFound(HTTPException):
-    def __init__(self, group_id: PydanticObjectId):
+    def __init__(self, group_id: GroupID):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Group with id {group_id} not found")

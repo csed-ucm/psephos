@@ -1,8 +1,9 @@
 from typing import List
-from beanie import PydanticObjectId, Document, after_event, Insert
+from beanie import Document, after_event, Insert
 from pydantic import Field
 from app.utils import colored_dbg
 from app.schemas.group import GroupID
+from app.schemas.user import UserID
 
 
 class Group(Document):
@@ -11,11 +12,11 @@ class Group(Document):
     name: str = Field(default="", min_length=3, max_length=50,
                       regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=300)
-    owner: PydanticObjectId = Field(
-        default_factory=PydanticObjectId, title="ownerID",
+    owner: UserID = Field(
+        default_factory=UserID, title="ownerID",
         description="Owner of the group")
-    members: List[PydanticObjectId] = []
-    admins: List[PydanticObjectId] = []
+    members: List[UserID] = []
+    admins: List[UserID] = []
 
     @after_event(Insert)
     def create_group(self) -> None:
