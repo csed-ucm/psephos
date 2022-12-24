@@ -19,9 +19,9 @@ from app.exceptions import user as user_exceptions
 from app.schemas.user import UserReadBasicInfo, UserID
 from app.schemas.group import (GroupCreateIn, GroupCreateOut, GroupID,
                                GroupUpdateIn, GroupUpdateOut,
-                               GroupAddMembers, GroupReadMembers, GroupMember,
+                               GroupAddMembers, GroupReadMembers, GroupMember, GroupMemberUpdateRole,
                                GroupReadSimple, GroupReadFull, GroupList)
-
+from app.utils.user import check_user_exists
 
 # APIRouter creates path operations for user module
 router = APIRouter(
@@ -388,20 +388,89 @@ async def add_user_to_group(group_id: GroupID, InputModel: GroupAddMembers,
                         "message": "Users have been added to group"})
 
 
+@router.get("/{group_id}/member/{user_id}",
+            response_description="Get member details",
+            tags=["Members"])
+async def get_member_details(group_id: GroupID, user_id: UserID,
+                             user: User = Depends(current_active_user)) -> GroupMember:
+    # Check if user is a member of the group
+    if (group := await Group.get(group_id)) is not None:
+        if user.id not in group.members:
+            raise group_exceptions.UserNotAuthorized(
+                user, group, "access members details")
+    else:
+        raise group_exceptions.GroupNotFound(group_id)
+
+    # Get the user from the database
+    found_user = await check_user_exists(user_id)
+
+    if found_user.id == group.owner:
+        role = "owner"
+    elif found_user.id in group.admins:
+        role = "admin"
+    else:
+        role = "user"
+    return GroupMember(email=EmailStr(found_user.email),
+                       first_name=found_user.first_name,
+                       last_name=found_user.last_name,
+                       role=role)
+
+
+# Update members role
+@router.patch("/{group_id}/member/{user_id}",
+              response_description="Promote a member to admin",
+              tags=["Members"])
+async def promote_user(group_id: GroupID, user_id: UserID,
+                       payload: GroupMemberUpdateRole = Body(...),
+                       user: User = Depends(current_active_user)) -> JSONResponse:
+    # Check if user is an admin of the group
+    if (group := await Group.get(group_id)) is not None:
+        if user.id not in group.admins and user.id != group.owner:
+            raise group_exceptions.UserNotAuthorized(
+                user, group, "promote users in")
+    else:
+        raise group_exceptions.GroupNotFound(group_id)
+
+    # Get the user from the database
+    found_user = await check_user_exists(user_id)
+
+    if found_user.id in group.members:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="User must be a member of the group to be promoted")
+    if found_user.id == group.owner:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Owner cannot be demoted")
+    message = f"Member {user.first_name} {user.last_name} role has not been changed"
+    if payload.role == "admin" and found_user.id not in group.admins:
+        await group.update({"$push": {"admins": user.id}})
+        message = f"Member {user.first_name} {user.last_name} has been promoted to admin"
+    elif payload.role == "user" and found_user.id not in group.admins:
+        await group.update({"$pull": {"admins": user.id}})
+        message = f"Member {user.first_name} {user.last_name} has been demoted to user"
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=message)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": message})
+    # return GroupMember(email=EmailStr(found_user.email),
+    #                    first_name=found_user.first_name,
+    #                    last_name=found_user.last_name,
+    #                    role=payload.role)
+
+
 # Remove a member from a group
-@router.delete("/{group_id}/member/{email}",
+@router.delete("/{group_id}/member/{user_id}",
                response_description="Remove a member from a group",
                tags=["Members"])
-async def remove_user(group_id: GroupID, email: EmailStr, user: User = Depends(current_active_user)) -> Response:
+async def remove_member(group_id: GroupID, user_id: UserID, user: User = Depends(current_active_user)) -> Response:
     # Check if user is an admin of the group
     if (group := await Group.get(group_id)) is not None:
         # Check if user is an admin of the group
-        if user.id not in group.admins:
+        if user.id not in group.admins and user.id != group.owner:
             raise group_exceptions.UserNotAuthorized(
                 user, group, "remove users from")
         # Prohibit the user from removing themselves
         # TODO: Check if this is necessary, because the should be able to leave the group
-        if user.email == email:
+        if user.id == user_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You cannot remove yourself from the group")
@@ -411,7 +480,7 @@ async def remove_user(group_id: GroupID, email: EmailStr, user: User = Depends(c
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You cannot remove the owner of the group")
         # Check if user exists
-        if (deleted_user := await User.find_one({"email": email})) is not None:
+        if (deleted_user := await User.find_one({"email": user_id})) is not None:
             # Check if user is in the group
             if deleted_user.id not in group.members:
                 raise group_exceptions.UserNotInGroup(deleted_user, group)
@@ -429,6 +498,6 @@ async def remove_user(group_id: GroupID, email: EmailStr, user: User = Depends(c
                             detail="User was not removed from the group")
                 return Response(status_code=status.HTTP_204_NO_CONTENT)
         else:
-            raise user_exceptions.UserNotFound(email)
+            raise user_exceptions.UserNotFound(user_id)
     else:
         raise group_exceptions.GroupNotFound(group_id)
