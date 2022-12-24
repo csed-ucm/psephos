@@ -1,5 +1,4 @@
 from typing import List
-# from beanie import PydanticObjectId
 from fastapi_users.db import BeanieBaseUser
 from pydantic import Field
 from app.schemas.user import UserID

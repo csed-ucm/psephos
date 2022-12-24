@@ -8,6 +8,7 @@ from fastapi import Response
 from app.schemas.user import UserAddToGroup
 
 
+# Custom PydanticObjectId class to override due to a bug
 class GroupID(PydanticObjectId):
     @classmethod
     def __modify_schema__(cls, field_schema):  # type: ignore
@@ -17,9 +18,10 @@ class GroupID(PydanticObjectId):
         )
 
 
+# Schema for the response with basic group info (name and role)
 class GroupReadSimple(BaseModel):
-    name: str = Field(example="Group 01", title="Name")
-    role: str = Field(example="user", title="Role")
+    name: str = Field(title="Name")
+    role: str = Field(title="Role")
 
     class Config:
         schema_extra = {
@@ -30,6 +32,7 @@ class GroupReadSimple(BaseModel):
         }
 
 
+# Schema for the response with full group info (name, description, owner info)
 class GroupReadFull(BaseModel):
     name: str = Field(example="Group 01", title="Name")
     description: str
@@ -48,6 +51,7 @@ class GroupReadFull(BaseModel):
         }
 
 
+# Schema for the response with basic group info
 class GroupList(BaseModel):
     groups: List[GroupReadSimple]
 
@@ -62,21 +66,8 @@ class GroupList(BaseModel):
             }
         }
 
-    # class Config:
-    #     schema_extra = {
-    #         "List of groups": {
-    #             "groups": [
-    #                 {"name": "Group 01", "role": "user"},
-    #                 {"name": "Group 02", "role": "user"},
-    #                 {"name": "Group 03", "role": "admin"},
-    #             ]
-    #         },
-    #         "Empty list of groups": {
-    #             "groups": []
-    #         }
-    #     }
 
-
+# Schema for the request to create a new group
 class GroupCreateIn(BaseModel):
     name: str = Field(
         default="",
@@ -94,6 +85,7 @@ class GroupCreateIn(BaseModel):
         }
 
 
+# Schema for the response to a group creation request
 class GroupCreateOut(BaseModel):
     message: str = "Group created successfully"
     id: GroupID
@@ -101,6 +93,7 @@ class GroupCreateOut(BaseModel):
     # description: str
 
 
+# Schema for the request to add a user to a group
 class GroupUpdateIn(BaseModel):
     name: str = Field(
         default="",
@@ -110,12 +103,15 @@ class GroupUpdateIn(BaseModel):
     description: str = Field(default="", title="Description", max_length=300)
 
 
+# Schema for the response to a group update request
+# NOTE: This needs testing
 class GroupUpdateOut(Response):
     status_code = 200
     media_type = "application/json"
     content = {"message": "Group updated successfully"}
 
 
+# Schema for the response with basic member info
 class GroupMember(BaseModel):
     email: EmailStr
     first_name: str
@@ -133,6 +129,7 @@ class GroupMember(BaseModel):
         }
 
 
+# Schema for the request to add a user to a group
 class GroupAddMembers(BaseModel):
     members: List[UserAddToGroup]
 
@@ -147,6 +144,7 @@ class GroupAddMembers(BaseModel):
         }
 
 
+# Schema for the response with a list of members and their info
 class GroupReadMembers(BaseModel):
     members: List[GroupMember]
 
@@ -169,3 +167,8 @@ class GroupReadMembers(BaseModel):
                 ]
             }
         }
+
+
+# Schema for the request to update a member's role
+class GroupMemberUpdateRole(BaseModel):
+    role: str = Field(example="admin", title="Role")
