@@ -2,6 +2,9 @@
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+py-modules = ["app"]
+
 [tool.setuptools.dynamic]
 version = {attr = "app.config.VERSION"}
 
