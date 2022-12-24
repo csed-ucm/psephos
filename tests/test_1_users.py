@@ -6,7 +6,7 @@ import pytest
 from httpx import AsyncClient
 from pydantic import BaseModel
 from app.app import app
-from app.models.user import User
+# from app.models.user import User
 from app.utils import colored_dbg
 from app.schemas.user import UserID
 
@@ -131,13 +131,14 @@ async def test_delete_account(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Deleting new user's account")
     # await User.update({"_id": new_user.id}, {"$set": {"is_superuser": True}})
-    found_user = None
-    if new_user.id:
-        found_user = await User.get(new_user.id)
-    if found_user:
-        found_user.is_superuser = True
-        await found_user.save()
-    response = await client_test.delete(f"/users/{new_user.id}", headers={"Authorization": "Bearer " + new_user.token})
+    # found_user = None
+    # if new_user.id:
+    # found_user = await User.get(new_user.id)
+    # if found_user:
+    #     found_user.is_superuser = True
+    #     await found_user.save()
+    response = await client_test.delete("/users/me", headers={"Authorization": "Bearer " + new_user.token})
+    print(response.json())
     assert response.status_code == status.HTTP_204_NO_CONTENT
     colored_dbg.test_success("New user's account has been deleted")
 
