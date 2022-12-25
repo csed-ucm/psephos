@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "5f0b2160-9961-4405-a9a4-6ba8bb07152b",
-		"name": "Polling App | 0.0.4 | Mock Driver",
+		"_postman_id": "c49861c3-7c54-4148-85a5-29f65db9a4a3",
+		"name": "Polling App | 0.0.5 | Documentation",
 		"description": "A REST API to manage users and polls",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_uid": "19614303-5f0b2160-9961-4405-a9a4-6ba8bb07152b"
+		"_uid": "19614303-c49861c3-7c54-4148-85a5-29f65db9a4a3"
 	},
 	"item": [
 		{
@@ -18,7 +18,7 @@
 							"item": [
 								{
 									"name": "Get Group Members",
-									"id": "d967e3f6-dec9-4fd9-b8df-e1b6ea587cbc",
+									"id": "6022863c-bccb-480f-86c7-e2390a180e96",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -62,11 +62,12 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group users Returns the list of group members with role. The user must be a member of the group or a superuser to access this endpoint.\n### Body **member**: list of members and their roles. Check the example for more details."
 									},
 									"response": [
 										{
-											"id": "229a33b0-7d48-428e-9abb-c4f6d3a88957",
+											"id": "e70720ed-3d9d-4e84-a8bc-762aae779fcc",
 											"name": "Get group members",
 											"originalRequest": {
 												"auth": {
@@ -159,23 +160,24 @@
 															"description": "(Required) "
 														}
 													]
-												}
+												},
+												"description": "## Get list of group users Returns the list of group members with role. The user must be a member of the group or a superuser to access this endpoint.\n### Body **member**: list of members and their roles. Check the example for more details."
 											},
 											"status": "OK",
 											"code": 200,
 											"_postman_previewlanguage": "json",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "application/json"
+													"value": "application/json",
+													"enabled": true
 												}
 											],
 											"cookie": [],
 											"body": "{\n  \"members\": [\n    {\n      \"email\": \"jdoe@example.com\",\n      \"first_name\": \"John\",\n      \"last_name\": \"Doe\",\n      \"role\": \"admin\"\n    },\n    {\n      \"email\": \"jsmith@example.com\",\n      \"first_name\": \"Jack\",\n      \"last_name\": \"Smith\",\n      \"role\": \"user\"\n    }\n  ]\n}"
 										},
 										{
-											"id": "b67db493-3ab4-4b69-ace5-66b62576d44c",
+											"id": "5617dc07-cb6a-4ca0-9c0b-e3ecea6736a6",
 											"name": "Not found",
 											"originalRequest": {
 												"auth": {
@@ -268,23 +270,24 @@
 															"description": "(Required) "
 														}
 													]
-												}
+												},
+												"description": "## Get list of group users Returns the list of group members with role. The user must be a member of the group or a superuser to access this endpoint.\n### Body **member**: list of members and their roles. Check the example for more details."
 											},
 											"status": "Not Found",
 											"code": 404,
 											"_postman_previewlanguage": "text",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "text/plain"
+													"value": "text/plain",
+													"enabled": true
 												}
 											],
 											"cookie": [],
 											"body": ""
 										},
 										{
-											"id": "817e1b32-71d2-41d5-a907-e0d8dfbc9a04",
+											"id": "eb859def-66ec-418d-a6b0-67dabd537bdf",
 											"name": "Validation Error",
 											"originalRequest": {
 												"auth": {
@@ -377,26 +380,27 @@
 															"description": "(Required) "
 														}
 													]
-												}
+												},
+												"description": "## Get list of group users Returns the list of group members with role. The user must be a member of the group or a superuser to access this endpoint.\n### Body **member**: list of members and their roles. Check the example for more details."
 											},
 											"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 											"code": 422,
 											"_postman_previewlanguage": "json",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "application/json"
+													"value": "application/json",
+													"enabled": true
 												}
 											],
 											"cookie": [],
-											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 										}
 									]
 								},
 								{
 									"name": "Add User To Group",
-									"id": "d417c31a-ae2f-42ce-835d-beded265ea8d",
+									"id": "1ce68dbb-95dc-4fa4-aa00-665a14a1a131",
 									"protocolProfileBehavior": {
 										"disableBodyPruning": true
 									},
@@ -454,11 +458,11 @@
 												}
 											]
 										},
-										"description": "Add member(s) to a group. The front-end application must do validation to ensure that the user exists in the database and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\nThe function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
+										"description": "## Add member(s) to a group. This route adds a user or multiple users to a group with a specified role. The front-end application must do validation to ensure that the user exists in the database        and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\n### Parameters **group_id**: The id of the group to update.\n### Body The function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group. Check the example for more details.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
 									},
 									"response": [
 										{
-											"id": "fe210be5-6242-44ad-8b35-882e1ee47392",
+											"id": "5ca2f271-5421-4b3a-b203-079756c8e741",
 											"name": "Add user(s) to a group",
 											"originalRequest": {
 												"auth": {
@@ -565,23 +569,23 @@
 														}
 													]
 												},
-												"description": "Add member(s) to a group. The front-end application must do validation to ensure that the user exists in the database and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\nThe function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
+												"description": "## Add member(s) to a group. This route adds a user or multiple users to a group with a specified role. The front-end application must do validation to ensure that the user exists in the database        and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\n### Parameters **group_id**: The id of the group to update.\n### Body The function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group. Check the example for more details.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
 											},
 											"status": "OK",
 											"code": 200,
 											"_postman_previewlanguage": "json",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "application/json"
+													"value": "application/json",
+													"enabled": true
 												}
 											],
 											"cookie": [],
 											"body": "{}"
 										},
 										{
-											"id": "779edadb-88bd-4cc8-98bf-8afe219fe164",
+											"id": "367bc5e5-bb5d-4824-a17d-cfbb0d293011",
 											"name": "Not found",
 											"originalRequest": {
 												"auth": {
@@ -688,23 +692,23 @@
 														}
 													]
 												},
-												"description": "Add member(s) to a group. The front-end application must do validation to ensure that the user exists in the database and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\nThe function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
+												"description": "## Add member(s) to a group. This route adds a user or multiple users to a group with a specified role. The front-end application must do validation to ensure that the user exists in the database        and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\n### Parameters **group_id**: The id of the group to update.\n### Body The function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group. Check the example for more details.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
 											},
 											"status": "Not Found",
 											"code": 404,
 											"_postman_previewlanguage": "text",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "text/plain"
+													"value": "text/plain",
+													"enabled": true
 												}
 											],
 											"cookie": [],
 											"body": ""
 										},
 										{
-											"id": "01c132d7-f89f-4950-ad78-ef077ad5316c",
+											"id": "9a47b980-dc8e-4e0a-bccb-e0825aa6a46d",
 											"name": "Validation Error",
 											"originalRequest": {
 												"auth": {
@@ -811,29 +815,1305 @@
 														}
 													]
 												},
-												"description": "Add member(s) to a group. The front-end application must do validation to ensure that the user exists in the database and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\nThe function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
+												"description": "## Add member(s) to a group. This route adds a user or multiple users to a group with a specified role. The front-end application must do validation to ensure that the user exists in the database        and is not already a member of the group. This function also does the same validation checks; However, no users will be added if any error occurs.\n### Parameters **group_id**: The id of the group to update.\n### Body The function takes a list of JSON objects(Models) with email of the new user and the role(privilege level) in the group. Check the example for more details.\nPossible outcomes: - The function will return a list of emails of users that were not found in the database. - The function will return an error if a user is already a member of the group - The function will successfully add the users to the group"
 											},
 											"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 											"code": 422,
 											"_postman_previewlanguage": "json",
-											"_postman_previewtype": "html",
 											"header": [
 												{
 													"key": "Content-Type",
-													"value": "application/json"
+													"value": "application/json",
+													"enabled": true
 												}
 											],
 											"cookie": [],
-											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 										}
 									]
 								}
 							],
-							"id": "4448de37-9e1e-4672-a1c9-87468f3e2a12"
+							"id": "3b729918-4f73-4833-ac87-eb16394ab3d2"
+						},
+						{
+							"name": "member/{user_id}",
+							"item": [
+								{
+									"name": "Get Member Details",
+									"id": "043600fd-8ac8-47bf-b108-bc7fcddc2e9c",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "grant_type",
+													"value": "password_credentials",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id",
+												"member",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												},
+												{
+													"key": "user_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Get member details Returns the details of a member of a group. The user must be a member of the group or a superuser to access this endpoint."
+									},
+									"response": [
+										{
+											"id": "3b8c1cf3-cafc-4680-9f6f-fdbad029df51",
+											"name": "Get member details",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Get member details Returns the details of a member of a group. The user must be a member of the group or a superuser to access this endpoint."
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{}"
+										},
+										{
+											"id": "4bc25fc0-7460-4d3f-a26d-c1bce5b506f7",
+											"name": "Not found",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Get member details Returns the details of a member of a group. The user must be a member of the group or a superuser to access this endpoint."
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"id": "32b1c195-e5e0-49a9-8428-f5e2bbdab6c6",
+											"name": "Validation Error",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Get member details Returns the details of a member of a group. The user must be a member of the group or a superuser to access this endpoint."
+											},
+											"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+											"code": 422,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
+										}
+									]
+								},
+								{
+									"name": "Remove Member",
+									"id": "587eb2a8-1741-48e9-81f8-f8fb4915c0ec",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "grant_type",
+													"value": "password_credentials",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id",
+												"member",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												},
+												{
+													"key": "user_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Remove a member from a group This route removes a member from a group. The user must be an admin of the group to remove a member. The owner of the group cannot be removed. The user cannot remove themselves from the group. (subject to change in the future)"
+									},
+									"response": [
+										{
+											"id": "1610b822-9756-4d46-9dd6-44cb078c4516",
+											"name": "Remove a member from a group",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "DELETE",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Remove a member from a group This route removes a member from a group. The user must be an admin of the group to remove a member. The owner of the group cannot be removed. The user cannot remove themselves from the group. (subject to change in the future)"
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{}"
+										},
+										{
+											"id": "86944d20-3dee-4505-a244-c1d0ea15f060",
+											"name": "Not found",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "DELETE",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Remove a member from a group This route removes a member from a group. The user must be an admin of the group to remove a member. The owner of the group cannot be removed. The user cannot remove themselves from the group. (subject to change in the future)"
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"id": "160244e6-4ce4-4baa-8713-7b05dd7251f3",
+											"name": "Validation Error",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "DELETE",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Remove a member from a group This route removes a member from a group. The user must be an admin of the group to remove a member. The owner of the group cannot be removed. The user cannot remove themselves from the group. (subject to change in the future)"
+											},
+											"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+											"code": 422,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
+										}
+									]
+								},
+								{
+									"name": "Promote User",
+									"id": "e428033a-01be-4a2f-bc7f-a3b982f78a74",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "grant_type",
+													"value": "password_credentials",
+													"type": "string"
+												}
+											]
+										},
+										"method": "PATCH",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"role\": \"<string>\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id",
+												"member",
+												":user_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												},
+												{
+													"key": "user_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Promote or demote a group member This route promotes a member with a user privilege to an admin or demotes an admin to a regular user. The owner of the group cannot be demoted. The user must be an admin of the group to promote or demote a member. If the user new role, specified in the body, is the same as the current role,         the function will return success but will not change the role."
+									},
+									"response": [
+										{
+											"id": "4b366e1e-5076-44e7-ba30-446e2c0dca15",
+											"name": "Promote a member to admin",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "PATCH",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"role\": \"<string>\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Promote or demote a group member This route promotes a member with a user privilege to an admin or demotes an admin to a regular user. The owner of the group cannot be demoted. The user must be an admin of the group to promote or demote a member. If the user new role, specified in the body, is the same as the current role,         the function will return success but will not change the role."
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{}"
+										},
+										{
+											"id": "6d3ee844-5714-4a59-9dcf-d8525f6cb1ad",
+											"name": "Not found",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "PATCH",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"role\": \"<string>\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Promote or demote a group member This route promotes a member with a user privilege to an admin or demotes an admin to a regular user. The owner of the group cannot be demoted. The user must be an admin of the group to promote or demote a member. If the user new role, specified in the body, is the same as the current role,         the function will return success but will not change the role."
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"id": "1d60d333-4290-4c6c-ad56-804934b4e45b",
+											"name": "Validation Error",
+											"originalRequest": {
+												"auth": {
+													"type": "oauth2",
+													"oauth2": [
+														{
+															"key": "accessToken",
+															"type": "any"
+														},
+														{
+															"key": "addTokenTo",
+															"type": "any"
+														},
+														{
+															"key": "callBackUrl",
+															"type": "any"
+														},
+														{
+															"key": "authUrl",
+															"type": "any"
+														},
+														{
+															"key": "accessTokenUrl",
+															"value": "auth/jwt/login",
+															"type": "string"
+														},
+														{
+															"key": "clientId",
+															"type": "any"
+														},
+														{
+															"key": "clientSecret",
+															"type": "any"
+														},
+														{
+															"key": "clientAuth",
+															"type": "any"
+														},
+														{
+															"key": "grantType",
+															"type": "any"
+														},
+														{
+															"key": "scope",
+															"type": "any"
+														},
+														{
+															"key": "username",
+															"type": "any"
+														},
+														{
+															"key": "password",
+															"type": "any"
+														},
+														{
+															"key": "tokenType",
+															"type": "any"
+														},
+														{
+															"key": "redirectUri",
+															"type": "any"
+														},
+														{
+															"key": "refreshToken",
+															"type": "any"
+														}
+													]
+												},
+												"method": "PATCH",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"role\": \"<string>\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/groups/:group_id/member/:user_id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"groups",
+														":group_id",
+														"member",
+														":user_id"
+													],
+													"variable": [
+														{
+															"key": "group_id",
+															"value": "<string>",
+															"description": "(Required) "
+														},
+														{
+															"key": "user_id",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												},
+												"description": "## Promote or demote a group member This route promotes a member with a user privilege to an admin or demotes an admin to a regular user. The owner of the group cannot be demoted. The user must be an admin of the group to promote or demote a member. If the user new role, specified in the body, is the same as the current role,         the function will return success but will not change the role."
+											},
+											"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+											"code": 422,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"enabled": true
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
+										}
+									]
+								}
+							],
+							"id": "9a637a6f-eb88-4ff5-bb22-0fff1c4701de"
 						},
 						{
 							"name": "Get Group",
-							"id": "99a915ff-a971-45b5-9d11-56e6730e394d",
+							"id": "6e7038c3-4d26-44d9-be81-cd501bd85c9c",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -876,11 +2156,12 @@
 											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Get group by id This endpoint returns the group's information if the user is a member of the group:            the group's name, description, and owner information.\n### Parameters **group_id**: The id of the group to get."
 							},
 							"response": [
 								{
-									"id": "191f06ac-b45b-4b9c-9ae2-e681faa55237",
+									"id": "2595b00d-7762-44b2-9745-bd16898bbec2",
 									"name": "Get group by id",
 									"originalRequest": {
 										"auth": {
@@ -972,23 +2253,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group by id This endpoint returns the group's information if the user is a member of the group:            the group's name, description, and owner information.\n### Parameters **group_id**: The id of the group to get."
 									},
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"name\": \"et fugiat aliqua eu\",\n  \"description\": \"nostrud\",\n  \"owner_name\": \"ad culpa elit amet\",\n  \"owner_email\": \"7Dm8joyvZLw@RrYKJwTSxetWAO.dvjn\"\n}"
+									"body": "{\n  \"name\": \"Example Group\",\n  \"description\": \"This is an example group\",\n  \"owner_name\": \"John Doe\",\n  \"owner_email\": \"jdoe@example.com\"\n}"
 								},
 								{
-									"id": "17605164-c7a0-4690-a10f-457b68a38799",
+									"id": "bc4bd680-f1d5-4274-bb09-30ce21e18961",
 									"name": "Not found",
 									"originalRequest": {
 										"auth": {
@@ -1080,23 +2362,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group by id This endpoint returns the group's information if the user is a member of the group:            the group's name, description, and owner information.\n### Parameters **group_id**: The id of the group to get."
 									},
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "5879da65-64ee-4c69-a281-1fbca56085df",
+									"id": "05741eb5-e9b1-4b02-80d5-0ec53323abab",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -1188,26 +2471,244 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group by id This endpoint returns the group's information if the user is a member of the group:            the group's name, description, and owner information.\n### Parameters **group_id**: The id of the group to get."
 									},
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Update Group",
+							"id": "03f0ab31-6abe-48af-abdb-2dd0e6466f31",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n \"name\": \"BKdKccNVOIq IcM 4921 6016 66 308 62265 PtDDwVfwO\",\n \"description\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/groups/:group_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"groups",
+										":group_id"
+									],
+									"variable": [
+										{
+											"key": "group_id",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "## Update a group Updates a group's information if the user is the owner of the group.\n### Parameters **group_id**: The id of the group to update."
+							},
+							"response": [
+								{
+									"id": "66a35eb7-0fd9-4fa5-8755-e46fc0e05935",
+									"name": "Update a group",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n \"name\": \"BKdKccNVOIq IcM 4921 6016 66 308 62265 PtDDwVfwO\",\n \"description\": \"\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Update a group Updates a group's information if the user is the owner of the group.\n### Parameters **group_id**: The id of the group to update."
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": "\"esse aute\""
+								},
+								{
+									"id": "35b419c5-8cd2-4019-b3c7-fc213f447ced",
+									"name": "Not found",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n \"name\": \"BKdKccNVOIq IcM 4921 6016 66 308 62265 PtDDwVfwO\",\n \"description\": \"\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Update a group Updates a group's information if the user is the owner of the group.\n### Parameters **group_id**: The id of the group to update."
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"id": "b44af18a-8f37-428e-a53a-4a7ca1ed97ca",
+									"name": "Validation Error",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n \"name\": \"BKdKccNVOIq IcM 4921 6016 66 308 62265 PtDDwVfwO\",\n \"description\": \"\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/groups/:group_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"groups",
+												":group_id"
+											],
+											"variable": [
+												{
+													"key": "group_id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										},
+										"description": "## Update a group Updates a group's information if the user is the owner of the group.\n### Parameters **group_id**: The id of the group to update."
+									},
+									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+									"code": 422,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Delete Group",
-							"id": "91987e0b-8504-4001-a4dc-04025c6f0424",
+							"id": "9377bc60-9d7a-43fd-aba3-2d2e0012a8ec",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1250,11 +2751,12 @@
 											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Delete a group Deletes a group if the user is the owner of the group. The group is also removed from the user's groups list.\n### Parameters **group_id**: The id of the group to delete."
 							},
 							"response": [
 								{
-									"id": "a7f26167-77a2-4ceb-8987-3ee1703a3d70",
+									"id": "edfce759-baa5-43f8-8842-362ba093f3db",
 									"name": "Delete group",
 									"originalRequest": {
 										"auth": {
@@ -1346,23 +2848,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Delete a group Deletes a group if the user is the owner of the group. The group is also removed from the user's groups list.\n### Parameters **group_id**: The id of the group to delete."
 									},
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{}"
 								},
 								{
-									"id": "8830a3af-99fe-4600-b07a-4d159afdef3c",
+									"id": "58f37e84-09d0-40c0-b086-7fbb1cffc789",
 									"name": "Not found",
 									"originalRequest": {
 										"auth": {
@@ -1454,23 +2957,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Delete a group Deletes a group if the user is the owner of the group. The group is also removed from the user's groups list.\n### Parameters **group_id**: The id of the group to delete."
 									},
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "aea0219d-c41e-407a-971d-67d8aa0045a4",
+									"id": "b477137f-f5a3-4f3b-b2be-49659affce70",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -1562,26 +3066,27 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Delete a group Deletes a group if the user is the owner of the group. The group is also removed from the user's groups list.\n### Parameters **group_id**: The id of the group to delete."
 									},
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Get Group Owner",
-							"id": "e7869c5e-6994-484a-99bf-1f4e111a9a51",
+							"id": "6e746d3c-67fd-49bf-bf22-ab3f6dde50d5",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -1625,11 +3130,12 @@
 											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Get group owner Returns the owner of the group if the user is a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 							},
 							"response": [
 								{
-									"id": "13785fe4-0a1d-4de3-b8d6-9f6b87d391be",
+									"id": "df953319-3a07-44fb-8059-cde4c2b5dfdc",
 									"name": "Get group owner",
 									"originalRequest": {
 										"auth": {
@@ -1722,23 +3228,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group owner Returns the owner of the group if the user is a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"email\": \"AnkrSV@JCYlePgrqKOAwknjgunTgMId.zm\",\n  \"first_name\": \"occaecat commodo cupidatat aute\",\n  \"last_name\": \"ut\"\n}"
+									"body": "{\n  \"email\": \"Ve1SJkEdbx3R@rYxuJoSUHvcwSNXNGD.bmb\",\n  \"first_name\": \"fugiat qui magna ex ullamco\",\n  \"last_name\": \"aute ad in sint\"\n}"
 								},
 								{
-									"id": "7c00fe42-bea8-47a6-a1e8-76ab27fcd2d7",
+									"id": "7d40033c-8352-4a97-9b38-8ed67b281f57",
 									"name": "Not found",
 									"originalRequest": {
 										"auth": {
@@ -1831,23 +3338,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group owner Returns the owner of the group if the user is a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "9c5d47f8-b8b0-45ab-b1af-1ac2c3752386",
+									"id": "f47e518d-fb0f-4746-b623-1646015530c0",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -1940,26 +3448,27 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get group owner Returns the owner of the group if the user is a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Get Group Admins",
-							"id": "881e6a8f-7b92-4cdb-b62c-3b98362d2dd7",
+							"id": "a10ef6cc-f3b4-490c-9ed4-7c019afe1595",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2004,11 +3513,12 @@
 											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Get list of group admins Returns the list of group members with admin privilege. The user must be a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 							},
 							"response": [
 								{
-									"id": "4a829f5d-9c92-48a8-bdef-5388f9f866e1",
+									"id": "6587b827-6342-4630-ad92-3a3dc1aca9e8",
 									"name": "Get list of group administrators",
 									"originalRequest": {
 										"auth": {
@@ -2102,23 +3612,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group admins Returns the list of group members with admin privilege. The user must be a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"members\": [\n    {\n      \"email\": \"jdoe@example.com\",\n      \"first_name\": \"John\",\n      \"last_name\": \"Doe\",\n      \"role\": \"admin\"\n    },\n    {\n      \"email\": \"jsmith@example.com\",\n      \"first_name\": \"Jack\",\n      \"last_name\": \"Smith\",\n      \"role\": \"user\"\n    }\n  ]\n}"
 								},
 								{
-									"id": "e649c04e-ad52-49a1-9ee9-5a944492f02b",
+									"id": "f1ddfbc8-0eb7-4c10-938e-b3e925de21c3",
 									"name": "Not found",
 									"originalRequest": {
 										"auth": {
@@ -2212,23 +3723,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group admins Returns the list of group members with admin privilege. The user must be a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "a515fbdf-48b3-41c0-ba98-08c2c0adced4",
+									"id": "cdfca230-9c77-4d20-8e7e-091050481a5d",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -2322,26 +3834,27 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group admins Returns the list of group members with admin privilege. The user must be a member of the group or a superuser.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Get Group Users",
-							"id": "5794a6d2-215c-4a59-8b92-454249a59e0a",
+							"id": "153f081d-c87c-4113-a4ba-984e1b73cc17",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2385,11 +3898,12 @@
 											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Get list of group users Returns the list of group members with user only privilege. The user must be a member of the group or a superuser to access this endpoint.\n### Parameters **group_id**: The id of the group to update."
 							},
 							"response": [
 								{
-									"id": "31efded6-6af6-4941-9429-45175eb5be2a",
+									"id": "d8e46de6-83eb-4a65-aea1-50b61cd5ebb4",
 									"name": "Get group members",
 									"originalRequest": {
 										"auth": {
@@ -2482,23 +3996,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group users Returns the list of group members with user only privilege. The user must be a member of the group or a superuser to access this endpoint.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"members\": [\n    {\n      \"email\": \"jdoe@example.com\",\n      \"first_name\": \"John\",\n      \"last_name\": \"Doe\",\n      \"role\": \"admin\"\n    },\n    {\n      \"email\": \"jsmith@example.com\",\n      \"first_name\": \"Jack\",\n      \"last_name\": \"Smith\",\n      \"role\": \"user\"\n    }\n  ]\n}"
 								},
 								{
-									"id": "6e613e4d-2049-4e5b-b164-f94476d8b111",
+									"id": "5b04f180-66dd-4f85-b0e8-e1258873194c",
 									"name": "Not found",
 									"originalRequest": {
 										"auth": {
@@ -2591,23 +4106,24 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group users Returns the list of group members with user only privilege. The user must be a member of the group or a superuser to access this endpoint.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "f9d300c8-1109-4e8b-8255-dce68cbe7df3",
+									"id": "b7a0763e-71ba-4365-99a0-dce366fb8ef7",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -2700,431 +4216,30 @@
 													"description": "(Required) "
 												}
 											]
-										}
+										},
+										"description": "## Get list of group users Returns the list of group members with user only privilege. The user must be a member of the group or a superuser to access this endpoint.\n### Parameters **group_id**: The id of the group to update."
 									},
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
-								}
-							]
-						},
-						{
-							"name": "Remove User",
-							"id": "107f94cf-19f4-4cae-9fab-89e5075295b3",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"auth": {
-									"type": "oauth2",
-									"oauth2": [
-										{
-											"key": "accessTokenUrl",
-											"value": "auth/jwt/login",
-											"type": "string"
-										},
-										{
-											"key": "grant_type",
-											"value": "password_credentials",
-											"type": "string"
-										}
-									]
-								},
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{baseUrl}}/groups/:group_id/member/:email",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"groups",
-										":group_id",
-										"member",
-										":email"
-									],
-									"variable": [
-										{
-											"key": "group_id",
-											"value": "<string>",
-											"description": "(Required) "
-										},
-										{
-											"key": "email",
-											"value": "<string>",
-											"description": "(Required) "
-										}
-									]
-								}
-							},
-							"response": [
-								{
-									"id": "9caf8fe2-af26-4a57-b937-36ae16c9bc0a",
-									"name": "Remove a member from a group",
-									"originalRequest": {
-										"auth": {
-											"type": "oauth2",
-											"oauth2": [
-												{
-													"key": "accessToken",
-													"type": "any"
-												},
-												{
-													"key": "addTokenTo",
-													"type": "any"
-												},
-												{
-													"key": "callBackUrl",
-													"type": "any"
-												},
-												{
-													"key": "authUrl",
-													"type": "any"
-												},
-												{
-													"key": "accessTokenUrl",
-													"value": "auth/jwt/login",
-													"type": "string"
-												},
-												{
-													"key": "clientId",
-													"type": "any"
-												},
-												{
-													"key": "clientSecret",
-													"type": "any"
-												},
-												{
-													"key": "clientAuth",
-													"type": "any"
-												},
-												{
-													"key": "grantType",
-													"type": "any"
-												},
-												{
-													"key": "scope",
-													"type": "any"
-												},
-												{
-													"key": "username",
-													"type": "any"
-												},
-												{
-													"key": "password",
-													"type": "any"
-												},
-												{
-													"key": "tokenType",
-													"type": "any"
-												},
-												{
-													"key": "redirectUri",
-													"type": "any"
-												},
-												{
-													"key": "refreshToken",
-													"type": "any"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/groups/:group_id/member/:email",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"groups",
-												":group_id",
-												"member",
-												":email"
-											],
-											"variable": [
-												{
-													"key": "group_id",
-													"value": "<string>",
-													"description": "(Required) "
-												},
-												{
-													"key": "email",
-													"value": "<string>",
-													"description": "(Required) "
-												}
-											]
-										}
-									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										}
-									],
-									"cookie": [],
-									"body": "{}"
-								},
-								{
-									"id": "bed6ec71-c8b2-49d8-9842-bdcd60f46b63",
-									"name": "Not found",
-									"originalRequest": {
-										"auth": {
-											"type": "oauth2",
-											"oauth2": [
-												{
-													"key": "accessToken",
-													"type": "any"
-												},
-												{
-													"key": "addTokenTo",
-													"type": "any"
-												},
-												{
-													"key": "callBackUrl",
-													"type": "any"
-												},
-												{
-													"key": "authUrl",
-													"type": "any"
-												},
-												{
-													"key": "accessTokenUrl",
-													"value": "auth/jwt/login",
-													"type": "string"
-												},
-												{
-													"key": "clientId",
-													"type": "any"
-												},
-												{
-													"key": "clientSecret",
-													"type": "any"
-												},
-												{
-													"key": "clientAuth",
-													"type": "any"
-												},
-												{
-													"key": "grantType",
-													"type": "any"
-												},
-												{
-													"key": "scope",
-													"type": "any"
-												},
-												{
-													"key": "username",
-													"type": "any"
-												},
-												{
-													"key": "password",
-													"type": "any"
-												},
-												{
-													"key": "tokenType",
-													"type": "any"
-												},
-												{
-													"key": "redirectUri",
-													"type": "any"
-												},
-												{
-													"key": "refreshToken",
-													"type": "any"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/groups/:group_id/member/:email",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"groups",
-												":group_id",
-												"member",
-												":email"
-											],
-											"variable": [
-												{
-													"key": "group_id",
-													"value": "<string>",
-													"description": "(Required) "
-												},
-												{
-													"key": "email",
-													"value": "<string>",
-													"description": "(Required) "
-												}
-											]
-										}
-									},
-									"status": "Not Found",
-									"code": 404,
-									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "text/plain"
-										}
-									],
-									"cookie": [],
-									"body": ""
-								},
-								{
-									"id": "bb478a56-0772-4218-9d65-a539ef82dedb",
-									"name": "Validation Error",
-									"originalRequest": {
-										"auth": {
-											"type": "oauth2",
-											"oauth2": [
-												{
-													"key": "accessToken",
-													"type": "any"
-												},
-												{
-													"key": "addTokenTo",
-													"type": "any"
-												},
-												{
-													"key": "callBackUrl",
-													"type": "any"
-												},
-												{
-													"key": "authUrl",
-													"type": "any"
-												},
-												{
-													"key": "accessTokenUrl",
-													"value": "auth/jwt/login",
-													"type": "string"
-												},
-												{
-													"key": "clientId",
-													"type": "any"
-												},
-												{
-													"key": "clientSecret",
-													"type": "any"
-												},
-												{
-													"key": "clientAuth",
-													"type": "any"
-												},
-												{
-													"key": "grantType",
-													"type": "any"
-												},
-												{
-													"key": "scope",
-													"type": "any"
-												},
-												{
-													"key": "username",
-													"type": "any"
-												},
-												{
-													"key": "password",
-													"type": "any"
-												},
-												{
-													"key": "tokenType",
-													"type": "any"
-												},
-												{
-													"key": "redirectUri",
-													"type": "any"
-												},
-												{
-													"key": "refreshToken",
-													"type": "any"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											}
-										],
-										"url": {
-											"raw": "{{baseUrl}}/groups/:group_id/member/:email",
-											"host": [
-												"{{baseUrl}}"
-											],
-											"path": [
-												"groups",
-												":group_id",
-												"member",
-												":email"
-											],
-											"variable": [
-												{
-													"key": "group_id",
-													"value": "<string>",
-													"description": "(Required) "
-												},
-												{
-													"key": "email",
-													"value": "<string>",
-													"description": "(Required) "
-												}
-											]
-										}
-									},
-									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
-									"code": 422,
-									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
-									"header": [
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										}
-									],
-									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						}
 					],
-					"id": "4aad3ba1-14d0-4c22-9225-75bcf932be42"
+					"id": "349ac77d-99b5-4ac7-b5b6-0a556f139376"
 				},
 				{
 					"name": "List Groups",
-					"id": "1f624ebd-0ad3-4a6e-aad6-a7dbaa578169",
+					"id": "30e8f71c-60f6-497f-8ec9-5e26abb86921",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -3170,11 +4285,12 @@
 									"value": "<string>"
 								}
 							]
-						}
+						},
+						"description": "## List all groups that the user is a member of. This endpoint can be used to search for groups by name or by member. This might be replaces later with a more robust search endpoint combined             with a simple GET endpoint for listing all groups from search. Returns a list of groups that match the search criteria. If no groups are found, an empty list is returned.\n### Parameters User can pass in a group name and/or a member's information to search for. If no parameters are passed in, all groups that the user is a member of will be returned. If user is a superuser, all groups in the database will be returned.\n**group_name**: The name of the group to search for. **member_data**: Either email or User id of the member to search for."
 					},
 					"response": [
 						{
-							"id": "1857a9f4-8436-4659-94be-2f45e90b366f",
+							"id": "09d19f9c-12c3-447b-9d7f-15db2f61f83a",
 							"name": "List all groups",
 							"originalRequest": {
 								"auth": {
@@ -3269,23 +4385,24 @@
 											"value": "<string>"
 										}
 									]
-								}
+								},
+								"description": "## List all groups that the user is a member of. This endpoint can be used to search for groups by name or by member. This might be replaces later with a more robust search endpoint combined             with a simple GET endpoint for listing all groups from search. Returns a list of groups that match the search criteria. If no groups are found, an empty list is returned.\n### Parameters User can pass in a group name and/or a member's information to search for. If no parameters are passed in, all groups that the user is a member of will be returned. If user is a superuser, all groups in the database will be returned.\n**group_name**: The name of the group to search for. **member_data**: Either email or User id of the member to search for."
 							},
 							"status": "OK",
 							"code": 200,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{}"
+							"body": "{\n  \"groups\": [\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    },\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    }\n  ]\n}"
 						},
 						{
-							"id": "f98c5509-a23a-4e9a-b14a-7e56a78f04bd",
+							"id": "69a8f070-4b81-4f6d-bbe5-5278e343cd05",
 							"name": "Not found",
 							"originalRequest": {
 								"auth": {
@@ -3380,23 +4497,24 @@
 											"value": "<string>"
 										}
 									]
-								}
+								},
+								"description": "## List all groups that the user is a member of. This endpoint can be used to search for groups by name or by member. This might be replaces later with a more robust search endpoint combined             with a simple GET endpoint for listing all groups from search. Returns a list of groups that match the search criteria. If no groups are found, an empty list is returned.\n### Parameters User can pass in a group name and/or a member's information to search for. If no parameters are passed in, all groups that the user is a member of will be returned. If user is a superuser, all groups in the database will be returned.\n**group_name**: The name of the group to search for. **member_data**: Either email or User id of the member to search for."
 							},
 							"status": "Not Found",
 							"code": 404,
 							"_postman_previewlanguage": "text",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "text/plain"
+									"value": "text/plain",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": ""
 						},
 						{
-							"id": "d14f57be-4493-4009-a091-45e8df23453f",
+							"id": "89346e6d-bfe8-4c71-99f8-0a21c9cba57d",
 							"name": "Validation Error",
 							"originalRequest": {
 								"auth": {
@@ -3491,26 +4609,27 @@
 											"value": "<string>"
 										}
 									]
-								}
+								},
+								"description": "## List all groups that the user is a member of. This endpoint can be used to search for groups by name or by member. This might be replaces later with a more robust search endpoint combined             with a simple GET endpoint for listing all groups from search. Returns a list of groups that match the search criteria. If no groups are found, an empty list is returned.\n### Parameters User can pass in a group name and/or a member's information to search for. If no parameters are passed in, all groups that the user is a member of will be returned. If user is a superuser, all groups in the database will be returned.\n**group_name**: The name of the group to search for. **member_data**: Either email or User id of the member to search for."
 							},
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"non sint magna pariat\",\n        \"ullamco anim\"\n      ],\n      \"msg\": \"sit magna voluptate\",\n      \"type\": \"culpa esse\"\n    },\n    {\n      \"loc\": [\n        \"dolor sit\",\n        \"dolore cupidatat pariatur sit in\"\n      ],\n      \"msg\": \"consectetur\",\n      \"type\": \"proide\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"e\",\n        \"officia adipisicing\"\n      ],\n      \"msg\": \"laborum sunt\",\n      \"type\": \"dolor\"\n    },\n    {\n      \"loc\": [\n        \"aliqua anim veniam\",\n        \"cillum aute aliquip\"\n      ],\n      \"msg\": \"Excepteur aute ea mollit officia\",\n      \"type\": \"sit\"\n    }\n  ]\n}"
 						}
 					]
 				},
 				{
 					"name": "Create Group",
-					"id": "2d9791e9-3d33-48b4-9f9d-b1a3d08a5b1c",
+					"id": "85e39ef4-17cd-4379-9118-a172dfdcd51e",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -3543,7 +4662,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
+							"raw": "{\n \"name\": \"Group 01\",\n \"description\": \"\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3559,11 +4678,12 @@
 								"groups",
 								""
 							]
-						}
+						},
+						"description": "## Create a new group This endpoint creates a new group with the user as the owner, admin, and member. If the group is successfully created, the group's information is returned.\n### Parameters **name**: The name of the group. Must be unique(per user). **description**: A short description of the group."
 					},
 					"response": [
 						{
-							"id": "baaad9e1-c192-42d2-9df6-b5a6ee4103f3",
+							"id": "7f3405af-be28-488f-aa64-168182f0735b",
 							"name": "Create new group",
 							"originalRequest": {
 								"auth": {
@@ -3645,7 +4765,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
+									"raw": "{\n \"name\": \"Group 01\",\n \"description\": \"\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3661,23 +4781,24 @@
 										"groups",
 										""
 									]
-								}
+								},
+								"description": "## Create a new group This endpoint creates a new group with the user as the owner, admin, and member. If the group is successfully created, the group's information is returned.\n### Parameters **name**: The name of the group. Must be unique(per user). **description**: A short description of the group."
 							},
 							"status": "Created",
 							"code": 201,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"id\": \"Excepteur\",\n  \"name\": \"et sunt\",\n  \"message\": \"Group created successfully\"\n}"
+							"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"name\": \"sint commodo\",\n  \"message\": \"Group created successfully\"\n}"
 						},
 						{
-							"id": "2a1fb5bf-4953-4b6d-b69e-147fe127a3e0",
+							"id": "e6378092-286d-4bf4-b4a8-1c7e225fb2e0",
 							"name": "Not found",
 							"originalRequest": {
 								"auth": {
@@ -3759,7 +4880,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
+									"raw": "{\n \"name\": \"Group 01\",\n \"description\": \"\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3775,23 +4896,24 @@
 										"groups",
 										""
 									]
-								}
+								},
+								"description": "## Create a new group This endpoint creates a new group with the user as the owner, admin, and member. If the group is successfully created, the group's information is returned.\n### Parameters **name**: The name of the group. Must be unique(per user). **description**: A short description of the group."
 							},
 							"status": "Not Found",
 							"code": 404,
 							"_postman_previewlanguage": "text",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "text/plain"
+									"value": "text/plain",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": ""
 						},
 						{
-							"id": "08f3d6d5-3d10-47b9-bcff-b535e408c2e7",
+							"id": "f15929bc-ef1f-41de-8944-a8f1697fa6db",
 							"name": "Validation Error",
 							"originalRequest": {
 								"auth": {
@@ -3873,7 +4995,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
+									"raw": "{\n \"name\": \"Group 01\",\n \"description\": \"\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3889,238 +5011,26 @@
 										"groups",
 										""
 									]
-								}
+								},
+								"description": "## Create a new group This endpoint creates a new group with the user as the owner, admin, and member. If the group is successfully created, the group's information is returned.\n### Parameters **name**: The name of the group. Must be unique(per user). **description**: A short description of the group."
 							},
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
-						}
-					]
-				},
-				{
-					"name": "Update Group",
-					"id": "9766f513-bb3e-426c-87a6-aa0f376d12ee",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/groups/:id",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"groups",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "<string>",
-									"description": "(Required) "
-								}
-							]
-						}
-					},
-					"response": [
-						{
-							"id": "43bea0ec-ae9d-4379-98c6-0eb9fa8eee63",
-							"name": "Update a group",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/groups/:id",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"groups",
-										":id"
-									],
-									"variable": [
-										{
-											"key": "id",
-											"value": "<string>",
-											"description": "(Required) "
-										}
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "\"ea ullamco ut\""
-						},
-						{
-							"id": "5bdd4a10-d1e0-45bb-8199-111609ada38b",
-							"name": "Not found",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/groups/:id",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"groups",
-										":id"
-									],
-									"variable": [
-										{
-											"key": "id",
-											"value": "<string>",
-											"description": "(Required) "
-										}
-									]
-								}
-							},
-							"status": "Not Found",
-							"code": 404,
-							"_postman_previewlanguage": "text",
-							"_postman_previewtype": "html",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "text/plain"
-								}
-							],
-							"cookie": [],
-							"body": ""
-						},
-						{
-							"id": "f0a0383a-0ddd-498d-805f-6dbb2e61be95",
-							"name": "Validation Error",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Accept",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/groups/:id",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"groups",
-										":id"
-									],
-									"variable": [
-										{
-											"key": "id",
-											"value": "<string>",
-											"description": "(Required) "
-										}
-									]
-								}
-							},
-							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
-							"code": 422,
-							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				}
 			],
-			"id": "c6b62dd7-044f-4b19-b427-2381f71ce2d8"
+			"id": "f80608b2-b8a4-4913-bdf5-d2852da2de72"
 		},
 		{
 			"name": "users",
@@ -4130,7 +5040,7 @@
 					"item": [
 						{
 							"name": "Users:Current User",
-							"id": "bb393c1c-59c6-44a3-8ea1-a9371d0e8745",
+							"id": "b75417a2-9dcd-4507-9d4d-788f23594105",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -4170,7 +5080,7 @@
 							},
 							"response": [
 								{
-									"id": "863cb282-8a7c-4b9f-b6e0-0e39d81987a2",
+									"id": "1cff6713-85a8-4f5a-9b0e-14c59fdb199c",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -4260,18 +5170,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+									"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 								},
 								{
-									"id": "c66137a3-06b5-46e0-a089-2c3a56c9d8d7",
+									"id": "6ed4b01b-c6e7-41e9-801c-15dbb6553a65",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -4361,11 +5271,341 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "Delete User",
+							"id": "b1f560ea-7406-4c37-9d48-8e27c23de021",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessTokenUrl",
+											"value": "auth/jwt/login",
+											"type": "string"
+										},
+										{
+											"key": "grant_type",
+											"value": "password_credentials",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"me"
+									]
+								},
+								"description": "## Delete current user account\nThis route deletes the account of the currently logged in user.\n### Request body\n- **user** - User object\n### Expected Response\n**204** - *The account has been deleted*"
+							},
+							"response": [
+								{
+									"id": "0bc28e01-7d6f-43d9-afb0-544bbaa1816c",
+									"name": "The account has been deleted",
+									"originalRequest": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"type": "any"
+												},
+												{
+													"key": "addTokenTo",
+													"type": "any"
+												},
+												{
+													"key": "callBackUrl",
+													"type": "any"
+												},
+												{
+													"key": "authUrl",
+													"type": "any"
+												},
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "clientId",
+													"type": "any"
+												},
+												{
+													"key": "clientSecret",
+													"type": "any"
+												},
+												{
+													"key": "clientAuth",
+													"type": "any"
+												},
+												{
+													"key": "grantType",
+													"type": "any"
+												},
+												{
+													"key": "scope",
+													"type": "any"
+												},
+												{
+													"key": "username",
+													"type": "any"
+												},
+												{
+													"key": "password",
+													"type": "any"
+												},
+												{
+													"key": "tokenType",
+													"type": "any"
+												},
+												{
+													"key": "redirectUri",
+													"type": "any"
+												},
+												{
+													"key": "refreshToken",
+													"type": "any"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/users/me",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"me"
+											]
+										},
+										"description": "## Delete current user account\nThis route deletes the account of the currently logged in user.\n### Request body\n- **user** - User object\n### Expected Response\n**204** - *The account has been deleted*"
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"id": "7db7065e-579a-42c7-87ec-70bfd07004c6",
+									"name": "User not found",
+									"originalRequest": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"type": "any"
+												},
+												{
+													"key": "addTokenTo",
+													"type": "any"
+												},
+												{
+													"key": "callBackUrl",
+													"type": "any"
+												},
+												{
+													"key": "authUrl",
+													"type": "any"
+												},
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "clientId",
+													"type": "any"
+												},
+												{
+													"key": "clientSecret",
+													"type": "any"
+												},
+												{
+													"key": "clientAuth",
+													"type": "any"
+												},
+												{
+													"key": "grantType",
+													"type": "any"
+												},
+												{
+													"key": "scope",
+													"type": "any"
+												},
+												{
+													"key": "username",
+													"type": "any"
+												},
+												{
+													"key": "password",
+													"type": "any"
+												},
+												{
+													"key": "tokenType",
+													"type": "any"
+												},
+												{
+													"key": "redirectUri",
+													"type": "any"
+												},
+												{
+													"key": "refreshToken",
+													"type": "any"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/users/me",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"me"
+											]
+										},
+										"description": "## Delete current user account\nThis route deletes the account of the currently logged in user.\n### Request body\n- **user** - User object\n### Expected Response\n**204** - *The account has been deleted*"
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain",
+											"enabled": true
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"id": "a0bc684a-8ab4-40d9-a120-147ba894b90a",
+									"name": "User was not deleted",
+									"originalRequest": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"type": "any"
+												},
+												{
+													"key": "addTokenTo",
+													"type": "any"
+												},
+												{
+													"key": "callBackUrl",
+													"type": "any"
+												},
+												{
+													"key": "authUrl",
+													"type": "any"
+												},
+												{
+													"key": "accessTokenUrl",
+													"value": "auth/jwt/login",
+													"type": "string"
+												},
+												{
+													"key": "clientId",
+													"type": "any"
+												},
+												{
+													"key": "clientSecret",
+													"type": "any"
+												},
+												{
+													"key": "clientAuth",
+													"type": "any"
+												},
+												{
+													"key": "grantType",
+													"type": "any"
+												},
+												{
+													"key": "scope",
+													"type": "any"
+												},
+												{
+													"key": "username",
+													"type": "any"
+												},
+												{
+													"key": "password",
+													"type": "any"
+												},
+												{
+													"key": "tokenType",
+													"type": "any"
+												},
+												{
+													"key": "redirectUri",
+													"type": "any"
+												},
+												{
+													"key": "refreshToken",
+													"type": "any"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/users/me",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"me"
+											]
+										},
+										"description": "## Delete current user account\nThis route deletes the account of the currently logged in user.\n### Request body\n- **user** - User object\n### Expected Response\n**204** - *The account has been deleted*"
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
@@ -4375,7 +5615,7 @@
 						},
 						{
 							"name": "Users:Patch Current User",
-							"id": "e31eb336-7b4e-4be3-a3e6-f7e39bedf958",
+							"id": "d980b606-ed9a-48a7-a1e6-574134d709c1",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -4428,7 +5668,7 @@
 							},
 							"response": [
 								{
-									"id": "62f11d55-6be8-4a61-8793-d2c375e54dbc",
+									"id": "b63a612a-93fa-45f7-8062-a4640b83ebd8",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -4531,18 +5771,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+									"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 								},
 								{
-									"id": "ccff7142-6f99-452c-a38e-f5ababf3a3ba",
+									"id": "17d450b6-f12e-414f-a35c-e7b3169eaac3",
 									"name": "Bad Request",
 									"originalRequest": {
 										"auth": {
@@ -4645,18 +5885,18 @@
 									"status": "Bad Request",
 									"code": 400,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"detail\": \"UPDATE_USER_EMAIL_ALREADY_EXISTS\"\n}"
 								},
 								{
-									"id": "fe7d8af4-19c9-44b3-a6b7-1b27d0102e2d",
+									"id": "f0127c81-fdc1-46a2-8d33-bdfa22e87997",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -4759,18 +5999,18 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "59571c14-0c0c-42ff-9aed-3c1bc35e144b",
+									"id": "cb6f509a-2859-41f4-a941-bf4e2578dc4a",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -4873,27 +6113,27 @@
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						}
 					],
-					"id": "f69ae5ab-4844-4d0d-9e9c-c0235fc48f4d"
+					"id": "a5416ec7-44e0-4cb2-b4ff-f91cead64a09"
 				},
 				{
 					"name": "{id}",
 					"item": [
 						{
 							"name": "Users:User",
-							"id": "c253f807-7e70-424b-ac90-a742ae55e715",
+							"id": "752557bd-fe5c-44a3-bb56-69793ac5da2f",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -4940,7 +6180,7 @@
 							},
 							"response": [
 								{
-									"id": "51ba8945-8da1-442c-b3d1-9ba334009020",
+									"id": "4bf4997d-a949-4de9-beec-ac2cf0642486",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -5037,18 +6277,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+									"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 								},
 								{
-									"id": "b988832e-5766-4498-aa00-95122333a645",
+									"id": "b29e209d-8312-41c1-ab60-5663c044a8be",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -5145,18 +6385,18 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "db792a37-83a8-428e-b16e-8d9b1f330b6c",
+									"id": "102f983c-4a28-4eeb-97d9-585d79d4af5d",
 									"name": "Not a superuser.",
 									"originalRequest": {
 										"auth": {
@@ -5253,18 +6493,18 @@
 									"status": "Forbidden",
 									"code": 403,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "14b47c52-1448-4586-82fb-ee40d6155a61",
+									"id": "47fb7ee4-97c8-4477-8e3f-d08f9f5e4364",
 									"name": "The user does not exist.",
 									"originalRequest": {
 										"auth": {
@@ -5361,18 +6601,18 @@
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "bc0be09c-684a-429a-973a-d4297783e242",
+									"id": "4d745e10-d80c-4d9d-850a-6c7151e0c2d4",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -5469,21 +6709,21 @@
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Users:Delete User",
-							"id": "2da8a352-af1e-427e-a467-5f34702dae49",
+							"id": "21075b71-ed9c-4092-a3ad-b67a751c3211",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -5530,7 +6770,7 @@
 							},
 							"response": [
 								{
-									"id": "353c57be-b40f-4ac2-83c2-f9ea61485ec0",
+									"id": "e8fa7029-c2ab-4ed1-b1b3-3defac3829e6",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -5627,18 +6867,18 @@
 									"status": "No Content",
 									"code": 204,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "fff8722d-0d47-42c9-84c7-5c4b0a671fd5",
+									"id": "c9c869f1-aedc-4443-9c21-80445cef6cb3",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -5735,18 +6975,18 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "a2a0bfc6-cad1-48fa-9811-cddb014e7bec",
+									"id": "9e526305-314d-480c-86dc-0c9e4e863ff9",
 									"name": "Not a superuser.",
 									"originalRequest": {
 										"auth": {
@@ -5843,18 +7083,18 @@
 									"status": "Forbidden",
 									"code": 403,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "45472f79-a698-45c2-a1fd-257409e73ea0",
+									"id": "3b2c1d83-c214-46c9-8285-c866e90e82c9",
 									"name": "The user does not exist.",
 									"originalRequest": {
 										"auth": {
@@ -5951,18 +7191,18 @@
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "2fe53d50-94cd-4b98-b54c-a8fbab069c1b",
+									"id": "3e377ee2-cfdb-4feb-bb4c-676508d908b4",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -6059,21 +7299,21 @@
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Users:Patch User",
-							"id": "fad405e9-94ad-447b-8949-438ead7f9e02",
+							"id": "3964e995-ad48-4ab0-93ed-2024d7495313",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -6133,7 +7373,7 @@
 							},
 							"response": [
 								{
-									"id": "c539cfdc-ebac-4636-a814-84af13ed7bcb",
+									"id": "1ea2b82e-3695-4d9f-82fb-7968c698d037",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -6243,18 +7483,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+									"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 								},
 								{
-									"id": "5f4c19b4-5aca-418b-85fd-0308889f93c5",
+									"id": "5cc4b3bd-a233-4b64-8371-0e397fe3f4b3",
 									"name": "Bad Request",
 									"originalRequest": {
 										"auth": {
@@ -6364,18 +7604,18 @@
 									"status": "Bad Request",
 									"code": 400,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"detail\": \"UPDATE_USER_EMAIL_ALREADY_EXISTS\"\n}"
 								},
 								{
-									"id": "0c95986b-230b-46c7-84ab-bcd1634bb44d",
+									"id": "2347f06d-4713-44a2-adfd-ad14e8dfb241",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -6485,18 +7725,18 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "62898155-ab16-48bb-9278-8a5e3ca92c6a",
+									"id": "ab57f94f-57fa-4d70-b8c1-44e3d02cdc5d",
 									"name": "Not a superuser.",
 									"originalRequest": {
 										"auth": {
@@ -6606,18 +7846,18 @@
 									"status": "Forbidden",
 									"code": 403,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "0652fc68-af4b-4dde-a4a6-4577ba88adcc",
+									"id": "f1f78b8f-a295-419c-af32-36a9b989c31c",
 									"name": "The user does not exist.",
 									"originalRequest": {
 										"auth": {
@@ -6727,18 +7967,18 @@
 									"status": "Not Found",
 									"code": 404,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": ""
 								},
 								{
-									"id": "39c80b2e-9573-4f52-9c11-4f2f96e313aa",
+									"id": "b411c13d-6ebd-4a6e-a7e5-e62465bc97ae",
 									"name": "Validation Error",
 									"originalRequest": {
 										"auth": {
@@ -6848,24 +8088,24 @@
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						}
 					],
-					"id": "06bcfc80-21d2-4458-b640-56fba9f57eaa"
+					"id": "a8b1dfff-785d-436f-b36a-a7352ca9e910"
 				},
 				{
-					"name": "List User Groups",
-					"id": "dd52c19e-1509-417d-89df-c023cafbc415",
+					"name": "List My Groups",
+					"id": "e5301974-eaeb-4afa-a381-6d41a8290b7e",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -6893,26 +8133,21 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/users/groups?user_id=<string>",
+							"raw": "{{baseUrl}}/users/groups",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"users",
 								"groups"
-							],
-							"query": [
-								{
-									"key": "user_id",
-									"value": "<string>"
-								}
 							]
-						}
+						},
+						"description": "## Get current user groups\nThis route returns all groups that currently logged in user is a member of,         with the user's role in that group."
 					},
 					"response": [
 						{
-							"id": "8753d78b-1975-469c-a4ae-17b959869283",
-							"name": "List all groups that a user is a member of",
+							"id": "e23af93c-3df8-4fec-aaba-a573474c835f",
+							"name": "List of groups.",
 							"originalRequest": {
 								"auth": {
 									"type": "oauth2",
@@ -6988,38 +8223,33 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/users/groups?user_id=<string>",
+									"raw": "{{baseUrl}}/users/groups",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
 										"groups"
-									],
-									"query": [
-										{
-											"key": "user_id",
-											"value": "<string>"
-										}
 									]
-								}
+								},
+								"description": "## Get current user groups\nThis route returns all groups that currently logged in user is a member of,         with the user's role in that group."
 							},
 							"status": "OK",
 							"code": 200,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{}"
+							"body": "{\n  \"groups\": [\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    },\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    }\n  ]\n}"
 						},
 						{
-							"id": "3e35d18c-6b43-422d-b332-f081b3741d29",
-							"name": "Not found",
+							"id": "45b105d7-3842-4c96-a440-fa1465a36df9",
+							"name": "User not found",
 							"originalRequest": {
 								"auth": {
 									"type": "oauth2",
@@ -7095,37 +8325,304 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/users/groups?user_id=<string>",
+									"raw": "{{baseUrl}}/users/groups",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
 										"groups"
-									],
-									"query": [
-										{
-											"key": "user_id",
-											"value": "<string>"
-										}
 									]
-								}
+								},
+								"description": "## Get current user groups\nThis route returns all groups that currently logged in user is a member of,         with the user's role in that group."
 							},
 							"status": "Not Found",
 							"code": 404,
 							"_postman_previewlanguage": "text",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "text/plain"
+									"value": "text/plain",
+									"enabled": true
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "List User Groups",
+					"id": "b8d11f92-e9fa-4f95-a776-df70d00593ea",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessTokenUrl",
+									"value": "auth/jwt/login",
+									"type": "string"
+								},
+								{
+									"key": "grant_type",
+									"value": "password_credentials",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:user_id/groups",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":user_id",
+								"groups"
+							],
+							"variable": [
+								{
+									"key": "user_id",
+									"value": "<string>",
+									"description": "(Required) "
+								}
+							]
+						},
+						"description": "## Delete current user account\nThis route, finds user by provided id, or raises a HTTP exception (User not found). If user is found, lists all groups that a user is a member of, with the user's role in that group.\n### Request Query Parameters\n**user_id**: id of the user whose groups are to be listed"
+					},
+					"response": [
+						{
+							"id": "37eec743-3398-4ff0-90c4-af2117ecece4",
+							"name": "List of groups.",
+							"originalRequest": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"type": "any"
+										},
+										{
+											"key": "addTokenTo",
+											"type": "any"
+										},
+										{
+											"key": "callBackUrl",
+											"type": "any"
+										},
+										{
+											"key": "authUrl",
+											"type": "any"
+										},
+										{
+											"key": "accessTokenUrl",
+											"value": "auth/jwt/login",
+											"type": "string"
+										},
+										{
+											"key": "clientId",
+											"type": "any"
+										},
+										{
+											"key": "clientSecret",
+											"type": "any"
+										},
+										{
+											"key": "clientAuth",
+											"type": "any"
+										},
+										{
+											"key": "grantType",
+											"type": "any"
+										},
+										{
+											"key": "scope",
+											"type": "any"
+										},
+										{
+											"key": "username",
+											"type": "any"
+										},
+										{
+											"key": "password",
+											"type": "any"
+										},
+										{
+											"key": "tokenType",
+											"type": "any"
+										},
+										{
+											"key": "redirectUri",
+											"type": "any"
+										},
+										{
+											"key": "refreshToken",
+											"type": "any"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:user_id/groups",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":user_id",
+										"groups"
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "## Delete current user account\nThis route, finds user by provided id, or raises a HTTP exception (User not found). If user is found, lists all groups that a user is a member of, with the user's role in that group.\n### Request Query Parameters\n**user_id**: id of the user whose groups are to be listed"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"enabled": true
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"groups\": [\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    },\n    {\n      \"name\": \"Group 01\",\n      \"role\": \"user\"\n    }\n  ]\n}"
+						},
+						{
+							"id": "3c8a52d8-c635-43be-ab9f-d1354c67f699",
+							"name": "User not found",
+							"originalRequest": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"type": "any"
+										},
+										{
+											"key": "addTokenTo",
+											"type": "any"
+										},
+										{
+											"key": "callBackUrl",
+											"type": "any"
+										},
+										{
+											"key": "authUrl",
+											"type": "any"
+										},
+										{
+											"key": "accessTokenUrl",
+											"value": "auth/jwt/login",
+											"type": "string"
+										},
+										{
+											"key": "clientId",
+											"type": "any"
+										},
+										{
+											"key": "clientSecret",
+											"type": "any"
+										},
+										{
+											"key": "clientAuth",
+											"type": "any"
+										},
+										{
+											"key": "grantType",
+											"type": "any"
+										},
+										{
+											"key": "scope",
+											"type": "any"
+										},
+										{
+											"key": "username",
+											"type": "any"
+										},
+										{
+											"key": "password",
+											"type": "any"
+										},
+										{
+											"key": "tokenType",
+											"type": "any"
+										},
+										{
+											"key": "redirectUri",
+											"type": "any"
+										},
+										{
+											"key": "refreshToken",
+											"type": "any"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/users/:user_id/groups",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										":user_id",
+										"groups"
+									],
+									"variable": [
+										{
+											"key": "user_id",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								},
+								"description": "## Delete current user account\nThis route, finds user by provided id, or raises a HTTP exception (User not found). If user is found, lists all groups that a user is a member of, with the user's role in that group.\n### Request Query Parameters\n**user_id**: id of the user whose groups are to be listed"
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": ""
 						},
 						{
-							"id": "e912c2c5-b8b2-4ee8-b0ec-df514e577b3d",
+							"id": "c21d8e7b-7598-4416-abea-8bccf7296356",
 							"name": "Validation Error",
 							"originalRequest": {
 								"auth": {
@@ -7202,39 +8699,42 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/users/groups?user_id=<string>",
+									"raw": "{{baseUrl}}/users/:user_id/groups",
 									"host": [
 										"{{baseUrl}}"
 									],
 									"path": [
 										"users",
+										":user_id",
 										"groups"
 									],
-									"query": [
+									"variable": [
 										{
 											"key": "user_id",
-											"value": "<string>"
+											"value": "<string>",
+											"description": "(Required) "
 										}
 									]
-								}
+								},
+								"description": "## Delete current user account\nThis route, finds user by provided id, or raises a HTTP exception (User not found). If user is found, lists all groups that a user is a member of, with the user's role in that group.\n### Request Query Parameters\n**user_id**: id of the user whose groups are to be listed"
 							},
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				}
 			],
-			"id": "8f17b8c8-7f5d-418a-ab2b-90d211d3e676"
+			"id": "8ccfd95b-63bc-4d07-8525-22c772a9cb3d"
 		},
 		{
 			"name": "auth",
@@ -7244,7 +8744,7 @@
 					"item": [
 						{
 							"name": "Auth:Jwt.Login",
-							"id": "0f364d13-f325-4cea-b510-8bfcada63da1",
+							"id": "dd353421-ffca-4092-86a3-986518831c4b",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -7264,14 +8764,14 @@
 									"mode": "urlencoded",
 									"urlencoded": [
 										{
+											"description": "(Required) ",
 											"key": "username",
-											"value": "<string>",
-											"description": "(Required) "
+											"value": "<string>"
 										},
 										{
+											"description": "(Required) ",
 											"key": "password",
-											"value": "<string>",
-											"description": "(Required) "
+											"value": "<string>"
 										},
 										{
 											"key": "grant_type",
@@ -7305,7 +8805,7 @@
 							},
 							"response": [
 								{
-									"id": "093a3371-db2d-4139-9780-99f378946e2f",
+									"id": "ffd852fa-cbca-43dd-af96-ba31852b139d",
 									"name": "Successful Response",
 									"originalRequest": {
 										"method": "POST",
@@ -7323,14 +8823,14 @@
 											"mode": "urlencoded",
 											"urlencoded": [
 												{
+													"description": "(Required) ",
 													"key": "username",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
+													"description": "(Required) ",
 													"key": "password",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
 													"key": "grant_type",
@@ -7365,18 +8865,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2ZDMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ.M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI\",\n  \"token_type\": \"bearer\"\n}"
 								},
 								{
-									"id": "0c646e52-2962-4013-b387-e4b175ad046e",
+									"id": "a7b6369f-269c-4f69-806b-2489e98df316",
 									"name": "Bad Request",
 									"originalRequest": {
 										"method": "POST",
@@ -7394,14 +8894,14 @@
 											"mode": "urlencoded",
 											"urlencoded": [
 												{
+													"description": "(Required) ",
 													"key": "username",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
+													"description": "(Required) ",
 													"key": "password",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
 													"key": "grant_type",
@@ -7436,18 +8936,18 @@
 									"status": "Bad Request",
 									"code": 400,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{\n  \"detail\": \"LOGIN_BAD_CREDENTIALS\"\n}"
 								},
 								{
-									"id": "e2d2e59e-c2f8-4c60-9a1f-d6767ed532fc",
+									"id": "fab2b233-b93a-47b1-9d64-6fd800fab1d5",
 									"name": "Validation Error",
 									"originalRequest": {
 										"method": "POST",
@@ -7465,14 +8965,14 @@
 											"mode": "urlencoded",
 											"urlencoded": [
 												{
+													"description": "(Required) ",
 													"key": "username",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
+													"description": "(Required) ",
 													"key": "password",
-													"value": "<string>",
-													"description": "(Required) "
+													"value": "<string>"
 												},
 												{
 													"key": "grant_type",
@@ -7507,21 +9007,21 @@
 									"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 									"code": 422,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
-									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+									"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 								}
 							]
 						},
 						{
 							"name": "Auth:Jwt.Logout",
-							"id": "9010c74c-bcab-46d0-b266-f872190a1d96",
+							"id": "b3b70b87-b349-41ff-90fe-a81309f709af",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -7562,7 +9062,7 @@
 							},
 							"response": [
 								{
-									"id": "e144411a-5bcb-4283-865b-c55bfabbf41b",
+									"id": "e383c637-2e6d-4186-b1b1-4ddb22531eb0",
 									"name": "Successful Response",
 									"originalRequest": {
 										"auth": {
@@ -7653,18 +9153,18 @@
 									"status": "OK",
 									"code": 200,
 									"_postman_previewlanguage": "json",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "application/json"
+											"value": "application/json",
+											"enabled": true
 										}
 									],
 									"cookie": [],
 									"body": "{}"
 								},
 								{
-									"id": "7fcba893-fef7-4fdc-a1a7-9f2ab9c035df",
+									"id": "558e0b27-5012-4436-be54-ad9e9acd09bb",
 									"name": "Missing token or inactive user.",
 									"originalRequest": {
 										"auth": {
@@ -7755,11 +9255,11 @@
 									"status": "Unauthorized",
 									"code": 401,
 									"_postman_previewlanguage": "text",
-									"_postman_previewtype": "html",
 									"header": [
 										{
 											"key": "Content-Type",
-											"value": "text/plain"
+											"value": "text/plain",
+											"enabled": true
 										}
 									],
 									"cookie": [],
@@ -7768,11 +9268,11 @@
 							]
 						}
 					],
-					"id": "74894da6-caa1-4190-9a13-3e0d4ab30c26"
+					"id": "622e3b94-b2a2-4af8-9682-86fe68bc7bc4"
 				},
 				{
 					"name": "Register:Register",
-					"id": "70f6acd1-e790-4827-9a83-01a560ac477c",
+					"id": "59eaaf32-662f-4f05-a6ce-b149cb418422",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -7790,7 +9290,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"<email>\",\n  \"password\": \"<string>\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"first_name\": \"<string>\",\n  \"last_name\": \"<string>\"\n}",
+							"raw": "{\n \"email\": \"<email>\",\n \"password\": \"<string>\",\n \"is_active\": true,\n \"is_superuser\": false,\n \"is_verified\": false,\n \"first_name\": \"John\",\n \"last_name\": \"Smith\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7810,7 +9310,7 @@
 					},
 					"response": [
 						{
-							"id": "71afe707-563a-4d30-833d-189bccc755d5",
+							"id": "61dd48b4-2fb3-4413-aea0-238cd6d02c23",
 							"name": "Successful Response",
 							"originalRequest": {
 								"method": "POST",
@@ -7826,7 +9326,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"email\": \"<email>\",\n  \"password\": \"<string>\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"first_name\": \"<string>\",\n  \"last_name\": \"<string>\"\n}",
+									"raw": "{\n \"email\": \"<email>\",\n \"password\": \"<string>\",\n \"is_active\": true,\n \"is_superuser\": false,\n \"is_verified\": false,\n \"first_name\": \"John\",\n \"last_name\": \"Smith\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -7847,18 +9347,18 @@
 							"status": "Created",
 							"code": 201,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+							"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 						},
 						{
-							"id": "3ac6032c-6470-4096-a9f6-8cb36a65a389",
+							"id": "4c0a87bd-3e6b-48f6-9eb1-a295724d58f1",
 							"name": "Bad Request",
 							"originalRequest": {
 								"method": "POST",
@@ -7874,7 +9374,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"email\": \"<email>\",\n  \"password\": \"<string>\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"first_name\": \"<string>\",\n  \"last_name\": \"<string>\"\n}",
+									"raw": "{\n \"email\": \"<email>\",\n \"password\": \"<string>\",\n \"is_active\": true,\n \"is_superuser\": false,\n \"is_verified\": false,\n \"first_name\": \"John\",\n \"last_name\": \"Smith\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -7895,18 +9395,18 @@
 							"status": "Bad Request",
 							"code": 400,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{\n  \"detail\": \"REGISTER_USER_ALREADY_EXISTS\"\n}"
 						},
 						{
-							"id": "c0214a91-7696-478a-a5df-1f00b45acfb6",
+							"id": "6001a8b4-9ba5-4880-96bb-55e4661e1b95",
 							"name": "Validation Error",
 							"originalRequest": {
 								"method": "POST",
@@ -7922,7 +9422,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"email\": \"<email>\",\n  \"password\": \"<string>\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false,\n  \"first_name\": \"<string>\",\n  \"last_name\": \"<string>\"\n}",
+									"raw": "{\n \"email\": \"<email>\",\n \"password\": \"<string>\",\n \"is_active\": true,\n \"is_superuser\": false,\n \"is_verified\": false,\n \"first_name\": \"John\",\n \"last_name\": \"Smith\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -7943,21 +9443,21 @@
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				},
 				{
 					"name": "Reset:Forgot Password",
-					"id": "a5e7d32f-c3f2-4586-b8b0-66ae34298c67",
+					"id": "98d606ec-faf4-431f-8095-b7c9d0598948",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -7995,7 +9495,7 @@
 					},
 					"response": [
 						{
-							"id": "a3035cec-2fa2-4d43-85b0-53e04c029ef0",
+							"id": "9c13c652-9e3a-4c75-93a5-74d0f47d2cb7",
 							"name": "Successful Response",
 							"originalRequest": {
 								"method": "POST",
@@ -8032,18 +9532,18 @@
 							"status": "Accepted",
 							"code": 202,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{}"
 						},
 						{
-							"id": "a29c1577-579d-409d-b4d9-85aa9b2f5a87",
+							"id": "83a642fc-3142-469d-843f-e48d79c14cc5",
 							"name": "Validation Error",
 							"originalRequest": {
 								"method": "POST",
@@ -8080,21 +9580,21 @@
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				},
 				{
 					"name": "Reset:Reset Password",
-					"id": "74cda0d4-a8b2-43da-82f0-6a81cbf115dd",
+					"id": "5f619938-e72b-4912-8c1e-c3992fee438d",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -8132,7 +9632,7 @@
 					},
 					"response": [
 						{
-							"id": "72c2da85-466b-42c4-8707-3f5ebb5e61a2",
+							"id": "cff850e7-a10c-4a38-89d9-0e2a4f4b0b37",
 							"name": "Successful Response",
 							"originalRequest": {
 								"method": "POST",
@@ -8169,18 +9669,18 @@
 							"status": "OK",
 							"code": 200,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{}"
 						},
 						{
-							"id": "c6e1f2c8-dd94-4b31-ab8b-14b3887bfb54",
+							"id": "4d491572-eb2e-4cbf-ad2b-5d3c7d9d98a6",
 							"name": "Bad Request",
 							"originalRequest": {
 								"method": "POST",
@@ -8217,18 +9717,18 @@
 							"status": "Bad Request",
 							"code": 400,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{\n  \"detail\": \"RESET_PASSWORD_BAD_TOKEN\"\n}"
 						},
 						{
-							"id": "980c7f35-c323-4000-9b68-b316164765ef",
+							"id": "44d4ff79-e979-49e5-9b41-6a60af31e29a",
 							"name": "Validation Error",
 							"originalRequest": {
 								"method": "POST",
@@ -8265,21 +9765,21 @@
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				},
 				{
 					"name": "Verify:Request-Token",
-					"id": "2f53934e-7083-4cbe-90c3-43e4191c83f7",
+					"id": "52647467-f93c-48f2-a23f-7f2738b7c4de",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -8317,7 +9817,7 @@
 					},
 					"response": [
 						{
-							"id": "35c51c31-6736-454f-a1d1-d66d82424b14",
+							"id": "3daa26dc-0cff-46fb-97e6-d452db4b8ad7",
 							"name": "Successful Response",
 							"originalRequest": {
 								"method": "POST",
@@ -8354,18 +9854,18 @@
 							"status": "Accepted",
 							"code": 202,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{}"
 						},
 						{
-							"id": "c9024519-0ca7-4bf2-bbfd-c5f88d6b73ee",
+							"id": "8dff4946-2687-48c8-be5c-d6b4eebd085a",
 							"name": "Validation Error",
 							"originalRequest": {
 								"method": "POST",
@@ -8402,21 +9902,21 @@
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				},
 				{
 					"name": "Verify:Verify",
-					"id": "5cfa5b06-96d2-48a0-88cb-3b706e29532d",
+					"id": "90cf4b05-5c5d-41d1-a198-0f4a42092335",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -8454,7 +9954,7 @@
 					},
 					"response": [
 						{
-							"id": "30edfa99-f96f-4d26-b35b-2013f92f1232",
+							"id": "0b108505-99bc-4484-9f6b-de66d9d9bcf1",
 							"name": "Successful Response",
 							"originalRequest": {
 								"method": "POST",
@@ -8491,18 +9991,18 @@
 							"status": "OK",
 							"code": 200,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"email\": \"dRJBvfI3bLm8NxA@ZSjDdCxlZhMGhxCcqZEAkNPJhL.tq\",\n  \"first_name\": \"et minim\",\n  \"last_name\": \"elit ad\",\n  \"id\": {},\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
+							"body": "{\n  \"id\": \"5eb7cf5a86d9755df3a6c593\",\n  \"email\": \"AbvpFyHzCWi6zOr@jNqhmzNOuSIUFPgQgXjkapzFqCYZcQL.uu\",\n  \"first_name\": \"cillum adipisicing aliqua\",\n  \"last_name\": \"nulla amet anim\",\n  \"is_active\": true,\n  \"is_superuser\": false,\n  \"is_verified\": false\n}"
 						},
 						{
-							"id": "f31234ee-d207-4dc8-8cde-4b9e1ec764e9",
+							"id": "395dcb29-9258-4319-99c8-e909dcbe051c",
 							"name": "Bad Request",
 							"originalRequest": {
 								"method": "POST",
@@ -8539,18 +10039,18 @@
 							"status": "Bad Request",
 							"code": 400,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
 							"body": "{\n  \"detail\": \"VERIFY_USER_BAD_TOKEN\"\n}"
 						},
 						{
-							"id": "6c847e99-4f27-4b7b-ab48-c824de2b824a",
+							"id": "bad222d1-0c9f-4d8b-9bac-fe368ee80e4f",
 							"name": "Validation Error",
 							"originalRequest": {
 								"method": "POST",
@@ -8587,28 +10087,27 @@
 							"status": "Unprocessable Entity (WebDAV) (RFC 4918)",
 							"code": 422,
 							"_postman_previewlanguage": "json",
-							"_postman_previewtype": "html",
 							"header": [
 								{
 									"key": "Content-Type",
-									"value": "application/json"
+									"value": "application/json",
+									"enabled": true
 								}
 							],
 							"cookie": [],
-							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"laboris\",\n        \"Excepteur ex tempor\"\n      ],\n      \"msg\": \"reprehenderit nostrud aliquip eu labore\",\n      \"type\": \"culpa eni\"\n    },\n    {\n      \"loc\": [\n        \"eiusmod dolore\",\n        \"do irure\"\n      ],\n      \"msg\": \"consectetur voluptate minim enim of\",\n      \"type\": \"l\"\n    }\n  ]\n}"
+							"body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        \"elit commodo a\",\n        \"veniam elit\"\n      ],\n      \"msg\": \"qui reprehenderit\",\n      \"type\": \"quis ad aliqua\"\n    },\n    {\n      \"loc\": [\n        \"laboris dolor sit dolor\",\n        \"ullamco\"\n      ],\n      \"msg\": \"culpa esse magna\",\n      \"type\": \"Duis\"\n    }\n  ]\n}"
 						}
 					]
 				}
 			],
-			"id": "a5c1a77e-4ef5-4fd7-9b3b-ae163ffc6f81"
+			"id": "54dc81d6-0849-467d-83be-1861195b2051"
 		}
 	],
 	"variable": [
 		{
-			"id": "c6970185-abdb-4a40-b56b-4c0040c20fcd",
+			"id": "547fafd1-eee9-4b4f-a75c-c049c1a899cc",
 			"key": "baseUrl",
-			"value": "/",
-			"type": "string"
+			"value": "/"
 		}
 	]
 }
