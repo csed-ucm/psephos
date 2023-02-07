@@ -1,7 +1,10 @@
 from app.models.user_manager import current_active_user
 from app.models.workspace import Workspace
-from app.schemas.workspace import (WorkspaceList, WorkspaceReadShort, WorkspaceReadFull)
+from app.schemas.workspace import (WorkspaceList, WorkspaceReadShort, WorkspaceReadFull,
+                                   WorkspaceCreateInput, WorkspaceCreateOutput)
 from app.schemas.user import UserRead
+# from app.models.user import User
+from app.exceptions import workspace as workspace_exceptions
 
 
 # Get all workspaces
@@ -34,3 +37,32 @@ async def get_user_workspaces() -> WorkspaceList:
             name=workspace.name, description=workspace.description, owner=owner))
 
     return WorkspaceList(workspaces=workspace_list)
+
+
+# Create a new workspace with user as the owner
+async def create_workspace(input_data: WorkspaceCreateInput) -> WorkspaceCreateOutput:
+    user = current_active_user.get()
+
+    # Check if workspace name is unique
+    if await Workspace.find_one({"name": input_data.name}):
+        raise workspace_exceptions.ExistsWithSuchName(input_data.name)
+
+    # Create a new workspace
+    new_workspace = await Workspace(name=input_data.name,
+                                    description=input_data.description,
+                                    owner=user).create()
+
+    # Check if workspace was created
+    if not new_workspace:
+        raise workspace_exceptions.ErrorWhileCreating(input_data.name)
+
+    # Add the user to workspace member list
+    await new_workspace.add_member(user)
+
+    # Specify fields for output schema
+    result = new_workspace.dict(include={'id': True,
+                                         'name': True,
+                                         'description': True,
+                                         'owner': {'id', 'first_name', 'last_name', 'email'}})
+
+    return WorkspaceCreateOutput(**result)

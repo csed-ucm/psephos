@@ -60,3 +60,32 @@ class WorkspaceList(BaseModel):
             }
         }
 
+
+# Schema for the request to create a workspace
+class WorkspaceCreateInput(BaseModel):
+    name: str = Field(title="Name")
+    description: str = Field(title="Description")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Workspace 01",
+                "description": "This is an example workspace",
+            }
+        }
+
+
+# Schema for the response when a workspace is created
+class WorkspaceCreateOutput(BaseModel):
+    id: WorkspaceID = Field(...)
+    name: str = Field(title="Name")
+    description: str = Field(title="Description")
+    owner: UserReadBasicInfo = Field(title="Owner")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Workspace 01",
+                "description": "This is an example workspace",
+            }
+        }
