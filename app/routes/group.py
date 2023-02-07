@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 from app.mongo_db import mainDB as Database
 from app.models.group import Group
 from app.models.user import User
-from app.models.user_manager import current_active_user, fastapi_users
+from app.models.user_manager import get_current_active_user, fastapi_users
 from app.exceptions import group as group_exceptions
 from app.exceptions import user as user_exceptions
 from app.schemas.user import UserReadBasicInfo, UserID
@@ -34,7 +34,7 @@ router = APIRouter(
 # TODO: Add api callbacks for group membership management: add, remove,
 # change role
 
-
+current_active_user = get_current_active_user
 current_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 

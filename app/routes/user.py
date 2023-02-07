@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from app.models.user import User
-from app.models.user_manager import current_active_user
+from app.models.user_manager import get_current_active_user
 from app.schemas.user import UserID
 from app.schemas.group import GroupList
 from app.exceptions import user as user_exceptions
@@ -15,6 +15,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+current_active_user = get_current_active_user()
 
 # List all groups that a user is a member of
 @router.get("/groups",

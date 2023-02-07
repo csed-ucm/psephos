@@ -1,3 +1,4 @@
+from contextvars import ContextVar
 from typing import Optional, AsyncGenerator
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
@@ -68,4 +69,5 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, UserID](  # type: ignore
     get_user_manager, [auth_backend])
 
-current_active_user = fastapi_users.current_user(active=True)
+get_current_active_user = fastapi_users.current_user(active=True)
+current_active_user = ContextVar("current_active_user")
