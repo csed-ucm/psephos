@@ -1,24 +1,20 @@
-from fastapi import HTTPException, status
-from app.utils.colored_dbg import print_warning
+from app.exceptions import resource
+from app.schemas.workspace import WorkspaceID
 
 
-class ExistsWithSuchName(HTTPException):
+# Exception for when a Workspace with the same name already exists
+class NonUniqueName(resource.NonUniqueName):
     def __init__(self, workspace_name: str):
-        super().__init__(status_code=status.HTTP_400_BAD_REQUEST,
-                         detail=f"Workspace with name \"{workspace_name}\" already exists")
-
-    def __str__(self) -> str:
-        print_warning(self.detail)
-        return self.detail
-        # logger.warning(self.detail)
+        super().__init__("Workspace", resource_name=workspace_name)
 
 
-class ErrorWhileCreating(HTTPException):
+# Exception for when an error occurs during Workspace creation
+class ErrorWhileCreating(resource.ErrorWhileCreating):
     def __init__(self, workspace_name: str):
-        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         detail=f"Error while creating workspace {workspace_name}")
+        super().__init__("Workspace", resource_name=workspace_name)
 
-    def __str__(self) -> str:
-        print_warning(self.detail)
-        return self.detail
-        # logger.warning(self.detail)
+
+# Exception for when a Workspace is not found
+class WorkspaceNotFound(resource.ResourceNotFound):
+    def __init__(self, workspace_id: WorkspaceID):
+        super().__init__("Workspace", resource_id=workspace_id)
