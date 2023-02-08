@@ -6,7 +6,7 @@ from app.mongo_db import mainDB
 # from app.routes import group, user, workspace
 from app.routes import workspace
 from app.config import get_settings
-from app.schemas.user import UserCreate, UserRead, UserUpdate
+from app.schemas.user import UserCreate, UserReadFull, UserUpdate
 from app.models.user_manager import auth_backend, fastapi_users, get_current_active_user, current_active_user
 from app.models.workspace import Workspace
 from app.models.user import User
@@ -32,16 +32,16 @@ app.include_router(workspace.router,
 app.include_router(fastapi_users.get_auth_router(auth_backend),
                    prefix="/auth/jwt",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_register_router(UserRead, UserCreate),
+app.include_router(fastapi_users.get_register_router(UserReadFull, UserCreate),
                    prefix="/auth",
                    tags=["Auth"])
 app.include_router(fastapi_users.get_reset_password_router(),
                    prefix="/auth",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_verify_router(UserRead),
+app.include_router(fastapi_users.get_verify_router(UserReadFull),
                    prefix="/auth",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_users_router(UserRead, UserUpdate),
+app.include_router(fastapi_users.get_users_router(UserReadFull, UserUpdate),
                    prefix="/users",
                    tags=["Users"])
 

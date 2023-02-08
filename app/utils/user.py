@@ -3,7 +3,7 @@ from app.models.group import Group
 from app.models.user import User
 from pydantic import EmailStr
 from app.schemas.user import UserID
-from app.schemas.group import GroupReadSimple, GroupList
+from app.schemas.group import GroupReadShort, GroupList
 from app.exceptions.user import UserNotFound
 
 
@@ -22,11 +22,11 @@ async def get_user_groups(user: User) -> GroupList:
     result = []
     for group in groups:
         if user.id == group.owner:
-            result.append(GroupReadSimple(name=group.name, role="owner"))
+            result.append(GroupReadShort(name=group.name, role="owner"))
         elif user.id in group.admins:
-            result.append(GroupReadSimple(name=group.name, role="admin"))
+            result.append(GroupReadShort(name=group.name, role="admin"))
         elif user.id in group.members:
-            result.append(GroupReadSimple(name=group.name, role="user"))
+            result.append(GroupReadShort(name=group.name, role="user"))
 
     group_list = GroupList(groups=result)
     return group_list

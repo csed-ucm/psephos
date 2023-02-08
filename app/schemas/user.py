@@ -14,16 +14,15 @@ class UserID(PydanticObjectId):
             example="5eb7cf5a86d9755df3a6c593")
 
 
-class UserRead(schemas.BaseUser[UserID]):
-    # email: EmailStr
+class UserReadFull(schemas.BaseUser[UserID]):
     id: UserID = Field(...)
     email: EmailStr = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
 
 
-class UserReadBasicInfo(BaseModel):
-    # email: EmailStr
+class UserReadShort(BaseModel):
+    id: UserID = Field(...)
     email: EmailStr = Field(...)
     first_name: str = Field(...)
     last_name: str = Field(...)
