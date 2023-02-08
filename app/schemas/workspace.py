@@ -1,7 +1,7 @@
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 from typing import List
-from app.schemas.user import UserReadBasicInfo, UserRead
+from app.schemas.user import UserReadShort, UserReadFull
 
 
 # Custom PydanticObjectId class to override due to a bug
@@ -16,6 +16,7 @@ class WorkspaceID(PydanticObjectId):
 
 # Schema for the response with basic workspace info (name and role)
 class WorkspaceReadShort(BaseModel):
+    id: WorkspaceID = Field(title="ID")
     name: str = Field(title="Name")
     description: str = Field(title="Description")
     owner: bool = Field(title="Owner")
@@ -23,6 +24,7 @@ class WorkspaceReadShort(BaseModel):
     class Config:
         schema_extra = {
             "example": {
+                "id": "1a2b3c4d5e6f7g8h9i0j",
                 "name": "Workspace 01",
                 "description": "This is an example workspace",
                 "owner": "true",
@@ -32,9 +34,26 @@ class WorkspaceReadShort(BaseModel):
 
 # Schema for the response with full workspace info (name, description, owner info)
 class WorkspaceReadFull(BaseModel):
+    id: WorkspaceID = Field(title="ID")
     name: str = Field(example="Workspace 01", title="Name")
     description: str = Field(title="Description")
-    owner: UserRead = Field(title="Owner")
+    owner: UserReadShort = Field(title="Owner")
+    members_count: int = Field(title="Members count")
+
+    class Config:
+        schema_extra = {
+            "example":         {
+                "name": "Workspace 01",
+                "description": "This is an example workspace",
+                "owner": {
+                    "id": "1a2b3c4d5e6f7g8h9i0j",
+                    "email": "user@example.com",
+                    "first_name": "John",
+                    "last_name": "Smith"
+                },
+                "members_count": 34
+            }
+        }
 
 
 # Schema for the response with a list of workspaces
@@ -80,7 +99,7 @@ class WorkspaceCreateOutput(BaseModel):
     id: WorkspaceID = Field(...)
     name: str = Field(title="Name")
     description: str = Field(title="Description")
-    owner: UserReadBasicInfo = Field(title="Owner")
+    owner: UserReadShort = Field(title="Owner")
 
     class Config:
         schema_extra = {
