@@ -5,7 +5,7 @@ from typing import List
 from fastapi import Response
 # from app.models.group import Group
 # from app.models.user import User
-from app.schemas.user import UserAddToGroup
+from app.schemas.user import UserAddToGroup, UserReadShort, UserReadFull
 
 
 # Custom PydanticObjectId class to override due to a bug
@@ -19,9 +19,9 @@ class GroupID(PydanticObjectId):
 
 
 # Schema for the response with basic group info (name and role)
-class GroupReadSimple(BaseModel):
+class GroupReadShort(BaseModel):
     name: str = Field(title="Name")
-    role: str = Field(title="Role")
+    description: str = Field(title="Role")
 
     class Config:
         schema_extra = {
@@ -36,8 +36,8 @@ class GroupReadSimple(BaseModel):
 class GroupReadFull(BaseModel):
     name: str = Field(example="Group 01", title="Name")
     description: str
-    owner_name: str
-    owner_email: EmailStr
+    owner: UserReadShort = Field(title="Owner")
+    members_count: int
     # TODO: Add list of members (emails with roles)
 
     class Config:
@@ -47,13 +47,14 @@ class GroupReadFull(BaseModel):
                 "description": "This is an example group",
                 "owner_name": "John Doe",
                 "owner_email": "jdoe@example.com",
+                "members_count": 3
             }
         }
 
 
 # Schema for the response with basic group info
 class GroupList(BaseModel):
-    groups: List[GroupReadSimple]
+    groups: List[GroupReadShort]
 
     class Config:
         schema_extra = {
@@ -68,7 +69,7 @@ class GroupList(BaseModel):
 
 
 # Schema for the request to create a new group
-class GroupCreateIn(BaseModel):
+class GroupCreateInput(BaseModel):
     name: str = Field(
         default="",
         min_length=3,
@@ -86,11 +87,10 @@ class GroupCreateIn(BaseModel):
 
 
 # Schema for the response to a group creation request
-class GroupCreateOut(BaseModel):
-    message: str = "Group created successfully"
+class GroupCreateOutput(BaseModel):
     id: GroupID
     name: str
-    # description: str
+    description: str
 
 
 # Schema for the request to add a user to a group
