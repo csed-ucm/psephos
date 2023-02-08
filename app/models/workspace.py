@@ -1,8 +1,10 @@
 from beanie import Document, after_event, Insert, Link
 from pydantic import Field
 from app.models.user import User
+from app.models.group import Group
 from app.utils import colored_dbg
 from app.schemas.workspace import WorkspaceID
+from app.mongo_db import create_link
 
 
 class Workspace(Document):
@@ -25,6 +27,7 @@ class Workspace(Document):
     owner: Link[User] = Field(
         title="Owner", description="Owner of the workspace")
     members: list[Link[User]] = []
+    groups: list[Link[Group]] = []
 
     @after_event(Insert)
     async def workspace_created(self) -> None:
@@ -32,7 +35,6 @@ class Workspace(Document):
             f'New workspace "{self.name}" ({self.id}) has been created')
 
     async def add_member(self, user: User) -> None:
-        from app.mongo_db import create_link
         link = await create_link(user)
         self.members.append(link)
         colored_dbg.info(
