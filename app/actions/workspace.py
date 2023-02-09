@@ -4,7 +4,7 @@ from app.schemas.workspace import (WorkspaceList, WorkspaceReadShort, WorkspaceR
                                    WorkspaceCreateInput, WorkspaceCreateOutput)
 from app.schemas.user import UserReadShort, UserReadFull
 # from app.models.user import User
-from app.exceptions import workspace as workspace_exceptions
+from app.exceptions import workspace as WorkspaceExceptions
 
 
 # Get all workspaces
@@ -54,7 +54,7 @@ async def create_workspace(input_data: WorkspaceCreateInput) -> WorkspaceCreateO
 
     # Check if workspace name is unique
     if await Workspace.find_one({"name": input_data.name}):
-        raise workspace_exceptions.NonUniqueName(input_data.name)
+        raise WorkspaceExceptions.NonUniqueName(input_data.name)
 
     # Create a new workspace
     new_workspace = await Workspace(name=input_data.name,
@@ -63,7 +63,7 @@ async def create_workspace(input_data: WorkspaceCreateInput) -> WorkspaceCreateO
 
     # Check if workspace was created
     if not new_workspace:
-        raise workspace_exceptions.ErrorWhileCreating(input_data.name)
+        raise WorkspaceExceptions.ErrorWhileCreating(input_data.name)
 
     # Add the user to workspace member list
     await new_workspace.add_member(user)
