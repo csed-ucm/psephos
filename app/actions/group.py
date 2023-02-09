@@ -4,7 +4,8 @@ from app.models.group import Group
 # from app.models.user import User
 from app.models.user_manager import current_active_user
 from app.schemas.user import UserReadShort
-from app.schemas.group import (GroupReadShort, GroupReadFull, GroupList)
+from app.schemas.group import (GroupReadShort, GroupReadFull, GroupList, GroupCreateInput, GroupCreateOutput)
+from app.exceptions import group as GroupExceptions
 
 
 # Get all groups
@@ -40,3 +41,35 @@ async def get_user_groups(workspace: Workspace) -> GroupList:
         group_list.append(GroupReadShort(name=group.name, description=group.description))
 
     return GroupList(groups=group_list)
+
+
+# Create a new group with user as the owner
+async def create_group(workspace: Workspace, input_data: GroupCreateInput) -> GroupCreateOutput:
+    # await workspace.fetch_link(workspace.groups)
+    user = current_active_user.get()
+
+    print(input_data)
+
+    # Check if group name is unique
+    if await Group.find_one({"name": input_data.name}):
+        raise GroupExceptions.NonUniqueName(input_data.name)
+
+    # Create a new group
+    new_group = await Group(name=input_data.name,
+                            description=input_data.description,
+                            owner=user).create()
+
+    # Check if group was created
+    if not new_group:
+        raise GroupExceptions.ErrorWhileCreating(input_data.name)
+
+    # Add the user to group member list
+    await new_group.add_member(user)
+
+    # Specify fields for output schema
+    result = new_group.dict(include={'id': True,
+                                     'name': True,
+                                     'description': True,
+                                     'owner': {'id', 'first_name', 'last_name', 'email'}})
+
+    return GroupCreateOutput(**result)
