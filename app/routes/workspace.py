@@ -49,7 +49,7 @@ async def create_workspace(input_data: WorkspaceCreateInput = Body(...)) -> Work
 # List all groups in the workspace
 @router.get("/{workspace_id}/groups", response_description="List of all groups", response_model=GroupList)
 async def list_groups(workspace: Workspace = Depends(get_workspace)) -> GroupList:
-    return await GroupActions.get_all_groups()
+    return await GroupActions.get_user_groups(workspace)
 
 
 # List all groups in the workspace
