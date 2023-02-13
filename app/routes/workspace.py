@@ -5,6 +5,8 @@ from app.actions import group as GroupActions
 from app.models.workspace import Workspace
 from app.schemas.workspace import (WorkspaceID, WorkspaceList,
                                    WorkspaceCreateInput, WorkspaceCreateOutput)
+from app.models.user import User
+from app.schemas.user import UserID
 from app.schemas.group import GroupList, GroupCreateInput, GroupCreateOutput
 from app.exceptions import workspace as WorkspaceExceptions
 
@@ -29,7 +31,7 @@ async def get_workspaces() -> WorkspaceList:
     """
     Returns all workspaces, the current user is a member of. The request does not accept any query parameters.
     """
-    return await WorkspaceActions.get_all_workspaces()
+    return await WorkspaceActions.get_user_workspaces()
 
 
 # Create a new workspace for current user
@@ -57,3 +59,17 @@ async def list_groups(workspace: Workspace = Depends(get_workspace)) -> GroupLis
 async def create_group(workspace: Workspace = Depends(get_workspace),
                        input_data: GroupCreateInput = Body(...)) -> GroupCreateOutput:
     return await GroupActions.create_group(workspace, input_data)
+
+
+# List all members in the workspace
+@router.get("/{workspace_id}/members", response_description="List of all groups", response_model=list)
+async def list_members(workspace: Workspace = Depends(get_workspace)) -> list:
+    return await WorkspaceActions.get_members(workspace)
+
+
+# List all members in the workspace
+@router.post("/{workspace_id}/members", response_description="List of all groups", response_model=User)
+async def add_member(user_id: UserID = Body(...),
+                     workspace: Workspace = Depends(get_workspace)):
+    return await WorkspaceActions.add_member(workspace, user_id)
+

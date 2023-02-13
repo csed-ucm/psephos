@@ -1,10 +1,12 @@
 from app.models.user_manager import current_active_user
+from app.models.user import User
 from app.models.workspace import Workspace
 from app.schemas.workspace import (WorkspaceList, WorkspaceReadShort, WorkspaceReadFull,
                                    WorkspaceCreateInput, WorkspaceCreateOutput)
-from app.schemas.user import UserReadShort, UserReadFull
+from app.schemas.user import UserID, UserReadShort, UserReadFull
 # from app.models.user import User
 from app.exceptions import workspace as WorkspaceExceptions
+from app.exceptions import user as UserExceptions
 
 
 # Get all workspaces
@@ -75,3 +77,28 @@ async def create_workspace(input_data: WorkspaceCreateInput) -> WorkspaceCreateO
                                          'owner': {'id', 'first_name', 'last_name', 'email'}})
 
     return WorkspaceCreateOutput(**result)
+
+
+# List all members of a workspace
+async def get_members(workspace: Workspace):
+    await workspace.fetch_link(Workspace.members)
+    member_list = []
+    member: User
+    # NOTE: The type test cannot check the type of the link, so we ignore it
+    for member in workspace.members:  # type: ignore
+        member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+        member_scheme = UserReadShort(**member_data)
+        print(member_scheme)
+        member_list.append(member_scheme)
+
+    # Return the list of members
+    return member_list
+
+
+# Add a member to a workspace
+async def add_member(workspace: Workspace, user_id: UserID):
+    user = await User.get(user_id)
+    if user:
+        return await workspace.add_member(user)
+    else:
+        raise UserExceptions.UserNotFound(user_id)
