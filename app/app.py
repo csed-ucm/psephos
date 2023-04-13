@@ -5,6 +5,7 @@ from app.mongo_db import mainDB
 # import app.routes as routes
 # from app.routes import group, user, workspace
 from app.routes import workspace
+from app.routes import group
 from app.config import get_settings
 from app.schemas.user import UserCreate, UserReadFull, UserUpdate
 from app.models.user_manager import auth_backend, fastapi_users, get_current_active_user, current_active_user
@@ -28,6 +29,10 @@ app = FastAPI(
 app.include_router(workspace.router,
                    prefix="/workspaces",
                    tags=["Workspaces"],
+                   dependencies=[Depends(set_active_user)])
+app.include_router(group.router,
+                   prefix="/groups",
+                   tags=["Groups"],
                    dependencies=[Depends(set_active_user)])
 app.include_router(fastapi_users.get_auth_router(auth_backend),
                    prefix="/auth/jwt",
