@@ -1,5 +1,7 @@
+# from typing import ForwardRef, NewType, TypeAlias, Optional
 from beanie import Document, after_event, Insert, Link
 from pydantic import Field
+from app.schemas.workspace import WorkspaceID
 from app.utils import colored_dbg
 from app.models.user import User
 from app.schemas.group import GroupID
@@ -12,6 +14,8 @@ class Group(Document):
     name: str = Field(default="", min_length=3, max_length=50,
                       regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=300)
+    # workspace: Link["Workspace"] = Field(title="Workspace", description="Workspace of the group")
+    workspace: WorkspaceID
     owner: Link[User] = Field(title="Owner", description="Owner of the group")
     members: list[Link[User]] = []
 
@@ -24,4 +28,4 @@ class Group(Document):
         self.members.append(link)
         colored_dbg.info(
             f'User {user.id} has been added to Group {self.id} as a member.')
-        await self.save()
+        await Group.save(self)

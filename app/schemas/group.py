@@ -1,11 +1,11 @@
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field, EmailStr
-from typing import List
+from typing import List, Optional
 # from random import choice, randint
-from fastapi import Response
+# from fastapi import Response
 # from app.models.group import Group
 # from app.models.user import User
-from app.schemas.user import UserAddToGroup, UserReadShort, UserReadFull
+from app.schemas.user import UserID, UserReadShort
 
 
 # Custom PydanticObjectId class to override due to a bug
@@ -95,20 +95,19 @@ class GroupCreateOutput(BaseModel):
 
 # Schema for the request to add a user to a group
 class GroupUpdateIn(BaseModel):
-    name: str = Field(
+    name: Optional[str] = Field(
         default="",
         min_length=3,
         max_length=50,
         regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
-    description: str = Field(default="", title="Description", max_length=300)
+    description: Optional[str] = Field(default="", title="Description", max_length=300)
 
-
-# Schema for the response to a group update request
-# NOTE: This needs testing
-class GroupUpdateOut(Response):
-    status_code = 200
-    media_type = "application/json"
-    content = {"message": "Group updated successfully"}
+    class Config:
+        schema_extra = {
+            "example": {
+                "Description": "Updated description"
+            }
+        }
 
 
 # Schema for the response with basic member info
@@ -129,16 +128,23 @@ class GroupMember(BaseModel):
         }
 
 
-# Schema for the request to add a user to a group
-class GroupAddMembers(BaseModel):
-    members: List[UserAddToGroup]
+# Temporary schema for the request to add a member to a workspace
+class AddMembers(BaseModel):
+    accounts: list[UserID]
+    groups: list[GroupID]
 
     class Config:
         schema_extra = {
             "example": {
-                "members": [
-                    {"email": "user1@example.com", "role": "admin"},
-                    {"email": "user2@example.com", "role": "user"},
+                "accounts": [
+                    "1a2b3c4d5e6f7g8h9i0j",
+                    "2a3b4c5d6e7f8g9h0i1j",
+                    "3a4b5c6d7e8f9g0h1i2j"
+                ],
+                "groups": [
+                    "4a5b6c7d8e9f0g1h2i3j",
+                    "5a6b7c8d9e0f1g2h3i4j",
+                    "6a7b8c9d0e1f2g3h4i5j"
                 ]
             }
         }
