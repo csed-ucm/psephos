@@ -58,4 +58,17 @@
         // "--max-complexity=18",
         // "--select=B,C,E,F,W,T4,B9",
     ],
+    "files.exclude": {
+        "**/.coverage": true,
+        "**/.history": true,
+        "**/.mypy_cache": true,
+        "**/.postman": true,
+        "**/.pytest_cache": true,
+        "**/.tox": true,
+        "**/.vscode": true,
+        "**/build": true,
+        "**/dist": true,
+        "**/postman": true,
+        "**/venv": true
+    },
 }
