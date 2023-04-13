@@ -34,3 +34,14 @@ class ResourceNotFound(HTTPException):
         print_warning(self.detail)
         return self.detail
         # logger.warning(self.detail)
+
+
+class ErrorWhileDeleting(HTTPException):
+    def __init__(self, resource: str, resource_id: PydanticObjectId):
+        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         detail=f"Error while deleting {resource} #{resource_id}")
+
+    def __str__(self) -> str:
+        print_warning(self.detail)
+        return self.detail
+        # logger.warning(self.detail)
