@@ -1,7 +1,8 @@
-from beanie import PydanticObjectId
+from beanie import Link, PydanticObjectId
+from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import List
-from app.schemas.user import UserReadShort, UserReadFull
+from app.schemas.user import UserID, UserReadShort, UserReadFull
 
 
 # Custom PydanticObjectId class to override due to a bug
@@ -96,7 +97,7 @@ class WorkspaceCreateInput(BaseModel):
 
 # Schema for the response when a workspace is created
 class WorkspaceCreateOutput(BaseModel):
-    id: WorkspaceID = Field(...)
+    id: WorkspaceID = Field(title="ID")
     name: str = Field(title="Name")
     description: str = Field(title="Description")
     owner: UserReadShort = Field(title="Owner")
@@ -106,5 +107,17 @@ class WorkspaceCreateOutput(BaseModel):
             "example": {
                 "name": "Workspace 01",
                 "description": "This is an example workspace",
+            }
+        }
+
+
+# Temporary schema for the request to add a member to a workspace
+class MemberAdd(BaseModel):
+    user_id: UserID = Field(title="ID")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "user_id": "1a2b3c4d5e6f7g8h9i0j",
             }
         }

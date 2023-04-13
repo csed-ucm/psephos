@@ -2,6 +2,7 @@ from beanie import Document, after_event, Insert, Link
 from pydantic import Field
 from app.models.user import User
 from app.models.group import Group
+from app.models.member import Member
 from app.utils import colored_dbg
 from app.schemas.workspace import WorkspaceID
 from app.mongo_db import create_link
@@ -21,11 +22,11 @@ class Workspace(Document):
     """
 
     id: WorkspaceID = Field(default_factory=WorkspaceID, alias="_id")
-    name: str = Field(default="", min_length=3, max_length=50,
-                      regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
+    name: str = Field(default="", min_length=3, max_length=50)
+    #  regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=300)
-    owner: Link[User] = Field(
-        title="Owner", description="Owner of the workspace")
+    owner: Link[User] = Field(title="Owner", description="Owner of the workspace")
+    # members: list[Link[User]] = []
     members: list[Link[User]] = []
     groups: list[Link[Group]] = []
 
@@ -34,9 +35,10 @@ class Workspace(Document):
         colored_dbg.info(
             f'New workspace "{self.name}" ({self.id}) has been created')
 
-    async def add_member(self, user: User) -> None:
-        link = await create_link(user)
-        self.members.append(link)
-        colored_dbg.info(
-            f'User {user.id} has been added to workspace {self.id} as a member.')
-        await self.save()
+    # async def add_member(self, user: User) -> User:
+    #     link = await create_link(user)
+    #     self.members.append(link)
+    #     colored_dbg.info(
+    #         f'User {user.id} has been added to workspace {self.id} as a member.')
+    #     await Workspace.save(self)
+    #     return user
