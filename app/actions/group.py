@@ -5,6 +5,7 @@ from app.models.workspace import Workspace
 from app.models.group import Group
 from app.models.user import User
 from app.models.user_manager import current_active_user
+from app.models.policy import Policy
 from app.schemas.user import UserID, UserReadShort
 from app.schemas import group as GroupSchemas
 # from app.schemas.workspace import WorkspaceID
@@ -13,6 +14,7 @@ from app.exceptions import user as UserExceptions
 from app.exceptions import workspace as WorkspaceExceptions
 from app.mongo_db import create_link
 from app.utils import colored_dbg
+from app.utils.permissions import GroupPermissions
 
 
 # Get all groups
@@ -204,11 +206,30 @@ async def add_members(group: Group, member_data: GroupSchemas.AddMembers):
         for account in group_to_add.members:
             accounts.add(account.ref.id)
 
+    # Find existing users from the member_data
     accounts.update(member_data.accounts)
     accounts = accounts.difference({member.ref.id for member in group.members})
-    user_list = await User.find(In(User.id, accounts)).to_list()
+    user_list = await User.find(In(User.id, member_data.groups)).to_list()
 
     print(user_list)
     # Add the user accounts to the group member list
     group.members.extend([await create_link(account) for account in user_list])
     await Group.save(group)
+
+
+# Link a group from the same workspace to another group to access its members
+async def link_group(group: Group, workspace: Workspace):
+    # Add group/s to the list
+    group.linked_groups.append(await create_link(group))
+    await Group.save(group)
+
+
+async def add_permission(group: Group, member_data: GroupSchemas.AddPermission):
+    # Find existing groups from the member_data
+    group_list = await Group.find(In(Group.id, member_data.permissions)).to_list()  # fetch_links=True
+    for new_group in group_list:
+        group_link = await create_link(new_group)
+        new_policy = await Policy(policy_holder_type="Group", 
+                                  policy_holder=link,
+                                  permissions=GroupPermissions['get_group_info']).create()
+        

@@ -18,6 +18,7 @@ class Group(Document):
     workspace: WorkspaceID
     owner: Link[User] = Field(title="Owner", description="Owner of the group")
     members: list[Link[User]] = []
+    linked_groups: list[Link["Group"]] = []
 
     @after_event(Insert)
     def create_group(self) -> None:

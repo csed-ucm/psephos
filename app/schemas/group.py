@@ -1,11 +1,12 @@
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional
+from typing import List, Literal, Optional
 # from random import choice, randint
 # from fastapi import Response
 # from app.models.group import Group
 # from app.models.user import User
 from app.schemas.user import UserID, UserReadShort
+from app.utils.permissions import Permissions
 
 
 # Custom PydanticObjectId class to override due to a bug
@@ -130,7 +131,7 @@ class GroupMember(BaseModel):
 
 # Temporary schema for the request to add a member to a workspace
 class AddMembers(BaseModel):
-    accounts: list[UserID]
+    accounts: list[UserID | GroupID]
     groups: list[GroupID]
 
     class Config:
@@ -178,3 +179,37 @@ class GroupReadMembers(BaseModel):
 # Schema for the request to update a member's role
 class GroupMemberUpdateRole(BaseModel):
     role: str = Field(example="admin", title="Role")
+
+
+class PermissionScheme(BaseModel):
+    type: Literal["member", "group"]
+    id: UserID | GroupID
+    permission: Permissions
+
+
+# Schema for adding permissions to a group
+class AddPermission(BaseModel):
+    permissions: list[PermissionScheme] = Field(title="Permissions")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "permissions": [
+                    {
+                        "type": "member",
+                        "id": "1a2b3c4d5e6f7g8h9i0j",
+                        "permission": "eff",
+                    },
+                    {
+                        "type": "member",
+                        "id": "2a3b4c5d6e7f8g9h0i1j",
+                        "permission": "a3",
+                    },
+                    {
+                        "type": "group",
+                        "id": "3a4b5c6d7e8f9g0h1i2j",
+                        "permission": "1",
+                    },
+                ]
+            }
+        }
