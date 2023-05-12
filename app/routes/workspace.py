@@ -1,57 +1,48 @@
 # FastAPI
 from fastapi import APIRouter, Body, Depends
 from app.actions import workspace as WorkspaceActions
-from app.actions import group as GroupActions
-from app.models.workspace import Workspace
-from app.schemas.workspace import (WorkspaceID, WorkspaceList, MemberAdd, WorkspaceReadFull, WorkspaceReadShort,
-                                   WorkspaceCreateInput, WorkspaceCreateOutput)
-from app.models.user import User
+from app.models.documents import Workspace, Account, ResourceID
+from app.schemas import workspace as WorkspaceSchemas
+from app.schemas import policy as PolicySchemas
 # from app.schemas.user import UserID
 from app.schemas.group import GroupList, GroupCreateInput, GroupCreateOutput
-from app.exceptions import workspace as WorkspaceExceptions
-
+from app import dependencies as Dependencies
+from app.account_manager import get_current_active_user
 
 # APIRouter creates path operations for user module
-router = APIRouter()
+open_router = APIRouter()
+router = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
 
 
-# Dependency for getting a workspace with the given id
-async def get_workspace(workspace_id: WorkspaceID) -> Workspace:
-    """
-    Returns a workspace with the given id.
-    """
-    workspace = await Workspace.get(workspace_id)
-    if not workspace:
-        raise WorkspaceExceptions.WorkspaceNotFound(workspace_id)
-    return workspace
-
-
+# TODO: Move to open router to a separate file
 # Get all workspaces with user as a member or owner
-@router.get("", response_description="List of all workspaces", response_model=WorkspaceList)
-async def get_workspaces() -> WorkspaceList:
+@open_router.get("", response_description="List of all workspaces", response_model=WorkspaceSchemas.WorkspaceList)
+async def get_workspaces() -> WorkspaceSchemas.WorkspaceList:
     """
-    Returns all workspaces, the current user is a member of. The request does not accept any query parameters.
+    Returns all workspaces where the current user is a member.
+    The request does not accept any query parameters.
     """
-    return await WorkspaceActions.get_user_workspaces()
+    return await WorkspaceActions.get_workspaces()
 
 
 # Create a new workspace for current user
-@router.post("", response_description="Created workspaces", response_model=WorkspaceCreateOutput)
-async def create_workspace(input_data: WorkspaceCreateInput = Body(...)) -> WorkspaceCreateOutput:
+@open_router.post("", response_description="Created workspaces",
+                  response_model=WorkspaceSchemas.WorkspaceCreateOutput)
+async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)) -> WorkspaceSchemas.WorkspaceCreateOutput:
     """
     Creates a new workspace for the current user.
     Body parameters:
     - **name** (str): name of the workspace, must be unique
     - **description** (str): description of the workspace
 
-    Returns the created workspace with the current user as the owner.
+    Returns the created workspace information.
     """
     return await WorkspaceActions.create_workspace(input_data=input_data)
 
 
 # Get a workspace with the given id
-@router.get("/{workspace_id}", response_description="Workspace data", response_model=WorkspaceReadFull)
-async def get_workspace_info(workspace: Workspace = Depends(get_workspace)) -> WorkspaceReadFull:
+@router.get("/{workspace_id}", response_description="Workspace data")
+async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     """
     Returns a workspace with the given id.
     """
@@ -59,9 +50,9 @@ async def get_workspace_info(workspace: Workspace = Depends(get_workspace)) -> W
 
 
 # Update a workspace with the given id
-@router.put("/{workspace_id}", response_description="Updated workspace", response_model=WorkspaceReadShort)
-async def update_workspace(workspace: Workspace = Depends(get_workspace),
-                           input_data: WorkspaceCreateInput = Body(...)) -> WorkspaceReadShort:
+@router.put("/{workspace_id}", response_description="Updated workspace")
+async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                           input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)):
     """
     Updates the workspace with the given id.
     Query parameters:
@@ -77,7 +68,7 @@ async def update_workspace(workspace: Workspace = Depends(get_workspace),
 
 # Delete a workspace with the given id
 @router.delete("/{workspace_id}", response_description="Deleted workspace")
-async def delete_workspace(workspace: Workspace = Depends(get_workspace)):
+async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     """
     Deletes the workspace with the given id.
     Query parameters:
@@ -86,9 +77,43 @@ async def delete_workspace(workspace: Workspace = Depends(get_workspace)):
     return await WorkspaceActions.delete_workspace(workspace)
 
 
+# List all groups in the workspace
+@router.get("/{workspace_id}/groups", response_description="List of all groups", response_model=GroupList)
+async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace_model)) -> GroupList:
+    return await WorkspaceActions.get_groups(workspace)
+
+
+# List all groups in the workspace
+@router.post("/{workspace_id}/groups", response_description="Created Group", response_model=GroupCreateOutput)
+async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                       input_data: GroupCreateInput = Body(...)) -> GroupCreateOutput:
+    return await WorkspaceActions.create_group(workspace, input_data)
+
+
+# List all members in the workspace
+@router.get("/{workspace_id}/members", response_description="List of all groups", response_model=dict)
+async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace_model)) -> dict:
+    return await WorkspaceActions.get_workspace_members(workspace)
+
+
+# List all members in the workspace
+@router.post("/{workspace_id}/members", response_description="List of all groups", response_model=Account)
+async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                      member_data: WorkspaceSchemas.MemberAdd = Body(...)):
+    return await WorkspaceActions.add_workspace_members(workspace, member_data.user_id)
+
+
+# List user's permissions in the workspace
+@router.get("/{workspace_id}/permissions", response_description="List of all groups")
+async def get_workspace_permissions(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                                    account_id: ResourceID | None = None):
+    return await WorkspaceActions.get_workspace_permissions(workspace, account_id)
+
+
 # Set permissions for a user in a workspace
 @router.put("/{workspace_id}/permissions", response_description="Updated permissions")
-async def set_permissions(workspace: Workspace = Depends(get_workspace), permissions: int = Body(...)):
+async def set_workspace_permissions(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                          permissions: PolicySchemas.PolicyInput = Body(...)):
     """
     Sets the permissions for a user in a workspace.
     Query parameters:
@@ -99,31 +124,4 @@ async def set_permissions(workspace: Workspace = Depends(get_workspace), permiss
 
     Returns the updated workspace.
     """
-    # return await WorkspaceActions.set_permissions(workspace, permissions)
-    return 200
-
-
-# List all groups in the workspace
-@router.get("/{workspace_id}/groups", response_description="List of all groups", response_model=GroupList)
-async def list_groups(workspace: Workspace = Depends(get_workspace)) -> GroupList:
-    return await GroupActions.get_user_groups(workspace)
-
-
-# List all groups in the workspace
-@router.post("/{workspace_id}/groups", response_description="Created Group", response_model=GroupCreateOutput)
-async def create_group(workspace: Workspace = Depends(get_workspace),
-                       input_data: GroupCreateInput = Body(...)) -> GroupCreateOutput:
-    return await GroupActions.create_group(workspace, input_data)
-
-
-# List all members in the workspace
-@router.get("/{workspace_id}/members", response_description="List of all groups", response_model=dict)
-async def list_members(workspace: Workspace = Depends(get_workspace)) -> dict:
-    return await WorkspaceActions.get_members(workspace)
-
-
-# List all members in the workspace
-@router.post("/{workspace_id}/members", response_description="List of all groups", response_model=User)
-async def add_member(member_data: MemberAdd,
-                     workspace: Workspace = Depends(get_workspace)):
-    return await WorkspaceActions.add_member(workspace, member_data.user_id)
+    return await WorkspaceActions.set_workspace_permissions(workspace, permissions)

@@ -1,72 +1,28 @@
-from beanie import PydanticObjectId
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Literal, Optional
-# from random import choice, randint
-# from fastapi import Response
-# from app.models.group import Group
-# from app.models.user import User
-from app.schemas.user import UserID, UserReadShort
+from typing import Any, List, Optional
+from app.models.documents import ResourceID
 from app.utils.permissions import Permissions
 
 
-# Custom PydanticObjectId class to override due to a bug
-class GroupID(PydanticObjectId):
-    @classmethod
-    def __modify_schema__(cls, field_schema):  # type: ignore
-        field_schema.update(
-            type="string",
-            example="5eb7cf5a86d9755df3a6c593",
-        )
+class Group(BaseModel):
+    id: Optional[ResourceID]
+    name: Optional[str]
+    description: Optional[str]
+    workspace: Optional[Any]
+    groups: Optional[list]
+    members: Optional[list]
+    policies: Optional[list]
 
 
-# Schema for the response with basic group info (name and role)
-class GroupReadShort(BaseModel):
-    name: str = Field(title="Name")
-    description: str = Field(title="Role")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "name": "Group 01",
-                "role": "user",
-            }
-        }
-
-
-# Schema for the response with full group info (name, description, owner info)
-class GroupReadFull(BaseModel):
-    name: str = Field(example="Group 01", title="Name")
+class GroupShort(BaseModel):
+    id: ResourceID
+    name: str
     description: str
-    owner: UserReadShort = Field(title="Owner")
-    members_count: int
-    # TODO: Add list of members (emails with roles)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "name": "Example Group",
-                "description": "This is an example group",
-                "owner_name": "John Doe",
-                "owner_email": "jdoe@example.com",
-                "members_count": 3
-            }
-        }
 
 
 # Schema for the response with basic group info
 class GroupList(BaseModel):
-    groups: List[GroupReadShort]
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "groups": [
-                    {"name": "Group 01", "role": "user"},
-                    {"name": "Group 02", "role": "user"},
-                    {"name": "Group 03", "role": "admin"},
-                ]
-            }
-        }
+    groups: list[GroupShort] | list[Group]
 
 
 # Schema for the request to create a new group
@@ -89,7 +45,7 @@ class GroupCreateInput(BaseModel):
 
 # Schema for the response to a group creation request
 class GroupCreateOutput(BaseModel):
-    id: GroupID
+    id: ResourceID
     name: str
     description: str
 
@@ -131,8 +87,8 @@ class GroupMember(BaseModel):
 
 # Temporary schema for the request to add a member to a workspace
 class AddMembers(BaseModel):
-    accounts: list[UserID | GroupID]
-    groups: list[GroupID]
+    accounts: list[ResourceID]
+    # groups: list[ResourceID]
 
     class Config:
         schema_extra = {
@@ -142,11 +98,11 @@ class AddMembers(BaseModel):
                     "2a3b4c5d6e7f8g9h0i1j",
                     "3a4b5c6d7e8f9g0h1i2j"
                 ],
-                "groups": [
-                    "4a5b6c7d8e9f0g1h2i3j",
-                    "5a6b7c8d9e0f1g2h3i4j",
-                    "6a7b8c9d0e1f2g3h4i5j"
-                ]
+                # "groups": [
+                #     "4a5b6c7d8e9f0g1h2i3j",
+                #     "5a6b7c8d9e0f1g2h3i4j",
+                #     "6a7b8c9d0e1f2g3h4i5j"
+                # ]
             }
         }
 
@@ -171,45 +127,6 @@ class GroupReadMembers(BaseModel):
                         "last_name": "Smith",
                         "role": "user"
                     }
-                ]
-            }
-        }
-
-
-# Schema for the request to update a member's role
-class GroupMemberUpdateRole(BaseModel):
-    role: str = Field(example="admin", title="Role")
-
-
-class PermissionScheme(BaseModel):
-    type: Literal["member", "group"]
-    id: UserID | GroupID
-    permission: Permissions
-
-
-# Schema for adding permissions to a group
-class AddPermission(BaseModel):
-    permissions: list[PermissionScheme] = Field(title="Permissions")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "permissions": [
-                    {
-                        "type": "member",
-                        "id": "1a2b3c4d5e6f7g8h9i0j",
-                        "permission": "eff",
-                    },
-                    {
-                        "type": "member",
-                        "id": "2a3b4c5d6e7f8g9h0i1j",
-                        "permission": "a3",
-                    },
-                    {
-                        "type": "group",
-                        "id": "3a4b5c6d7e8f9g0h1i2j",
-                        "permission": "1",
-                    },
                 ]
             }
         }

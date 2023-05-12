@@ -1,134 +1,63 @@
-from beanie import DeleteRules
 from beanie.operators import In
-# from devtools import debug
-from app.models.workspace import Workspace
-from app.models.group import Group
-from app.models.user import User
-from app.models.user_manager import current_active_user
-from app.models.policy import Policy
-from app.schemas.user import UserID, UserReadShort
+from app.account_manager import current_active_user
+from app.models.documents import Policy, ResourceID, Workspace, Group, Account
+from app.schemas import account as AccountSchemas
 from app.schemas import group as GroupSchemas
-# from app.schemas.workspace import WorkspaceID
+from app.schemas import policy as PolicySchemas
+from app.schemas import workspace as WorkspaceSchema
+from app.exceptions import account as AccountExceptions
 from app.exceptions import group as GroupExceptions
-from app.exceptions import user as UserExceptions
 from app.exceptions import workspace as WorkspaceExceptions
-from app.mongo_db import create_link
+from app.exceptions import resource as GenericExceptions
 from app.utils import colored_dbg
-from app.utils.permissions import GroupPermissions
+from app.utils import permissions as Permissions
 
 
-# Get all groups
-async def get_all_groups() -> GroupSchemas.GroupList:
-    group_list = []
-    search_result = await Group.find_all().to_list()
+# Get all groups (for superuser)
+# async def get_all_groups() -> GroupSchemas.GroupList:
+#     group_list = []
+#     search_result = await Group.find_all().to_list()
 
-    # Create a group list for output schema using the search results
-    for group in search_result:
-        await group.fetch_link(Group.owner)
-        # NOTE: The type test cannot check the type of the link, so we ignore it
-        owner_data = group.owner.dict(  # type: ignore
-            include={'id', 'first_name', 'last_name', 'email'})
-        owner_scheme = UserReadShort(**owner_data)
-        group_list.append(GroupSchemas.GroupReadFull(
-            name=group.name,
-            description=group.description,
-            owner=owner_scheme,
-            members_count=len(group.members)))
+#     # Create a group list for output schema using the search results
+#     for group in search_result:
+#         group_list.append(GroupSchemas.Group(**group.dict()))
 
-    return GroupSchemas.GroupList(groups=group_list)
-
-
-# Get a list of groups where the user is a owner/member
-async def get_user_groups(workspace: Workspace) -> GroupSchemas.GroupList:
-    await workspace.fetch_link(Workspace.groups)
-    user = current_active_user.get()
-    group_list: list[GroupSchemas.GroupReadShort] = []
-
-    # Convert the list of links to a list of
-    group: Group
-    for group in workspace.groups:  # type: ignore
-        member: User
-        for member in group.members:   # type: ignore
-            # if user.id == UserID(member.ref.id):
-            if user.id == UserID(member.id):
-                group_list.append(GroupSchemas.GroupReadShort(
-                    name=group.name, description=group.description))
-
-    # Return the list of groups
-    return GroupSchemas.GroupList(groups=group_list)
-
-
-# Create a new group with user as the owner
-async def create_group(workspace: Workspace,
-                       input_data: GroupSchemas.GroupCreateInput) -> GroupSchemas.GroupCreateOutput:
-    # await workspace.fetch_link(workspace.groups)
-    user = current_active_user.get()
-
-    # Check if group name is unique
-    await workspace.fetch_link(Workspace.groups)
-    group: Group  # For type hinting, until Link type is supported
-    for group in workspace.groups:  # type: ignore
-        if group.name == input_data.name:
-            raise GroupExceptions.NonUniqueName(group)
-
-    # Create a new group
-    # workspace_link = await create_link(workspace)
-    new_group = await Group(name=input_data.name,
-                            description=input_data.description,
-                            owner=user,
-                            workspace=workspace.id).create()
-
-    # Check if group was created
-    if not new_group:
-        raise GroupExceptions.ErrorWhileCreating(new_group)
-
-    # Add the user to group member list
-    await new_group.add_member(user)
-
-    # Add the group to workspace group list
-    workspace.groups.append(await create_link(new_group))
-    await Workspace.save(workspace)
-
-    # Specify fields for output schema
-    result = new_group.dict(include={'id': True,
-                                     'name': True,
-                                     'description': True,
-                                     'owner': {'id', 'first_name', 'last_name', 'email'}})
-
-    return GroupSchemas.GroupCreateOutput(**result)
+#     return GroupSchemas.GroupList(groups=group_list)
 
 
 # Get group by id
-async def get_group(group: Group) -> GroupSchemas.GroupReadFull:
-    # Fetch the owner of the group
-    await group.fetch_link(Group.owner)
-
-    # NOTE: The type test cannot check the type of the link, so we ignore it
-    owner_data = group.owner.dict(  # type: ignore
-        include={'id', 'first_name', 'last_name', 'email'})
-    owner_scheme = UserReadShort(**owner_data)
-
+async def get_group(group: Group) -> GroupSchemas.Group:
     # Create a group list for output schema using the search results
-    group_list = GroupSchemas.GroupReadFull(
-        name=group.name,
-        description=group.description,
-        owner=owner_scheme,
-        members_count=len(group.members))
+    await group.fetch_all_links()
+    member_list = []
+    policy_list = []
+    group_list = []
+    for member in group.members:
+        member_list.append(AccountSchemas.AccountShort(**member.dict()))
+    for policy in group.policies:
+        policy_list.append(PolicySchemas.PolicyShort(**policy.dict(exclude={"policy_holder"}), policy_holder=policy.policy_holder))
 
-    return group_list
+    res = GroupSchemas.Group(id=group.id, name=group.name, description=group.description,
+                             workspace=WorkspaceSchema.WorkspaceShort(**group.workspace.dict()),
+                             members=member_list,
+                             policies=policy_list,
+                             groups=group_list)
+    return res
 
 
 # Update a group
-async def update_group(group: Group, group_data: GroupSchemas.GroupUpdateIn) -> GroupSchemas.GroupReadShort:
-    # Check if group name is unique
-    workspace = await Workspace.get(group.workspace)
-    if not workspace:
-        raise WorkspaceExceptions.WorkspaceNotFound(group.workspace)
+async def update_group(group: Group, group_data: GroupSchemas.GroupUpdateIn) -> GroupSchemas.Group:
+    # workspace = await Workspace.get(group.workspace)
+    await group.fetch_link(Group.workspace)
+    workspace: Workspace = group.workspace  # type: ignore
 
-    # Check if there is any data to update
+    # The group must belong to a workspace
+    if not workspace:
+        raise WorkspaceExceptions.WorkspaceNotFound(workspace)
+
+    # Check if no updates are provided
     if not group_data.name and not group_data.description:
-        return GroupSchemas.GroupReadShort(name=group.name, description=group.description)
-        # Raise an exception
+        return GroupSchemas.Group(**group.dict())
 
     # Update the group
     if group_data.name:
@@ -143,15 +72,18 @@ async def update_group(group: Group, group_data: GroupSchemas.GroupUpdateIn) -> 
 
     # Save the updates
     await Group.save(group)
-    return GroupSchemas.GroupReadShort(name=group.name, description=group.description)
+    return GroupSchemas.Group(**group.dict())
 
 
 # Delete a group
 async def delete_group(group: Group):
     # await Group.delete(group) # link_rule=DeleteRules.DELETE_LINKS
-    await Group.delete(group, link_rule=DeleteRules.DELETE_LINKS)
+    await Group.delete(group)
 
-    workspace = await Workspace.get(group.workspace)
+    # workspace = await Workspace.get(group.workspace)
+    await group.fetch_link(Group.workspace)
+    workspace: Workspace = group.workspace  # type: ignore
+
     if workspace:
         workspace.groups = [g for g in workspace.groups if g.ref.id != group.id]
         await Workspace.save(workspace)
@@ -160,76 +92,82 @@ async def delete_group(group: Group):
         return GroupExceptions.ErrorWhileDeleting(group.id)
 
 
-# Add a single member to group
-async def add_member(group: Group, user_id: UserID):
-    user = await User.get(user_id)
-    if not user:
-        raise UserExceptions.UserNotFound(user_id)
-
-    workspace = await Workspace.get(group.workspace)
-    if not workspace:
-        raise WorkspaceExceptions.WorkspaceNotFound(group.workspace)
-
-    # Check if user is already a member
-    if user.id in [UserID(member.ref.id) for member in group.members]:
-        raise GroupExceptions.AddingExistingMember(group, user)
-    # Check if user is a member of the workspace
-    if user.id not in [UserID(member.ref.id) for member in workspace.members]:
-        raise WorkspaceExceptions.UserNotMember(workspace, user)
-
-    # TODO: Create a member object and add it to the group instead of adding the user directly
-    link = await create_link(user)
-    group.members.append(link)
-    colored_dbg.info(
-        f'User {user.id} has been added to workspace {workspace.id} as a member.')
-    await Workspace.save(workspace)
-    return user
-
-
 # Get list of members of a group
-async def get_members(group: Group) -> list[UserReadShort]:
+async def get_group_members(group: Group) -> list[AccountSchemas.Account]:
     await group.fetch_link(Group.members)
     attributes = {'id', 'first_name', 'last_name', 'email'}
     members = [member.dict(include=attributes) for member in group.members]  # type: ignore
-    member_list = [UserReadShort(**member) for member in members]
+    member_list = [AccountSchemas.Account(**member) for member in members]
     return member_list
 
 
 # Add groups/members to group
-async def add_members(group: Group, member_data: GroupSchemas.AddMembers):
-    accounts = set()  # A set to store unique ids of user accounts
-
-    # Find existing groups from the member_data
-    group_list = await Group.find(In(Group.id, member_data.groups)).to_list()  # fetch_links=True
-    # Add the members of each group to the accounts set
-    for group_to_add in group_list:
-        for account in group_to_add.members:
-            accounts.add(account.ref.id)
-
-    # Find existing users from the member_data
-    accounts.update(member_data.accounts)
+async def add_group_members(group: Group, member_data: GroupSchemas.AddMembers):
+    accounts = set(member_data.accounts)
+    
+    # Remove existing members from the accounts set
     accounts = accounts.difference({member.ref.id for member in group.members})
-    user_list = await User.find(In(User.id, member_data.groups)).to_list()
-
-    print(user_list)
-    # Add the user accounts to the group member list
-    group.members.extend([await create_link(account) for account in user_list])
+    
+    # Find the accounts from the database
+    account_list = await Account.find(In(Account.id, accounts)).to_list()
+    
+    # Default policy(permissions) for the new members
+    default_permissions: Permissions.GroupPermissions = Permissions.GroupPermissions(1)  # type: ignore
+    
+    # Add the accounts to the group member list with default permissions
+    for account in account_list:
+        await group.add_member(group.workspace, account, default_permissions)
+        colored_dbg.info(f'Account {account.id} has been added to workspace {group.id} as a member.')
     await Group.save(group)
 
-
-# Link a group from the same workspace to another group to access its members
-async def link_group(group: Group, workspace: Workspace):
-    # Add group/s to the list
-    group.linked_groups.append(await create_link(group))
-    await Group.save(group)
+    return {"new members": [AccountSchemas.AccountShort(**account.dict()) for account in account_list]}
 
 
-async def add_permission(group: Group, member_data: GroupSchemas.AddPermission):
-    # Find existing groups from the member_data
-    group_list = await Group.find(In(Group.id, member_data.permissions)).to_list()  # fetch_links=True
-    for new_group in group_list:
-        group_link = await create_link(new_group)
-        new_policy = await Policy(policy_holder_type="Group", 
-                                  policy_holder=link,
-                                  permissions=GroupPermissions['get_group_info']).create()
-        
+# Remove a member from a workspace
+async def remove_group_member(workspace: Workspace, account_id: ResourceID):
+    account = await Account.get(account_id)
+    if not account:
+        raise AccountExceptions.AccountNotFound(account_id)
+
+    if account.id not in [ResourceID(member.ref.id) for member in workspace.members]:
+        raise WorkspaceExceptions.UserNotMember(workspace, account)
+    return await workspace.remove_member(account)
+
+
+# List all permissions for a user in a workspace
+async def get_group_permissions(group: Group, account_id: ResourceID | None):
+    # Check if account_id is specified in request, if account_id is not specified, use the current user
+    account: Account = await Account.get(account_id) if account_id else current_active_user.get()  # type: ignore
+
+    if not account:
+        raise AccountExceptions.AccountNotFound(account_id)
+
+    # Check if account is a member of the group
+    if account.id not in [member.ref.id for member in group.members]:
+        raise GroupExceptions.UserNotMember(group, account)
+
+    await group.fetch_link(Group.policies)
+    user_permissions = await Permissions.get_all_permissions(group, account)
+    res = {'permissions': Permissions.GroupPermissions(user_permissions).name.split('|'),  # type: ignore
+           'account': AccountSchemas.AccountShort(**account.dict())}
+    return res
+
+
+async def set_group_permissions(group: Group, input_data: PolicySchemas.PolicyInput):
+    account: Account = current_active_user.get()
+    await group.fetch_link(group.policies)
+    # Find the policy for the account
+    policy: Policy
+    for policy in group.policies:  # type: ignore
+        if policy.policy_holder == account:
+            new_permission_value = 0
+            for i in input_data.permissions:
+                try:
+                    new_permission_value += Permissions.GroupPermissions[i].value  # type: ignore
+                except KeyError:
+                    raise GenericExceptions.InvalidPermission(i)
+            policy.permissions = Permissions.GroupPermissions(new_permission_value)  # type: ignore
+            # print(policy.permissions)
+            await Policy.save(policy)
+            return {'permissions': Permissions.GroupPermissions(policy.permissions).name.split('|')}  # type: ignore
+    raise GroupExceptions.UserNotMember(group, account)

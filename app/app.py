@@ -1,24 +1,18 @@
 from fastapi import FastAPI, Depends
-from beanie import init_beanie
+from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
+from beanie import init_beanie
 from app.mongo_db import mainDB
-# import app.routes as routes
-# from app.routes import group, user, workspace
 from app.routes import workspace
 from app.routes import group
 from app.config import get_settings
-from app.schemas.user import UserCreate, UserReadFull, UserUpdate
-from app.models.user_manager import auth_backend, fastapi_users, get_current_active_user, current_active_user
-from app.models.workspace import Workspace
-from app.models.user import User
-from app.models.group import Group
+from app.schemas.account import Account, CreateAccount, UpdateAccount
+from app.account_manager import auth_backend, fastapi_users
+from app.models import documents as Documents
+from app.dependencies import set_active_user
+
+
 settings = get_settings()
-
-
-# Get all workspaces
-async def set_active_user(user_account: User = Depends(get_current_active_user)):
-    current_active_user.set(user_account)
-    return user_account
 
 app = FastAPI(
     title=settings.app_name,
@@ -26,6 +20,11 @@ app = FastAPI(
     version=settings.app_version,
 )
 
+
+app.include_router(workspace.open_router,
+                   prefix="/workspaces",
+                   tags=["Workspaces"],
+                   dependencies=[Depends(set_active_user)])
 app.include_router(workspace.router,
                    prefix="/workspaces",
                    tags=["Workspaces"],
@@ -37,16 +36,16 @@ app.include_router(group.router,
 app.include_router(fastapi_users.get_auth_router(auth_backend),
                    prefix="/auth/jwt",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_register_router(UserReadFull, UserCreate),
+app.include_router(fastapi_users.get_register_router(Account, CreateAccount),
                    prefix="/auth",
                    tags=["Auth"])
 app.include_router(fastapi_users.get_reset_password_router(),
                    prefix="/auth",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_verify_router(UserReadFull),
+app.include_router(fastapi_users.get_verify_router(Account),
                    prefix="/auth",
                    tags=["Auth"])
-app.include_router(fastapi_users.get_users_router(UserReadFull, UserUpdate),
+app.include_router(fastapi_users.get_users_router(Account, UpdateAccount),
                    prefix="/users",
                    tags=["Users"])
 
@@ -64,12 +63,19 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    # Simplify operation IDs so that generated API clients have simpler function names
+    # Each route will have its operation ID set to the method name
+    for route in app.routes:
+        if isinstance(route, APIRoute):
+            route.operation_id = route.name
+
     await init_beanie(
         database=mainDB,
         document_models=[
-            # BUG: Incompatible type "Type[Group]"; expected "Union[Type[View], str]"
-            User,  # type: ignore
-            Group,  # type: ignore
-            Workspace
+            Documents.Resource,
+            Documents.Account,
+            Documents.Group,
+            Documents.Workspace,
+            Documents.Policy,
         ],
     )

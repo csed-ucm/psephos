@@ -1,26 +1,21 @@
-from beanie import Link, PydanticObjectId
-from bson import DBRef
+
+# from bson import DBRef
 from pydantic import BaseModel, Field
-from typing import List
-from app.schemas.user import UserID, UserReadShort, UserReadFull
-
-
-# Custom PydanticObjectId class to override due to a bug
-class WorkspaceID(PydanticObjectId):
-    @classmethod
-    def __modify_schema__(cls, field_schema):  # type: ignore
-        field_schema.update(
-            type="string",
-            example="5eb7cf5a86d9755df3a6c593",
-        )
+from typing import List, Literal, Optional
+from app.models.documents import ResourceID
+from app.schemas.account import Account
+from app.schemas.group import Group
+from app.schemas.policy import Policy
 
 
 # Schema for the response with basic workspace info (name and role)
-class WorkspaceReadShort(BaseModel):
-    id: WorkspaceID = Field(title="ID")
-    name: str = Field(title="Name")
-    description: str = Field(title="Description")
-    owner: bool = Field(title="Owner")
+class Workspace(BaseModel):
+    id: Optional[ResourceID]
+    name: Optional[str]
+    description: Optional[str]
+    members: Optional[list]
+    groups: Optional[list]
+    policies: Optional[list]
 
     class Config:
         schema_extra = {
@@ -28,39 +23,20 @@ class WorkspaceReadShort(BaseModel):
                 "id": "1a2b3c4d5e6f7g8h9i0j",
                 "name": "Workspace 01",
                 "description": "This is an example workspace",
-                "owner": "true",
             }
         }
 
 
-# Schema for the response with full workspace info (name, description, owner info)
-class WorkspaceReadFull(BaseModel):
-    id: WorkspaceID = Field(title="ID")
-    name: str = Field(example="Workspace 01", title="Name")
+class WorkspaceShort(BaseModel):
+    id: ResourceID = Field(title="ID")
+    name: str = Field(title="Name")
     description: str = Field(title="Description")
-    owner: UserReadShort = Field(title="Owner")
-    members_count: int = Field(title="Members count")
-
-    class Config:
-        schema_extra = {
-            "example":         {
-                "name": "Workspace 01",
-                "description": "This is an example workspace",
-                "owner": {
-                    "id": "1a2b3c4d5e6f7g8h9i0j",
-                    "email": "user@example.com",
-                    "first_name": "John",
-                    "last_name": "Smith"
-                },
-                "members_count": 34
-            }
-        }
 
 
 # Schema for the response with a list of workspaces
 # It can be used to return a list of workspaces with basic info or full info
 class WorkspaceList(BaseModel):
-    workspaces: List[WorkspaceReadShort | WorkspaceReadFull]
+    workspaces: List[WorkspaceShort | Workspace]
 
     class Config:
         schema_extra = {
@@ -97,10 +73,9 @@ class WorkspaceCreateInput(BaseModel):
 
 # Schema for the response when a workspace is created
 class WorkspaceCreateOutput(BaseModel):
-    id: WorkspaceID = Field(title="ID")
+    id: ResourceID = Field(title="ID")
     name: str = Field(title="Name")
     description: str = Field(title="Description")
-    owner: UserReadShort = Field(title="Owner")
 
     class Config:
         schema_extra = {
@@ -113,11 +88,27 @@ class WorkspaceCreateOutput(BaseModel):
 
 # Temporary schema for the request to add a member to a workspace
 class MemberAdd(BaseModel):
-    user_id: UserID = Field(title="ID")
+    user_id: ResourceID = Field(title="ID")
 
     class Config:
         schema_extra = {
             "example": {
                 "user_id": "1a2b3c4d5e6f7g8h9i0j",
+            }
+        }
+
+
+# Schema for the request to add a member to a workspace
+class AddMembers(BaseModel):
+    accounts: list[ResourceID] = Field(title="Accounts")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "accounts": [
+                    "1a2b3c4d5e6f7g8h9i0j",
+                    "2a3b4c5d6e7f8g9h0i1j",
+                    "3a4b5c6d7e8f9g0h1i2j"
+                ]
             }
         }
