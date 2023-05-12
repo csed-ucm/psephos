@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from app.app import app
 # from app.models.user import User
 from app.utils import colored_dbg
-from app.schemas.user import UserID
+from app.schemas.account import UserID
 
 
 fake = Faker()

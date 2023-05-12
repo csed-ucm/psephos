@@ -9,8 +9,8 @@ from httpx import AsyncClient
 # from pydantic import BaseSettings
 from app.app import app
 from app.utils import colored_dbg
-from app.models.user import User
-from app.schemas.user import UserID
+from app.models.account import User
+from app.schemas.account import UserID
 from app.schemas.group import GroupID
 # from app.exceptions.group import GroupNotFound
 from tests import test_1_users
