@@ -32,6 +32,7 @@ class AccountShort(BaseModel):
     id: ResourceID
     email: EmailStr
     first_name: str
+    last_name: str
 
 
 class CreateAccount(schemas.BaseUserCreate):
