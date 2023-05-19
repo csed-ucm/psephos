@@ -6,7 +6,7 @@
 
 ### Useful Links:
 
-- [Developer Wiki](https://github.com/mike-pisman/PollingApp/wiki) 
+- [Developer Wiki](https://github.com/mike-pisman/PollingAPI/wiki) 
 
 - [Polling API](https://polling.website/)
 
