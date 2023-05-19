@@ -9,11 +9,9 @@ from httpx import AsyncClient
 # from pydantic import BaseSettings
 from app.app import app
 from app.utils import colored_dbg
-from app.models.account import User
-from app.schemas.account import UserID
-from app.schemas.group import GroupID
+from app.models.documents import Account, ResourceID
 # from app.exceptions.group import GroupNotFound
-from tests import test_1_users
+from tests import test_1_accounts
 
 fake = Faker()
 client = TestClient(app)
@@ -81,17 +79,17 @@ def create_random_user():
     last_name = fake.unique.last_name()
     email = (first_name[0] + last_name + "@ucmerced.edu").lower()
     password = fake.password()
-    return test_1_users.TestUser(first_name=first_name, last_name=last_name, email=email, password=password)
+    return test_1_accounts.TestAccount(first_name=first_name, last_name=last_name, email=email, password=password)
 
 
 @pytest.mark.skip()
 class TestGroup(BaseModel):
-    id: GroupID | None = None
+    id: ResourceID | None = None
     name: str = "Group " + fake.aba()
     description: str = fake.sentence()
-    owner: UserID | None = None
-    admins: list[UserID] = []
-    members: list[UserID] = []
+    owner: ResourceID | None = None
+    admins: list[ResourceID] = []
+    members: list[ResourceID] = []
 
 
 global owner, admins, members, group
@@ -105,10 +103,10 @@ async def test_create_group(client_test: AsyncClient):
     global owner, admins, members, group
     # Register new user who will be the owner of the group
     print("\n")
-    owner = await test_1_users.test_register(client_test, owner)
+    owner = await test_1_accounts.test_register(client_test, owner)
     colored_dbg.test_success("Created owner {} {} ({})".format(
         owner.first_name, owner.last_name, owner.email))
-    await test_1_users.test_login(client_test, owner)  # Login the user
+    await test_1_accounts.test_login(client_test, owner)  # Login the user
     colored_dbg.test_success("Logged in owner {} {} ({})".format(
         owner.first_name, owner.last_name, owner.email))
 
@@ -199,19 +197,19 @@ async def test_add_members_to_group(client_test: AsyncClient):
     members = []  # List of members to add to the group
 
     for i in range(len(users)):
-        users[i] = await test_1_users.test_register(client_test, users[i])
-        colored_dbg.test_info("User {} + {} ({}) has registered".format(
+        users[i] = await test_1_accounts.test_register(client_test, users[i])
+        colored_dbg.test_info("Account {} + {} ({}) has registered".format(
             users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": users[i].email, "role": "user"})
-        colored_dbg.test_info("User {} has been added to the group list as a member".format(
+        colored_dbg.test_info("Account {} has been added to the group list as a member".format(
             users[i].first_name))
 
     for i in range(len(admins)):
-        admins[i] = await test_1_users.test_register(client_test, admins[i])
-        colored_dbg.test_info("User {} + {} ({}) has registered".format(
+        admins[i] = await test_1_accounts.test_register(client_test, admins[i])
+        colored_dbg.test_info("Account {} + {} ({}) has registered".format(
             users[i].first_name, users[i].last_name, users[i].email))
         members.append({"email": admins[i].email, "role": "admin"})
-        colored_dbg.test_info("User {} has been added to the group list as an admin".format(
+        colored_dbg.test_info("Account {} has been added to the group list as an admin".format(
             users[i].first_name))
 
     # Post the members to the group
@@ -268,7 +266,7 @@ async def test_delete_group_no_owner(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Testing group deletion from non existing group")
 
-    random_group_id = GroupID()
+    random_group_id = ResourceID()
 
     # Delete the group
     # NOTE: pytest.raises() does not work(with async functions?)
@@ -310,5 +308,5 @@ async def test_delete_group(client_test: AsyncClient):
     # TODO: Check that no users have the group in their groups list
 
     # Delete the users by email
-    await User.find({"email": {"$in": [user.email for user in (users+admins+[owner])]}}).delete()
+    await Account.find({"email": {"$in": [user.email for user in (users+admins+[owner])]}}).delete()
     colored_dbg.test_info("All users deleted")
