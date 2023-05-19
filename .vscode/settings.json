@@ -18,12 +18,13 @@
         {
             "text": "NOTE:",
             "backgroundColor": "#9580ff",
-            // "overviewRulerColor": "grey"
+            "color": "black",
             "isWholeLine": true,
         },
         {
             "text": "HACK:",
             "backgroundColor": "#ff80ab",
+            "color": "#414558",
             "isWholeLine": true,
         },
         {
@@ -33,7 +34,7 @@
             "isWholeLine": true,
         },
         {
-            "text": "TODO(string):",
+            "text": "TODO:",
             "backgroundColor": "#ffca80",
             "color": "#414558",
             "isWholeLine": true,
@@ -41,15 +42,14 @@
         {
             "text": "DEBUG:",
             "backgroundColor": "#80ffab",
+            "color": "#414558",
             "isWholeLine": true,
         },
     ],
     "todohighlight.defaultStyle": {
         "color": "#414558",
-        "overviewRulerColor": "#ffab00",
+        "overviewRulerColor": "#ffca80",
         "cursor": "pointer",
-        // "border": "1px solid #eee",
-        // "borderRadius": "2px",
         "isWholeLine": true,
     },
     "flake8.args": [
@@ -59,13 +59,16 @@
         // "--select=B,C,E,F,W,T4,B9",
     ],
     "files.exclude": {
+        ".vscode": true,
+        "**.egg-info": true,
+        "**/__init__.py": true,
         "**/.coverage": true,
         "**/.history": true,
         "**/.mypy_cache": true,
         "**/.postman": true,
         "**/.pytest_cache": true,
         "**/.tox": true,
-        "**/.vscode": true,
+        "**/*.egg-info": true,
         "**/build": true,
         "**/dist": true,
         "**/postman": true,
