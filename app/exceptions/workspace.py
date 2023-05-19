@@ -1,7 +1,5 @@
-from fastapi import HTTPException, status
 from app.models.documents import ResourceID, Workspace, Account
 from app.exceptions import resource
-from app.utils.colored_dbg import print_warning
 
 
 # Exception for when a Workspace with the same name already exists
@@ -23,15 +21,9 @@ class WorkspaceNotFound(resource.ResourceNotFound):
 
 
 # Exception for trying to add a member that already exists
-class AddingExistingMember(HTTPException):
-    def __init__(self, workspace: Workspace, member: Account):
-        super().__init__(status_code=status.HTTP_400_BAD_REQUEST,
-                         detail=f"Member {member.email} already exists in {workspace.name} #{workspace.id}")
-
-    def __str__(self) -> str:
-        print_warning(self.detail)
-        return self.detail
-        # logger.warning(self.detail)
+class AddingExistingMember(resource.AddingExistingMember):
+    def __init__(self, workspace: Workspace, user: Account):
+        super().__init__(workspace, user)
 
 
 # Exception for when a Workspace was not deleted successfully
@@ -40,6 +32,7 @@ class ErrorWhileDeleting(resource.ErrorWhileDeleting):
         super().__init__("Workspace", resource_id=workspace_id)
 
 
+# Exception for when a user is not a member of the workspace
 class UserNotMember(resource.UserNotMember):
     def __init__(self, workspace: Workspace, user: Account):
         super().__init__(workspace, user)
