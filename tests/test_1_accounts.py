@@ -6,9 +6,9 @@ import pytest
 from httpx import AsyncClient
 from pydantic import BaseModel
 from app.app import app
-# from app.models.user import User
+# from app.models.user import Account
 from app.utils import colored_dbg
-from app.schemas.account import UserID
+from app.models.documents import ResourceID
 
 
 fake = Faker()
@@ -19,14 +19,14 @@ pytestmark = pytest.mark.asyncio
 # NOTE: Add logout test
 
 
-# Test User class
+# Test Account class
 @pytest.mark.skip()
-class TestUser(BaseModel):
+class TestAccount(BaseModel):
     first_name: str = fake.first_name()
     last_name: str = fake.last_name()
     email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
     password: str = fake.password()
-    id: UserID | None = None
+    id: ResourceID | None = None
     token: str = ""
     is_active: bool = True
     is_superuser: bool = False
@@ -37,14 +37,14 @@ class TestUser(BaseModel):
 # last_name: str = fake.last_name()
 # email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
 # password: str = fake.password()
-# new_user = User(email=email, first_name=first_name, last_name=last_name, hashed_password=password)
-new_user = TestUser()
+# new_user = Account(email=email, first_name=first_name, last_name=last_name, hashed_password=password)
+new_user = TestAccount()
 
 
 # Test to see if the user can create an account
 # Check if the response is 201(Success)
 # Check if the user information is correct
-async def test_register(client_test: AsyncClient, new_user: TestUser = new_user):
+async def test_register(client_test: AsyncClient, new_user: TestAccount = new_user):
     print("\n")
     colored_dbg.test_info("Registering new user: ", new_user.email)
     response = await client_test.post("/auth/register", json=new_user.dict())
@@ -96,7 +96,7 @@ async def test_login_incorrect_password(client_test: AsyncClient):
 
 
 # Test to see if the new user can login with the correct credentials
-async def test_login(client_test: AsyncClient, new_user: TestUser = new_user):
+async def test_login(client_test: AsyncClient, new_user: TestAccount = new_user):
     print("\n")
     colored_dbg.test_info("Logging in new user with correct credentials: ", new_user.email)
     response = await client_test.post("/auth/jwt/login",
@@ -113,7 +113,7 @@ async def test_login(client_test: AsyncClient, new_user: TestUser = new_user):
 async def test_get_account_info(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Getting new user's account information")
-    response = await client_test.get("/users/me", headers={"Authorization": "Bearer " + new_user.token})
+    response = await client_test.get("/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == 200
     response = response.json()
     assert response.get("id") == new_user.id
@@ -126,20 +126,19 @@ async def test_get_account_info(client_test: AsyncClient):
     colored_dbg.test_success("New user's account information has been retrieved and verified")
 
 
-# Test to see if User can delete their own account
+# Test to see if Account can delete their own account
 async def test_delete_account(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Deleting new user's account")
-    # await User.update({"_id": new_user.id}, {"$set": {"is_superuser": True}})
+    # await Account.update({"_id": new_user.id}, {"$set": {"is_superuser": True}})
     # found_user = None
     # if new_user.id:
-    # found_user = await User.get(new_user.id)
+    # found_user = await Account.get(new_user.id)
     # if found_user:
     #     found_user.is_superuser = True
     #     await found_user.save()
-    response = await client_test.delete("/users/me", headers={"Authorization": "Bearer " + new_user.token})
+    response = await client_test.delete("/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == status.HTTP_204_NO_CONTENT
     colored_dbg.test_success("New user's account has been deleted")
 
 # TODO: Update the user's information
-# TODO: Get user's group list
