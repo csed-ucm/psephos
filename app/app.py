@@ -2,13 +2,13 @@ from fastapi import FastAPI, Depends
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
-from app.mongo_db import mainDB
-from app.routes import workspace
-from app.routes import group
+from app.mongo_db import mainDB, DOCUMENT_MODELS
+from app.routes import workspace as WorkspaceRoutes
+from app.routes import group as GroupRoutes
+from app.routes import account as AccountRoutes
 from app.config import get_settings
 from app.schemas.account import Account, CreateAccount, UpdateAccount
 from app.account_manager import auth_backend, fastapi_users
-from app.models import documents as Documents
 from app.dependencies import set_active_user
 
 
@@ -21,21 +21,25 @@ app = FastAPI(
 )
 
 
-app.include_router(workspace.open_router,
+app.include_router(WorkspaceRoutes.open_router,
                    prefix="/workspaces",
                    tags=["Workspaces"],
                    dependencies=[Depends(set_active_user)])
-app.include_router(workspace.router,
+app.include_router(WorkspaceRoutes.router,
                    prefix="/workspaces",
                    tags=["Workspaces"],
                    dependencies=[Depends(set_active_user)])
-app.include_router(group.router,
+app.include_router(GroupRoutes.router,
                    prefix="/groups",
                    tags=["Groups"],
                    dependencies=[Depends(set_active_user)])
+app.include_router(AccountRoutes.router,
+                   prefix="/accounts",
+                   tags=["Accounts"],
+                   dependencies=[Depends(set_active_user)])
 app.include_router(fastapi_users.get_auth_router(auth_backend),
                    prefix="/auth/jwt",
-                   tags=["Auth"])
+                   tags=["Authentication"])
 app.include_router(fastapi_users.get_register_router(Account, CreateAccount),
                    prefix="/auth",
                    tags=["Auth"])
@@ -46,8 +50,8 @@ app.include_router(fastapi_users.get_verify_router(Account),
                    prefix="/auth",
                    tags=["Auth"])
 app.include_router(fastapi_users.get_users_router(Account, UpdateAccount),
-                   prefix="/users",
-                   tags=["Users"])
+                   prefix="/accounts",
+                   tags=["Accounts"])
 
 
 origins = ["*"]
@@ -71,11 +75,5 @@ async def on_startup() -> None:
 
     await init_beanie(
         database=mainDB,
-        document_models=[
-            Documents.Resource,
-            Documents.Account,
-            Documents.Group,
-            Documents.Workspace,
-            Documents.Policy,
-        ],
+        document_models=DOCUMENT_MODELS,
     )
