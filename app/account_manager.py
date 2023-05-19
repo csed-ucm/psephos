@@ -1,14 +1,15 @@
 from contextvars import ContextVar
 from typing import Optional, AsyncGenerator
-from beanie import PydanticObjectId
+from beanie import PydanticObjectId, Document
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
-                                          BearerTransport,
+                                          BearerTransport, CookieTransport,
                                           JWTStrategy)
-from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
+from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin  
+from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
+from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
 from app.models.documents import Account
-from app.mongo_db import get_account_db
 from app.utils import colored_dbg
 
 SECRET = "SECRET"
@@ -44,27 +45,45 @@ class AccountManager(ObjectIDIDMixin, UserManager):
             f"Account {user.id} is going to be deleted, cleaning up their data.")
 
 
-async def get_user_manager(user_db: BeanieUserDatabase[Account, PydanticObjectId] =
-                           Depends(get_account_db)) -> AsyncGenerator[UserManager, None]:
+class AccessToken(BeanieBaseAccessToken, Document):
+    pass
+
+
+async def get_account_db() -> AsyncGenerator:
+    yield BeanieUserDatabase(Account)  # type: ignore
+
+
+async def get_user_manager(user_db=Depends(get_account_db)) -> AsyncGenerator[UserManager, None]:
     yield AccountManager(user_db)
 
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
-# cookie_transport = CookieTransport(cookie_max_age=3600)
+cookie_transport = CookieTransport(cookie_max_age=3600)
 
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
 
 
+async def get_access_token_db():
+    yield BeanieAccessTokenDatabase(AccessToken)  # type: ignore
+
+
+def get_database_strategy(
+        access_token_db: AccessTokenDatabase[AccessToken] = Depends(get_access_token_db)  # type: ignore
+        ) -> DatabaseStrategy:
+    return DatabaseStrategy(access_token_db, lifetime_seconds=3600)
+
+
 auth_backend = AuthenticationBackend(
     name="jwt",
     transport=bearer_transport,
-    get_strategy=get_jwt_strategy,
+    # transport=cookie_transport,
+    # get_strategy=get_jwt_strategy,
+    get_strategy=get_database_strategy,
 )
 
-fastapi_users = FastAPIUsers[Account, PydanticObjectId](  # type: ignore
-    get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[Account, PydanticObjectId](get_user_manager, [auth_backend])  # type: ignore
 
 get_current_active_user = fastapi_users.current_user(active=True)
 current_active_user = ContextVar("current_active_user")
