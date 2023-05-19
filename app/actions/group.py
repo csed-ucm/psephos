@@ -5,6 +5,7 @@ from app.schemas import account as AccountSchemas
 from app.schemas import group as GroupSchemas
 from app.schemas import policy as PolicySchemas
 from app.schemas import workspace as WorkspaceSchema
+from app.schemas import member as MemberSchemas
 from app.exceptions import account as AccountExceptions
 from app.exceptions import group as GroupExceptions
 from app.exceptions import workspace as WorkspaceExceptions
@@ -33,12 +34,13 @@ async def get_group(group: Group) -> GroupSchemas.Group:
     policy_list = []
     group_list = []
     for member in group.members:
-        member_list.append(AccountSchemas.AccountShort(**member.dict()))
+        member_list.append(AccountSchemas.AccountShort(**member.dict()))  # type: ignore
     for policy in group.policies:
-        policy_list.append(PolicySchemas.PolicyShort(**policy.dict(exclude={"policy_holder"}), policy_holder=policy.policy_holder))
+        policy_list.append(PolicySchemas.PolicyShort(**policy.dict(exclude={"policy_holder"}),  # type: ignore
+                                                     policy_holder=policy.policy_holder))  # type: ignore
 
     res = GroupSchemas.Group(id=group.id, name=group.name, description=group.description,
-                             workspace=WorkspaceSchema.WorkspaceShort(**group.workspace.dict()),
+                             workspace=WorkspaceSchema.WorkspaceShort(**group.workspace.dict()),  # type: ignore
                              members=member_list,
                              policies=policy_list,
                              groups=group_list)
@@ -93,54 +95,60 @@ async def delete_group(group: Group):
 
 
 # Get list of members of a group
-async def get_group_members(group: Group) -> list[AccountSchemas.Account]:
+async def get_group_members(group: Group) -> MemberSchemas.MemberList:
+    members = set()
     await group.fetch_link(Group.members)
-    attributes = {'id', 'first_name', 'last_name', 'email'}
-    members = [member.dict(include=attributes) for member in group.members]  # type: ignore
-    member_list = [AccountSchemas.Account(**member) for member in members]
-    return member_list
+    member_list = [MemberSchemas.Member(**member) for member in group.members]  # type: ignore
+    return MemberSchemas.MemberList(members=member_list)
 
 
 # Add groups/members to group
-async def add_group_members(group: Group, member_data: GroupSchemas.AddMembers):
+async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers):
     accounts = set(member_data.accounts)
-    
+
     # Remove existing members from the accounts set
     accounts = accounts.difference({member.ref.id for member in group.members})
-    
+
     # Find the accounts from the database
     account_list = await Account.find(In(Account.id, accounts)).to_list()
-    
+
     # Default policy(permissions) for the new members
     default_permissions: Permissions.GroupPermissions = Permissions.GroupPermissions(1)  # type: ignore
-    
+
     # Add the accounts to the group member list with default permissions
     for account in account_list:
         await group.add_member(group.workspace, account, default_permissions)
         colored_dbg.info(f'Account {account.id} has been added to workspace {group.id} as a member.')
     await Group.save(group)
 
-    return {"new members": [AccountSchemas.AccountShort(**account.dict()) for account in account_list]}
+    # Return the list of members added to the group
+    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
 
 
 # Remove a member from a workspace
-async def remove_group_member(workspace: Workspace, account_id: ResourceID):
-    account = await Account.get(account_id)
-    if not account:
-        raise AccountExceptions.AccountNotFound(account_id)
+async def remove_group_member(group: Group, account_id: ResourceID | None):
+    # Check if account_id is specified in request, if account_id is not specified, use the current user
+    if account_id:
+        account = await Account.get(account_id)  # type: ignore
+        if not account:
+            raise AccountExceptions.AccountNotFound(account_id)
+    else:
+        account = current_active_user.get()
 
-    if account.id not in [ResourceID(member.ref.id) for member in workspace.members]:
-        raise WorkspaceExceptions.UserNotMember(workspace, account)
-    return await workspace.remove_member(account)
+    if account.id not in [ResourceID(member.ref.id) for member in group.members]:
+        raise GroupExceptions.UserNotMember(group, account)
+    return await group.remove_member(account)
 
 
 # List all permissions for a user in a workspace
 async def get_group_permissions(group: Group, account_id: ResourceID | None):
     # Check if account_id is specified in request, if account_id is not specified, use the current user
-    account: Account = await Account.get(account_id) if account_id else current_active_user.get()  # type: ignore
-
-    if not account:
-        raise AccountExceptions.AccountNotFound(account_id)
+    if account_id:
+        account = await Account.get(account_id)  # type: ignore
+        if not account:
+            raise AccountExceptions.AccountNotFound(account_id)
+    else:
+        account = current_active_user.get()
 
     # Check if account is a member of the group
     if account.id not in [member.ref.id for member in group.members]:
