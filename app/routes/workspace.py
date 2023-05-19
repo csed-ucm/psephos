@@ -1,5 +1,5 @@
 # FastAPI
-from fastapi import APIRouter, Body, Depends, HTTPException, Path
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from app.actions import workspace as WorkspaceActions
 from app.exceptions.resource import APIException
 from app.models.documents import Workspace, ResourceID
@@ -93,7 +93,8 @@ async def update_workspace(workspace: Workspace = Depends(Dependencies.get_works
 
 # Delete a workspace with the given id
 @router.delete("/{workspace_id}",
-               response_description="Deleted workspace")
+               response_description="Deleted workspace",
+               status_code=204)
 async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     """
     Deletes the workspace with the given id.
@@ -104,7 +105,8 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
     Response has no detail.
     """
     try:
-        return await WorkspaceActions.delete_workspace(workspace)
+        await WorkspaceActions.delete_workspace(workspace)
+        return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -195,8 +197,8 @@ async def get_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
 @router.put("/{workspace_id}/policy",
             response_description="Updated permissions",
             response_model=PolicySchemas.PolicyOutput)
-async def set_workspace_permissions(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                                    permissions: PolicySchemas.PolicyInput = Body(...)):
+async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                               permissions: PolicySchemas.PolicyInput = Body(...)):
     """
     Sets the permissions for a user in a workspace.
     Query parameters:
