@@ -28,7 +28,7 @@ class ErrorWhileCreating(APIException):
 
 class ResourceNotFound(APIException):
     def __init__(self, resource: str, resource_id: PydanticObjectId):
-        super().__init__(code=status.HTTP_400_BAD_REQUEST,
+        super().__init__(code=status.HTTP_404_NOT_FOUND,
                          detail=f"{resource} #{resource_id} does not exist")
 
 
