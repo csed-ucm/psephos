@@ -1,11 +1,8 @@
 
 # from bson import DBRef
 from pydantic import BaseModel, Field
-from typing import List, Literal, Optional
+from typing import List, Optional
 from app.models.documents import ResourceID
-from app.schemas.account import Account
-from app.schemas.group import Group
-from app.schemas.policy import Policy
 
 
 # Schema for the response with basic workspace info (name and role)
@@ -82,33 +79,5 @@ class WorkspaceCreateOutput(BaseModel):
             "example": {
                 "name": "Workspace 01",
                 "description": "This is an example workspace",
-            }
-        }
-
-
-# Temporary schema for the request to add a member to a workspace
-class MemberAdd(BaseModel):
-    user_id: ResourceID = Field(title="ID")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "user_id": "1a2b3c4d5e6f7g8h9i0j",
-            }
-        }
-
-
-# Schema for the request to add a member to a workspace
-class AddMembers(BaseModel):
-    accounts: list[ResourceID] = Field(title="Accounts")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "accounts": [
-                    "1a2b3c4d5e6f7g8h9i0j",
-                    "2a3b4c5d6e7f8g9h0i1j",
-                    "3a4b5c6d7e8f9g0h1i2j"
-                ]
             }
         }
