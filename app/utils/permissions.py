@@ -30,6 +30,14 @@ WorkspacePermissions = parse_action_file("workspace")
 GroupPermissions = parse_action_file("group")
 
 
+WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
+WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"])  # type: ignore
+# Example: (WorkspacePermissions["get_workspace"] + WorkspacePermissions["get_workspace_members"])
+
+GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
+GROUP_BASIC_PERMISSIONS = (GroupPermissions["get_group"])  # type: ignore
+
+
 # Check if a user has a permission
 def check_permission(user_permission, required_permission) -> bool:
     """Check if a user has a right provided in the permission argument.
@@ -48,6 +56,9 @@ def check_permission(user_permission, required_permission) -> bool:
 
 async def get_all_permissions(resource, account):
     permission_sum = 0
+    # print("resource: ", resource.name)
+    # await resource.fetch_link("policies")
+    # print("policies: ", resource.policies)
     # Get policies for the resource
     for policy in resource.policies:
         # Get policy for the user
@@ -58,12 +69,25 @@ async def get_all_permissions(resource, account):
             elif hasattr(policy.policy_holder, "ref"):  # In case the policy_holder is a Link
                 policy_holder_id = policy.policy_holder.ref.id
             if policy_holder_id == account.id:
+                # print("Found policy for user")
                 permission_sum |= policy.permissions
+                # print("User permissions: ", policy.permissions)
         # If there is a group that user is a member of, add group permissions to the user permissions
         elif policy.policy_holder_type == "group":
+            # NOTE: Non-recursive way, will not get permissions from nested groups
+            # group = await policy.policy_holder.fetch()
+            # await group.fetch_link("members")
+            # if account in group.members:
+            #     permission_sum |= policy.permissions
+
+            # Recursive way
+            # TODO: Test this
+            # await policy.fetch_all_links()
             group = await policy.policy_holder.fetch()
-            await group.fetch_link("members")
-            if account in group.members:
+            await group.fetch_link("policies")
+            # print("Checking group: ", group.name)
+            if await get_all_permissions(group, account):
                 permission_sum |= policy.permissions
+                # print("Group permissions: ", policy.permissions)
 
     return permission_sum
