@@ -30,7 +30,7 @@ class ResourceID(PydanticObjectId):
 class Resource(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     resource_type = ""
-    name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=16)
+    name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
     # Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=300)
     members: list[Link["Account"]] = []
@@ -46,7 +46,7 @@ class Resource(Document):
     def create_group(self) -> None:
         colored_dbg.info(f'New {self.resource_type} "{self.id}" has been created')
 
-    async def add_member(self, workspace, account, permissions) -> "Account":
+    async def add_member(self, workspace, account, permissions, save: bool = True) -> "Account":
         # Add the account to the group
         self.members.append(account)
         # Create a policy for the new member
@@ -57,12 +57,13 @@ class Resource(Document):
 
         # Add the policy to the group
         self.policies.append(new_policy)
-        await Resource.save(self, link_rule=WriteRules.WRITE)
+        if save:
+            await Resource.save(self, link_rule=WriteRules.WRITE)
         return account
 
 
-class Account(BeanieBaseUser[ResourceID]):
-    id: PydanticObjectId = Field(default_factory=ResourceID, alias="_id")
+class Account(BeanieBaseUser, Document):
+    id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     first_name: str = Field(
         default_factory=str,
         max_length=20,
@@ -84,20 +85,6 @@ class Group(Resource):
     workspace: Link["Workspace"]
     # workspace: list[BackLink[Workspace]] = Field(original_field="groups")
 
-    # async def add_member(self, account, permissions=WorkspacePermissions(-1)) -> None:
-    #     # Add the account to the group
-    #     self.members.append(account)
-    #     # Create a policy for the new member
-    #     new_policy = Policy(policy_holder_type='account',
-    #                         policy_holder=account,
-    #                         permissions=permissions,
-    #                         workspace=self.workspace)
-
-    #     # Add the policy to the group
-    #     self.policies.append(new_policy)
-    #     await Group.save(self, link_rule=WriteRules.WRITE)
-
-from typing import Union, Any
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
