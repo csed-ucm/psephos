@@ -1,4 +1,4 @@
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException
 from app.account_manager import current_active_user, get_current_active_user
 from app.models.documents import ResourceID, Workspace, Group, Account
 from app.utils import permissions as Permissions
@@ -47,7 +47,11 @@ async def check_workspace_permission(request: Request, account: Account = Depend
 
     # Check if workspace exists
     if not workspace:
-        raise WorkspaceExceptions.WorkspaceNotFound(workspaceID)
+        e = WorkspaceExceptions.WorkspaceNotFound(workspaceID)
+        raise HTTPException(e.code, str(e))
+
+    if account.is_superuser:
+        return
 
     # Get the user policy for the workspace
     user_permissions = await Permissions.get_all_permissions(workspace, account)
@@ -55,10 +59,13 @@ async def check_workspace_permission(request: Request, account: Account = Depend
     # Check that the user has the required permission
     try:
         required_permission = Permissions.WorkspacePermissions[operationID]  # type: ignore
-        if not Permissions.check_permission(Permissions.WorkspacePermissions(user_permissions), required_permission):
-            raise WorkspaceExceptions.UserNotAuthorized(account, workspace, operationID)
+        if not Permissions.check_permission(Permissions.WorkspacePermissions(user_permissions),   # type: ignore
+                                            required_permission):
+            e = WorkspaceExceptions.UserNotAuthorized(account, workspace, operationID)
+            raise HTTPException(e.code, str(e))
     except KeyError:
-        raise WorkspaceExceptions.ActionNotFound(operationID)
+        e = WorkspaceExceptions.ActionNotFound(operationID)
+        raise HTTPException(e.code, str(e))
 
 
 # Check if the current user has permissions to access the workspace and perform requested actions
@@ -78,7 +85,8 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
     # Check that the user has the required permission
     try:
         required_permission = Permissions.GroupPermissions[operationID]  # type: ignore
-        if not Permissions.check_permission(Permissions.GroupPermissions(user_permissions), required_permission):
+        if not Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
+                                            required_permission):
             raise GroupExceptions.UserNotAuthorized(account, group, operationID)
     except KeyError:
         raise GroupExceptions.ActionNotFound(operationID)
