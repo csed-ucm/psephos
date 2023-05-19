@@ -1,6 +1,6 @@
 # from typing import Optional
 # from pydantic import EmailStr
-from beanie import WriteRules
+from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from app.account_manager import current_active_user
 from app.models.documents import Group, ResourceID, Workspace, Account, Policy, create_link
@@ -81,11 +81,21 @@ async def update_workspace(workspace: Workspace, input_data: WorkspaceSchemas.Wo
 
 # Delete a workspace
 async def delete_workspace(workspace: Workspace):
-    await workspace.delete()  # type: ignore
+    await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
+    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    else:
-        return {'message': 'Workspace deleted successfully'}
+    
+    # policy: Policy
+    # for policy in workspace.policies:  # type: ignore
+        # await Policy.delete(policy)
+
+    # group: Group
+    # for group in workspace.groups:  # type: ignore
+        # await Group.delete(group)
+
+    await Policy.find(Policy.workspace.id == workspace.id).delete()
+    await Group.find(Group.workspace.id == workspace).delete()
 
 
 # List all members of a workspace
