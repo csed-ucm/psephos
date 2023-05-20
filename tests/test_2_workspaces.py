@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from httpx import AsyncClient
 from app.app import app
 from app.utils import colored_dbg
-from app.models.documents import ResourceID, Account
-from app.schemas import workspace as WorkspaceSchema
+from app.models.documents import ResourceID  # Account
+# from app.schemas import workspace as WorkspaceSchema
 from tests import test_1_accounts
 from app.utils import permissions as Permissions
 
@@ -40,14 +40,15 @@ class TestWorkspace(BaseModel):
     members: list[ResourceID] = []
 
 
-global accounts, workspace
+global accounts, workspaces
 accounts = [create_random_user() for i in range(10)]
-workspace = TestWorkspace()
+workspaces = [TestWorkspace(name="Workspace " + fake.aba(), description=fake.sentence()) for i in range(2)]
 
 
 async def test_create_workspace(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Create a workspace [POST /workspaces]")
+    workspace = workspaces[0]
 
     # Register new account who will create the workspace
     active_user = await test_1_accounts.test_register(client_test, accounts[0])
@@ -64,20 +65,23 @@ async def test_create_workspace(client_test: AsyncClient):
     assert response["workspaces"] == []
     colored_dbg.test_success("Account has no workspaces")
 
-    # Create a workspace
-    response = await client_test.post("/workspaces",
-                                      json={"name": workspace.name, "description": workspace.description},
-                                      headers={"Authorization": f"Bearer {active_user.token}"})
-    assert response.status_code == status.HTTP_201_CREATED
-    response = response.json()
-    assert response["name"] == workspace.name
-    workspace.id = response["id"]  # Set the workspace id
+    # Create 2 workspaces
+    for workspace in workspaces:
+        response = await client_test.post("/workspaces",
+                                          json={"name": workspace.name, "description": workspace.description},
+                                          headers={"Authorization": f"Bearer {active_user.token}"})
+        assert response.status_code == status.HTTP_201_CREATED
+        response = response.json()
+        assert response["name"] == workspace.name
+        workspace.id = response["id"]  # Set the workspace id
+
     colored_dbg.test_success("Created workspace {} with id {}".format(workspace.name, workspace.id))
 
 
 async def test_create_workspace_duplicate_name(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Create a workspace with duplicate name [POST /workspaces]")
+    workspace = workspaces[0]
     active_user = accounts[0]
 
     # Create a workspace with duplicate name
@@ -90,8 +94,8 @@ async def test_create_workspace_duplicate_name(client_test: AsyncClient):
 
 async def test_get_workspaces(client_test: AsyncClient):
     print("\n")
-    active_user = accounts[0]
     colored_dbg.test_info("Get list of workspaces [GET /workspaces]")
+    active_user = accounts[0]
 
     # Find workspace in user's list of workspaces
     response = await client_test.get("/workspaces",
@@ -100,30 +104,37 @@ async def test_get_workspaces(client_test: AsyncClient):
     response = response.json()
 
     # Get the first workspace(should be the only workspace)
-    assert len(response["workspaces"]) == 1
-    response = response["workspaces"][0]
-    assert response["id"] == workspace.id
-    assert response["name"] == workspace.name
-    assert response["description"] == workspace.description
-    colored_dbg.test_success("Account has 1 workspace \"{}\" with id {}".format(workspace.name, workspace.id))
+    assert len(response["workspaces"]) == 2
+    print(response["workspaces"])
+    for ws in response["workspaces"]:
+        if ws["id"] == workspaces[0].id:
+            assert workspaces[0].name == ws["name"]
+            assert workspaces[0].description == ws["description"]
+        elif ws["id"] == workspaces[1].id:
+            assert workspaces[1].name == ws["name"]
+            assert workspaces[1].description == ws["description"]
+        else:
+            assert False
+    colored_dbg.test_success("Account has 2 workspaces with correct information")
 
 
 async def test_get_workspace_wrong_id(client_test: AsyncClient):
     print("\n")
+    colored_dbg.test_info("Get workspace with wrong id")
     random_id = ResourceID()
-    colored_dbg.test_info(f"Get workspace with wrong id [GET /workspaces/{random_id}]")
     active_user = accounts[0]
 
     # Get workspace with wrong id
     response = await client_test.get(f"/workspaces/{random_id}",
                                      headers={"Authorization": f"Bearer {active_user.token}"})
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_404_NOT_FOUND
     colored_dbg.test_success(f"Workspace with id {random_id} does not exist")
 
 
 async def test_get_workspace_info(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info(f"Get workspace info [GET /workspace/{workspace.id}] ")
+    colored_dbg.test_info("Get workspace info [GET /workspaces/{workspace_id}]")
+    workspace = workspaces[0]
     active_user = accounts[0]
 
     # Get the workspace basic info and and validate basic information
@@ -149,9 +160,41 @@ async def test_get_workspace_info(client_test: AsyncClient):
     colored_dbg.test_success(f"Workspace \"{workspace.name}\" has one member: {active_user.email}")
 
 
+async def test_update_workspace_info(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Update workspace info [PATCH /workspaces/{workspace.id}]")
+    workspace = workspaces[1]
+    active_user = accounts[0]
+
+    # Update the workspace info
+    response = await client_test.patch(f"/workspaces/{workspace.id}",
+                                       json={"name": "Updated Name", "description": "Updated Description"},
+                                       headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["name"] == "Updated Name"
+    assert response["description"] == "Updated Description"
+    colored_dbg.test_success("Workspace \"{}\" has updated name and description".format(workspace.name))
+
+
+async def test_update_workspace_info_duplicate_name(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Update workspace info with duplicate name [PATCH /workspaces/{workspace.id}]")
+    workspace = workspaces[1]
+    active_user = accounts[0]
+
+    # Update the workspace info
+    response = await client_test.patch(f"/workspaces/{workspace.id}",
+                                       json={"name": workspaces[0].name, "description": workspaces[0].description},
+                                       headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    colored_dbg.test_success("Workspace \"{}\" cannot be updated with duplicate name".format(workspace.name))
+
+
 async def test_add_members_to_workspace(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info(f"Add members to workspace \"{workspace.name}\"")
+    colored_dbg.test_info("Add members to workspace [POST /workspaces/{workspace.id}/members]")
+    workspace = workspaces[0]
     active_user = accounts[0]
 
     members = []  # List of member ids to add to the workspace
@@ -176,7 +219,8 @@ async def test_add_members_to_workspace(client_test: AsyncClient):
 
 async def test_get_workspace_members(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info(f"Getting members of workspace \"{workspace.name}\"")
+    colored_dbg.test_info("Getting members of workspace [GET /workspaces/{workspace.id}/members]]")
+    workspace = workspaces[0]
     active_user = accounts[0]
 
     # Check that all users were added to the workspace as members
@@ -191,26 +235,10 @@ async def test_get_workspace_members(client_test: AsyncClient):
     colored_dbg.test_success("The workspace returned the correct list of members")
 
 
-async def test_add_group(client_test: AsyncClient):
-    print("\n")
-    colored_dbg.test_info(f"Adding group to workspace \"{workspace.name}\"")
-    active_user = accounts[0]
-
-    # Create a group
-    group = await test_2_groups.test_create_group(client_test, GroupCreate(name="test_group"))
-
-    # Add the group to the workspace
-    response = await client_test.post(f"/workspaces/{workspace.id}/groups", json={"groups": [group.id]},
-                                      headers={"Authorization": f"Bearer {active_user.token}"})
-    assert response.status_code == status.HTTP_200_OK
-    response = response.json()
-    assert response["groups"][0]["id"] == group.id
-    colored_dbg.test_success(f"Group \"{group.name}\" has been added to the workspace")
-
-
 async def test_get_permissions(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info(f"Getting list of member permissions in workspace \"{workspace.name}\"")
+    colored_dbg.test_info("Getting list of member permissions in workspace [GET /workspaces/{workspace.id}/policy]")
+    workspace = workspaces[0]
     active_user = accounts[0]
 
     # Check permission of the user who created the workspace
@@ -233,7 +261,8 @@ async def test_get_permissions(client_test: AsyncClient):
 
 async def test_permissions(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Try actions without permissions")
+    colored_dbg.test_info("Actions and permissions")
+    workspace = workspaces[0]
     active_user = accounts[1]
     await test_1_accounts.test_login(client_test, active_user)  # Login the active_user
 
@@ -301,7 +330,7 @@ async def test_permissions(client_test: AsyncClient):
 
 # async def test_set_permissions(client_test: AsyncClient):
 #     print("\n")
-#     colored_dbg.test_info(f"Setting permissions of workspace \"{workspace.name}\"")
+#     colored_dbg.test_info("Setting permissions of workspace \"{workspace.name}\"")
 #     active_user = accounts[0]
 
 #     # Set permissions of the user who created the workspace
@@ -343,29 +372,37 @@ async def test_permissions(client_test: AsyncClient):
 #     # assert
 
 
-# # Delete the workspace and users
-# async def test_delete_workspace(client_test: AsyncClient):
-#     print("\n")
-#     colored_dbg.test_info("Testing workspace deletion")
-#     # Get the workspace
-#     response = await client_test.get(f"/workspaces/{workspace.id}", headers={"Authorization": f"Bearer {owner.token}"})
-#     assert response.status_code == status.HTTP_200_OK
-#     response = response.json()
-#     assert response["name"] == workspace.name
-#     colored_dbg.test_info(f'Workspace "{workspace.name}" exists')
+# Delete the workspace
+async def test_delete_workspace(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Testing workspace deletion")
+    active_user = accounts[0]
+    workspace = workspaces[0]
+    headers = {"Authorization": f"Bearer {active_user.token}"}
 
-#     # Delete the workspace
-#     response = await client_test.delete(f"/workspaces/{workspace.id}", headers={"Authorization": f"Bearer {owner.token}"})
-#     assert response.status_code == status.HTTP_204_NO_CONTENT
-#     colored_dbg.test_info(f'Workspace "{workspace.name}" has been successfully deleted')
+    # Get the workspace
+    response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["name"] == workspace.name
+    colored_dbg.test_info('Workspace "{workspace.name}" exists')
 
-#     # Test to get the workspace
-#     response = await client_test.get(f"/workspaces/{workspace.id}", headers={"Authorization": f"Bearer {owner.token}"})
-#     assert response.status_code == status.HTTP_404_NOT_FOUND
-#     colored_dbg.test_info(f'Workspace "{workspace.name}" is not found')
+    # Delete the workspace
+    response = await client_test.delete(f"/workspaces/{workspace.id}", headers=headers)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    colored_dbg.test_info('Workspace "{workspace.name}" has been successfully deleted')
 
-#     # TODO: Check that no users have the workspace in their workspaces list
+    # Test to get the workspace
+    response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    colored_dbg.test_info('Workspace "{workspace.name}" is not found')
 
-#     # Delete the users by email
-#     await Account.find({"email": {"$in": [user.email for user in (users+admins+[owner])]}}).delete()
-#     colored_dbg.test_info("All users deleted")
+    # TODO: Check that no users have the workspace in their workspaces list
+
+
+# TODO: Delete accounts
+async def test_cleanup(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Cleaning up")
+    # await Account.find({"email": {"$in": [user.email for user in (accounts)]}}).delete()
+    # colored_dbg.test_success("All users deleted")
