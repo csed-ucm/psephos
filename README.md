@@ -1,12 +1,12 @@
 # PollingApp 
 
-![Tests](https://github.com/mike-pisman/PollingApp/actions/workflows/tests.yaml/badge.svg?branch=Development)
+![Tests](https://github.com/mike-pisman/PollingAPI/actions/workflows/tests.yaml/badge.svg?branch=Development)
 
 **This is the Development Branch**
 
 ### Useful Links:
 
-- [Developer Wiki](https://github.com/mike-pisman/PollingApp/wiki) 
+- [Developer Wiki](https://github.com/mike-pisman/PollingAPI/wiki) 
 
 - [Polling API](https://polling.website/)
 
