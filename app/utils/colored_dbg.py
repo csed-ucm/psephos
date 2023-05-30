@@ -43,7 +43,7 @@ def print_warning(*message: List[str] | str) -> None:
 
 
 # Print message with blue MESSAGE header
-def print_message(*message: List[str] | str, source: str = "SWEEP") -> None:
+def print_message(*message: List[str] | str, source: str = "") -> None:
     print_in_color(
         *message,
         color=Fore.BLUE,
