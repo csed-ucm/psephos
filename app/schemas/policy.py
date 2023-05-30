@@ -20,6 +20,7 @@ class PolicyShort(BaseModel):
 
 class PolicyInput(BaseModel):
     policy_id: Optional[ResourceID] = Field(title="Policy ID")
+    account_id: Optional[ResourceID] = Field(title="Account ID")
     permissions: list[str] = Field(title="Permissions")
 
     class Config:
