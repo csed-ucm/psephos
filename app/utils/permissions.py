@@ -83,7 +83,10 @@ async def get_all_permissions(resource, account):
             # Recursive way
             # TODO: Test this
             # await policy.fetch_all_links()
+            # BUG: Cannot fetch policy holder link
             group = await policy.policy_holder.fetch()
+            # from app.models.documents import Group
+            # group = await Group.get(policy.policy_holder.ref.id)
             await group.fetch_link("policies")
             # print("Checking group: ", group.name)
             if await get_all_permissions(group, account):

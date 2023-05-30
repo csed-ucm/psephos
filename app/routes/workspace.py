@@ -124,6 +124,7 @@ async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace_m
 
 # List all groups in the workspace
 @router.post("/{workspace_id}/groups",
+             status_code=201,
              response_description="Created Group",
              response_model=GroupSchemas.GroupCreateOutput)
 async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace_model),

@@ -87,7 +87,7 @@ async def delete_group(group: Group):
     workspace: Workspace = group.workspace  # type: ignore
 
     if workspace:
-        workspace.groups = [g for g in workspace.groups if g.ref.id != group.id]
+        workspace.groups = [g for g in workspace.groups if g.id != group.id]
         await Workspace.save(workspace)
 
     if await Group.get(group.id):
@@ -96,9 +96,14 @@ async def delete_group(group: Group):
 
 # Get list of members of a group
 async def get_group_members(group: Group) -> MemberSchemas.MemberList:
-    members = set()
     await group.fetch_link(Group.members)
-    member_list = [MemberSchemas.Member(**member) for member in group.members]  # type: ignore
+
+    member_list = []
+    member: Account
+    for member in group.members:  # type: ignore
+        member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+        member_scheme = MemberSchemas.Member(**member_data)
+        member_list.append(member_scheme)
     return MemberSchemas.MemberList(members=member_list)
 
 

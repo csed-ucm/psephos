@@ -45,6 +45,7 @@ async def update_group(group_data: GroupSchemas.GroupUpdateIn,
 
 # Delete a group
 @router.delete("/{group_id}",
+               status_code=status.HTTP_204_NO_CONTENT,
                response_description="Delete a group")
 async def delete_group(group: Group = Depends(Dependencies.get_group_model)):
     try:
