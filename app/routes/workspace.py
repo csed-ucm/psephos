@@ -171,7 +171,7 @@ async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.ge
 
 
 # List all policies in the workspace
-@router.get("/{workspace_id}/all_policies",
+@router.get("/{workspace_id}/policies",
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
 async def get_all_workspace_policies(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
