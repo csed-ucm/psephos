@@ -5,7 +5,19 @@ from app.utils import permissions as Permissions
 # Exceptions
 from app.exceptions import workspace as WorkspaceExceptions
 from app.exceptions import group as GroupExceptions
+from app.exceptions import account as AccountExceptions
 from app.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
+
+
+# Dependency to get account by id
+async def get_account(account_id: ResourceID) -> Account:
+    """
+    Returns an account with the given id.
+    """
+    account = await Account.get(account_id)
+    if not account:
+        raise AccountExceptions.AccountNotFound(account_id)
+    return account
 
 
 # Dependency for getting a workspace with the given id
