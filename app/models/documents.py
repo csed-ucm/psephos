@@ -2,11 +2,11 @@
 from typing import Literal
 from bson import DBRef
 # from typing import ForwardRef, Optional
-from beanie import Document, WriteRules, after_event, Insert, Link, PydanticObjectId, BackLink
+from beanie import Document, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
-from app.utils import colored_dbg
-from app.utils.permissions import Permissions, WorkspacePermissions
+from app.utils import colored_dbg as Debug
+from app.utils.permissions import Permissions  # WorkspacePermissions
 
 
 # Create a link to the Document model
@@ -44,7 +44,7 @@ class Resource(Document):
 
     @after_event(Insert)
     def create_group(self) -> None:
-        colored_dbg.info(f'New {self.resource_type} "{self.id}" has been created')
+        Debug.info(f'New {self.resource_type} "{self.id}" has been created')
 
     async def add_member(self, workspace, account, permissions, save: bool = True) -> "Account":
         # Add the account to the group
@@ -56,10 +56,33 @@ class Resource(Document):
                             workspace=workspace)
 
         # Add the policy to the group
-        self.policies.append(new_policy)
+        self.policies.append(new_policy)  # type: ignore
         if save:
             await Resource.save(self, link_rule=WriteRules.WRITE)
         return account
+
+    async def remove_member(self, account, save: bool = True) -> bool:
+        # Remove the account from the group
+        # await self.fetch_link("members")
+        for i, member in enumerate(self.members):
+            if account.id == member.ref.id:
+                self.members.remove(member)
+                Debug.info(f"Removed member {member.ref.id} from {self.resource_type} {self.id}")  # type: ignore
+                break
+
+        # Remove the policy from the group
+        await self.fetch_link("policies")
+        for policy in self.policies:
+            # pc = await policy.policy_holder.fetch()  # type: ignore
+            pc = policy.policy_holder  # type: ignore
+            if pc.ref.id == account.id:
+                self.policies.remove(policy)
+                await Policy.delete(policy)
+                Debug.info(f"Removed policy: {pc.ref.id} from {self.resource_type} {self.id}")
+                break
+
+        await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return True
 
 
 class Account(BeanieBaseUser, Document):
