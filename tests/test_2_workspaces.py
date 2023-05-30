@@ -1,14 +1,15 @@
+import pytest
 from faker import Faker
 from fastapi.testclient import TestClient
 from fastapi import status
-import pytest
 from pydantic import BaseModel
 from httpx import AsyncClient
+from beanie.operators import In
 from app.app import app
 from app.utils import colored_dbg
-from app.models.documents import ResourceID  # Account
+from app.models.documents import ResourceID, Account
 # from app.schemas import workspace as WorkspaceSchema
-from tests import test_1_accounts
+from . import test_1_accounts
 from app.utils import permissions as Permissions
 
 
@@ -33,22 +34,24 @@ def create_random_user():
 @pytest.mark.skip()
 class TestWorkspace(BaseModel):
     id: ResourceID | None = None
-    name: str = "Workspace " + fake.aba()
-    description: str = fake.sentence()
-    owner: ResourceID | None = None
+    name: str
+    description: str
+    groups: list[ResourceID] = []
     policies: list[ResourceID] = []
     members: list[ResourceID] = []
 
 
 global accounts, workspaces
-accounts = [create_random_user() for i in range(10)]
+# accounts = [create_random_user() for _ in range(10)]
+accounts = [create_random_user() for _ in range(4)]
 workspaces = [TestWorkspace(name="Workspace " + fake.aba(), description=fake.sentence()) for i in range(2)]
 
 
-async def test_create_workspace(client_test: AsyncClient):
+async def test_create_workspace(client_test: AsyncClient, workspace=None):
     print("\n")
     colored_dbg.test_info("Create a workspace [POST /workspaces]")
-    workspace = workspaces[0]
+    if workspace is None:
+        workspace = workspaces[0]
 
     # Register new account who will create the workspace
     active_user = await test_1_accounts.test_register(client_test, accounts[0])
@@ -76,6 +79,7 @@ async def test_create_workspace(client_test: AsyncClient):
         workspace.id = response["id"]  # Set the workspace id
 
     colored_dbg.test_success("Created workspace {} with id {}".format(workspace.name, workspace.id))
+    return workspace
 
 
 async def test_create_workspace_duplicate_name(client_test: AsyncClient):
@@ -167,13 +171,15 @@ async def test_update_workspace_info(client_test: AsyncClient):
     active_user = accounts[0]
 
     # Update the workspace info
+    workspace.name = "Updated Name"
+    workspace.description = "Updated Description"
     response = await client_test.patch(f"/workspaces/{workspace.id}",
-                                       json={"name": "Updated Name", "description": "Updated Description"},
+                                       json={"name": workspace.name, "description": workspace.description},
                                        headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response["name"] == "Updated Name"
-    assert response["description"] == "Updated Description"
+    assert response["name"] == workspace.name
+    assert response["description"] == workspace.description
     colored_dbg.test_success("Workspace \"{}\" has updated name and description".format(workspace.name))
 
 
@@ -217,6 +223,9 @@ async def test_add_members_to_workspace(client_test: AsyncClient):
     colored_dbg.test_success("All members have been successfully added to the workspace")
 
 
+# TODO: Test adding existing members to workspace
+
+
 async def test_get_workspace_members(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Getting members of workspace [GET /workspaces/{workspace.id}/members]]")
@@ -257,6 +266,28 @@ async def test_get_permissions(client_test: AsyncClient):
         response = response.json()
         assert response["permissions"] == Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")  # type: ignore
     colored_dbg.test_success("All members have the correct permissions")
+
+
+async def test_get_all_policies(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Getting all policies [GET /workspaces/{workspace.id}/policies]")
+    workspace = workspaces[0]
+    active_user = accounts[0]
+
+    # Check permission of the user who created the workspace
+    response = await client_test.get(f"/workspaces/{workspace.id}/policies",
+                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert len(response["policies"]) == len(accounts)
+    temp_acc_list = [acc.dict(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
+    for policy in response["policies"]:
+        assert policy["policy_holder"] in temp_acc_list
+        if policy["policy_holder"]["id"] == accounts[0].id:
+            assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
+        else:
+            assert policy["permissions"] == Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")
+    colored_dbg.test_success("The workspace returned the correct list of policies")
 
 
 async def test_permissions(client_test: AsyncClient):
@@ -305,10 +336,6 @@ async def test_permissions(client_test: AsyncClient):
                                  headers=headers)
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    # Try to delete group
-    # res = await client_test.delete(f"/workspaces/{workspace.id}/groups/{groups[0].id}", headers=headers)
-    # assert res.status_code == status.HTTP_403_FORBIDDEN
-
     # Try to delete members from workspace
     res = await client_test.delete(f"/workspaces/{workspace.id}/members/{accounts[2].id}",
                                    headers=headers)
@@ -328,48 +355,51 @@ async def test_permissions(client_test: AsyncClient):
 
     colored_dbg.test_success("User #1 can't do any actions without permissions")
 
-# async def test_set_permissions(client_test: AsyncClient):
-#     print("\n")
-#     colored_dbg.test_info("Setting permissions of workspace \"{workspace.name}\"")
-#     active_user = accounts[0]
 
-#     # Set permissions of the user who created the workspace
-#     # response = await client_test.put(f"/workspaces/{workspace.id}/permissions",
-#     #                                  json={"permissions": ["READ", "WRITE"]},
-#     #                                  headers={"Authorization": f"Bearer {active_user.token}"})
-#     # assert response.status_code == status.HTTP_200_OK
-#     # response = response.json()
-#     # assert response["permissions"] == ["READ", "WRITE"]
+async def test_set_permissions(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Setting permissions of workspace members [PUT /workspaces/{workspace.id}/policy]")
+    active_user = accounts[0]
+    workspace = workspaces[0]
 
-#     # Set permissions of the rest of the members
-#     # for acc in accounts:
-#     #     acc = {"id": acc.id, "email": acc.email, "first_name": acc.first_name, "last_name": acc.last_name}
-#     #     assert acc in response["permissions"]
+    # Update policy of another member
+    response = await client_test.put(f"/workspaces/{workspace.id}/policy?",
+                                     json={"account_id": accounts[1].id,
+                                           "permissions": Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")},
+                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
 
-#     colored_dbg.test_success("All members have the correct permissions")
+    # Check permissions
+    response = await client_test.get(f"/workspaces/{workspace.id}/policy?account_id={accounts[1].id}",
+                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
+
+    # Now the member should be able to get their policy information
+    response = await client_test.get(f"/workspaces/{workspace.id}/policy",
+                                     headers={"Authorization": f"Bearer {accounts[1].token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
+
+    colored_dbg.test_success("All members have the correct permissions")
 
 
-# # Attempt to delete a user from non existing workspace
-# async def test_delete_workspace_no_owner(client_test: AsyncClient):
-#     print("\n")
-#     colored_dbg.test_info("Testing workspace deletion from non existing workspace")
+# Attempt to remove a member from non existing workspace
+async def test_delete_non_existing_workspace(client_test: AsyncClient):
+    print("\n")
+    colored_dbg.test_info("Testing workspace deletion from non existing workspace")
+    active_user = accounts[1]
 
-#     random_workspace_id = ResourceID()
+    random_workspace_id = ResourceID()
 
-#     # Delete the workspace
-#     # NOTE: pytest.raises() does not work(with async functions?)
-#     # with pytest.raises(WorkspaceNotFound):
-#     #     response = await client_test.delete(f"/workspaces/{random_workspace_id}",
-#     #                                         headers={"Authorization": f"Bearer {owner.token}"})
-#     #     print(response.json())
-#     response = await client_test.delete(f"/workspaces/{random_workspace_id}",
-#                                         headers={"Authorization": f"Bearer {owner.token}"})
-#     assert response.status_code == status.HTTP_404_NOT_FOUND
-#     assert response.json()["detail"] == f'Workspace with id {str(random_workspace_id)} not found'
+    response = await client_test.delete(f"/workspaces/{random_workspace_id}",
+                                        headers={"Authorization": f"Bearer {active_user.token}"})
 
-#     colored_dbg.test_success("Workspace deletion from non existing workspace failed as expected")
-#     # assert response.status_code == status.HTTP_404_NOT_FOUND
-#     # assert
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 # Delete the workspace
@@ -377,32 +407,32 @@ async def test_delete_workspace(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Testing workspace deletion")
     active_user = accounts[0]
-    workspace = workspaces[0]
     headers = {"Authorization": f"Bearer {active_user.token}"}
 
-    # Get the workspace
-    response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
-    assert response.status_code == status.HTTP_200_OK
-    response = response.json()
-    assert response["name"] == workspace.name
-    colored_dbg.test_info('Workspace "{workspace.name}" exists')
+    for workspace in workspaces:
+        # Get the workspace
+        response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
+        assert response.status_code == status.HTTP_200_OK
+        response = response.json()
+        assert response["name"] == workspace.name
+        colored_dbg.test_info(f'Workspace "{workspace.name}" found')
 
-    # Delete the workspace
-    response = await client_test.delete(f"/workspaces/{workspace.id}", headers=headers)
-    assert response.status_code == status.HTTP_204_NO_CONTENT
-    colored_dbg.test_info('Workspace "{workspace.name}" has been successfully deleted')
+        # Delete the workspace
+        response = await client_test.delete(f"/workspaces/{workspace.id}", headers=headers)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        colored_dbg.test_info(f'Deleting workspace "{workspace.name}"')
 
-    # Test to get the workspace
-    response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    colored_dbg.test_info('Workspace "{workspace.name}" is not found')
+        # Test to get the workspace
+        response = await client_test.get(f"/workspaces/{workspace.id}", headers=headers)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        colored_dbg.test_success(f'Workspace "{workspace.name}" has been successfully deleted')
 
     # TODO: Check that no users have the workspace in their workspaces list
 
 
-# TODO: Delete accounts
+# Delete accounts
 async def test_cleanup(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Cleaning up")
-    # await Account.find({"email": {"$in": [user.email for user in (accounts)]}}).delete()
-    # colored_dbg.test_success("All users deleted")
+    await Account.find(In(Account.id, [ResourceID(account.id) for account in accounts])).delete()
+    colored_dbg.test_success("All users deleted")
