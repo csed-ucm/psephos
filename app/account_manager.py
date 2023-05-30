@@ -6,7 +6,7 @@ from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
                                           BearerTransport, CookieTransport,
                                           JWTStrategy)
-from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin  
+from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
 from app.models.documents import Account
