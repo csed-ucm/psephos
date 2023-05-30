@@ -5,7 +5,7 @@ from beanie.operators import In
 from app.account_manager import current_active_user
 from app.models.documents import Group, ResourceID, Workspace, Account, Policy, create_link
 from app.schemas import workspace as WorkspaceSchemas
-from app.schemas import account as AccountSchemas
+# from app.schemas import account as AccountSchemas
 from app.schemas import group as GroupSchemas
 from app.schemas import policy as PolicySchemas
 from app.schemas import member as MemberSchemas
@@ -85,7 +85,7 @@ async def delete_workspace(workspace: Workspace):
     # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    
+
     # policy: Policy
     # for policy in workspace.policies:  # type: ignore
         # await Policy.delete(policy)
@@ -94,8 +94,8 @@ async def delete_workspace(workspace: Workspace):
     # for group in workspace.groups:  # type: ignore
         # await Group.delete(group)
 
-    await Policy.find(Policy.workspace.id == workspace.id).delete()
-    await Group.find(Group.workspace.id == workspace).delete()
+    await Policy.find(Policy.workspace.id == workspace.id).delete()  # type: ignore
+    await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
 
 
 # List all members of a workspace
@@ -253,23 +253,38 @@ async def get_workspace_policy(workspace: Workspace,
         policy_holder=MemberSchemas.Member(**account.dict()))
 
 
+# Set permissions for a user in a workspace
 async def set_workspace_policy(workspace: Workspace,
                                input_data: PolicySchemas.PolicyInput) -> PolicySchemas.PolicyOutput:
     policy: Policy | None = None
     if input_data.policy_id:
         policy = await Policy.get(input_data.policy_id)
+        if not policy:
+            raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
+        # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
+        else:
+            account = Account.get(policy.policy_holder.ref.id)
     else:
-        account: Account = current_active_user.get()
-        await workspace.fetch_link(workspace.policies)
+        if input_data.account_id:
+            account = await Account.get(input_data.account_id)
+            if not account:
+                raise AccountExceptions.AccountNotFound(input_data.account_id)
+        else:
+            account = current_active_user.get()
+        await workspace.fetch_link(Workspace.policies)
         # Find the policy for the account
+        # NOTE: To set a policy for a user, the user must be a member of the workspace, therefore the policy must exist
         p: Policy
         for p in workspace.policies:  # type: ignore
-            if p.policy_holder == account:
-                policy = p
-                break
-    if not policy:
-        raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
-
+            if p.policy_holder_type == "account":
+                if p.policy_holder.ref.id == account.id:
+                    policy = p
+                    break
+            # if not policy:
+            #     policy = Policy(policy_holder_type='account',
+            #                     policy_holder=(await create_link(account)),
+            #                     permissions=Permissions.WorkspacePermissions(0),
+            #                     workspace=workspace)
     new_permission_value = 0
     for i in input_data.permissions:
         try:
@@ -278,7 +293,8 @@ async def set_workspace_policy(workspace: Workspace,
             raise GenericExceptions.InvalidPermission(i)
     policy.permissions = Permissions.WorkspacePermissions(new_permission_value)  # type: ignore
     await Policy.save(policy)
+
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**policy.policy_holder.dict()))
+        policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
     raise WorkspaceExceptions.UserNotMember(workspace, account)
