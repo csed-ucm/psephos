@@ -130,13 +130,6 @@ async def test_get_account_info(client_test: AsyncClient):
 async def test_delete_account(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Deleting new user's account")
-    # await Account.update({"_id": new_user.id}, {"$set": {"is_superuser": True}})
-    # found_user = None
-    # if new_user.id:
-    # found_user = await Account.get(new_user.id)
-    # if found_user:
-    #     found_user.is_superuser = True
-    #     await found_user.save()
     response = await client_test.delete("/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == status.HTTP_204_NO_CONTENT
     colored_dbg.test_success("New user's account has been deleted")
