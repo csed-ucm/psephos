@@ -109,7 +109,6 @@ async def test_get_workspaces(client_test: AsyncClient):
 
     # Get the first workspace(should be the only workspace)
     assert len(response["workspaces"]) == 2
-    print(response["workspaces"])
     for ws in response["workspaces"]:
         if ws["id"] == workspaces[0].id:
             assert workspaces[0].name == ws["name"]

@@ -54,7 +54,6 @@ async def test_register(client_test: AsyncClient, new_user: TestAccount = new_us
     assert response.get("email") == new_user.email
     assert response.get("first_name") == new_user.first_name
     assert response.get("last_name") == new_user.last_name
-    print(response)
     new_user.id = response.get("id")
     colored_dbg.test_success("New user has been registered: ", new_user.email, "with id: ", new_user.id)
     return new_user
