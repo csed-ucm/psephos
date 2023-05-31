@@ -74,23 +74,19 @@ async def get_all_permissions(resource, account):
                 # print("User permissions: ", policy.permissions)
         # If there is a group that user is a member of, add group permissions to the user permissions
         elif policy.policy_holder_type == "group":
-            # NOTE: Non-recursive way, will not get permissions from nested groups
-            # group = await policy.policy_holder.fetch()
-            # await group.fetch_link("members")
-            # if account in group.members:
-            #     permission_sum |= policy.permissions
-
-            # Recursive way
-            # TODO: Test this
-            # await policy.fetch_all_links()
-            # BUG: Cannot fetch policy holder link
+            # Try to fetch the group
             group = await policy.policy_holder.fetch()
-            # from app.models.documents import Group
-            # group = await Group.get(policy.policy_holder.ref.id)
-            await group.fetch_link("policies")
-            # print("Checking group: ", group.name)
-            if await get_all_permissions(group, account):
-                permission_sum |= policy.permissions
-                # print("Group permissions: ", policy.permissions)
+            # BUG: sometimes links are not fetched properly
+            # If fetching policy holder is not working, find the group manually
+            if not group:
+                from app.models.documents import Group
+                group = await Group.get(policy.policy_holder.ref.id)
+
+            if group:
+                await group.fetch_link("policies")
+                # print("Checking group: ", group.name)
+                if await get_all_permissions(group, account):
+                    permission_sum |= policy.permissions
+                    # print("Group permissions: ", policy.permissions)
 
     return permission_sum
