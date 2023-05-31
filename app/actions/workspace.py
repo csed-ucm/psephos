@@ -81,19 +81,10 @@ async def update_workspace(workspace: Workspace, input_data: WorkspaceSchemas.Wo
 
 # Delete a workspace
 async def delete_workspace(workspace: Workspace):
-    await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
-    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
+    # await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
+    await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-
-    # policy: Policy
-    # for policy in workspace.policies:  # type: ignore
-        # await Policy.delete(policy)
-
-    # group: Group
-    # for group in workspace.groups:  # type: ignore
-        # await Group.delete(group)
-
     await Policy.find(Policy.workspace.id == workspace.id).delete()  # type: ignore
     await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
 
@@ -109,12 +100,13 @@ async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberLis
         member_scheme = MemberSchemas.Member(**member_data)
         member_list.append(member_scheme)
 
-    # # Return the list of members
+    # Return the list of members
     return MemberSchemas.MemberList(members=member_list)
 
 
 # Add groups/members to group
-async def add_workspace_members(workspace: Workspace, member_data: MemberSchemas.AddMembers):
+async def add_workspace_members(workspace: Workspace,
+                                member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
     accounts = set(member_data.accounts)
 
     # Remove existing members from the accounts set
@@ -186,13 +178,13 @@ async def create_group(workspace: Workspace,
         raise GroupExceptions.ErrorWhileCreating(new_group)
 
     # Add the account to group member list
-    await new_group.add_member(workspace, account, Permissions.WORKSPACE_ALL_PERMISSIONS)
+    await new_group.add_member(workspace, account, Permissions.GROUP_ALL_PERMISSIONS)
 
     # Create a policy for the new group
-    full_permissions = Permissions.WorkspacePermissions(-1)  # type: ignore
+    permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS  # type: ignore
     new_policy = Policy(policy_holder_type='group',
                         policy_holder=(await create_link(new_group)),
-                        permissions=full_permissions,
+                        permissions=permissions,
                         workspace=workspace)  # type: ignore
 
     # Add the group and the policy to the workspace
@@ -204,7 +196,7 @@ async def create_group(workspace: Workspace,
     return GroupSchemas.GroupCreateOutput(**new_group.dict())
 
 
-# Set permissions for a user in a workspace
+# Get all policies of a workspace
 async def get_all_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
     policy_list = []
     await workspace.fetch_link(Workspace.policies)
