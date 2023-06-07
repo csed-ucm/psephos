@@ -6,6 +6,7 @@ from app.mongo_db import mainDB, DOCUMENT_MODELS
 from app.routes import workspace as WorkspaceRoutes
 from app.routes import group as GroupRoutes
 from app.routes import account as AccountRoutes
+from app.routes import websocket as WebSocketRoutes
 from app.config import get_settings
 from app.schemas.account import Account, CreateAccount, UpdateAccount
 from app.account_manager import auth_backend, fastapi_users
@@ -37,6 +38,9 @@ app.include_router(AccountRoutes.router,
                    prefix="/accounts",
                    tags=["Accounts"],
                    dependencies=[Depends(set_active_user)])
+app.include_router(WebSocketRoutes.router,
+                   prefix="/ws",
+                   tags=["WebSocket"])
 app.include_router(fastapi_users.get_auth_router(auth_backend),
                    prefix="/auth/jwt",
                    tags=["Authentication"])
