@@ -1,7 +1,8 @@
 name: Back-end Testing
 
 on:
-  pull_request:
+  # pull_request:
+  push:
     branches:
       - "Development"
 
