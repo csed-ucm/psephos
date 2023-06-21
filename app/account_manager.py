@@ -4,10 +4,14 @@ from beanie import PydanticObjectId, Document
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
-                                          BearerTransport, CookieTransport)
+                                        #   BearerTransport, 
+                                          CookieTransport)
+from app.utils.auth_transport import BearerTransport
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
-from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
-from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
+# from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
+from app.utils.token_db import BeanieAccessTokenDatabase, BeanieBaseAccessToken
+# from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
+from app.utils.auth_strategy import AccessTokenDatabase, DatabaseStrategy
 from app.models.documents import Account
 from app.utils import colored_dbg
 
