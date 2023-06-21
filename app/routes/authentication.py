@@ -6,17 +6,13 @@ from fastapi_users.openapi import OpenAPIResponseType
 from fastapi_users.router.common import ErrorCode, ErrorModel
 from fastapi_users.authentication import Strategy
 
-from app.account_manager import fastapi_users, get_user_manager
-from app.account_manager import jwt_backend, get_database_strategy, get_access_token_db
+from app.account_manager import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
+from app.actions import authentication as AuthActions
 from app.schemas import account as AccountSchemas
+from app.exceptions.resource import APIException
 # from app.schemas import authentication as AuthSchemas
-from app.models.documents import Account
 from app.utils.token_db import BeanieAccessTokenDatabase
 from app.utils.auth_strategy import DatabaseStrategy
-
-
-import re
-
 router = APIRouter()
 
 
@@ -35,39 +31,16 @@ async def refresh_jwt(response: Response,
                       refresh_token: Annotated[str | None, Header()] = None,
                       token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
                       strategy: DatabaseStrategy = Depends(get_database_strategy)):
-    # Make sure the Authorization header is valid and extract the access token
+    """Refresh the access token using the refresh token.
+
+    Headers:
+        authorization: `Authorization` header with the access token
+        refresh_token: `Refresh-Token` header with the refresh token
+    """
     try:
-        access_token = re.match(r'^Bearer ([A-z0-9\-]+)$', authorization).group(1)  # type: ignore
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Authorization header")
-
-    # Get the token data from the database using the access token
-    # NOTE: We do not supply a max_age parameter in case access tokens has already expired
-    token_data = await token_db.get_by_token(access_token)
-
-    # Make sure the access token exists in the database
-    if token_data is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
-
-    # Make sure the access token is associated with the supplied refresh token
-    if token_data.refresh_token != refresh_token:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid refresh token")
-
-    # Get the user from the database using the user ID in the token data
-    user = await Account.get(token_data.user_id)
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="User not found")
-
-    # Check if the refresh token is the most recent one
-    all_tokens = await token_db.get_token_family_by_user_id(user.id)
-    if (await all_tokens.to_list())[0].refresh_token != refresh_token:
-        # If not, delete all tokens associated with the user and return an error
-        await strategy.destroy_token_family(user)
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid refresh token")
-
-    # Generate new pair of access and refresh tokens
-    return await jwt_backend.login(strategy, user)
+        return await AuthActions.refresh_token(authorization, refresh_token, token_db, strategy)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=e.detail)
 
 
 login_responses: OpenAPIResponseType = {
