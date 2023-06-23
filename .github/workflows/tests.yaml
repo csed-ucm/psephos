@@ -10,7 +10,7 @@ jobs:
   test:
     # runs-on: ${{matrix.os}}
     # runs-on: self-hosted
-    runs-on: arc-runner-set
+    runs-on: arc-runner-k8s
     strategy:
       fail-fast: false
       matrix:
