@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status, HTTPException, Depends
+from app.account_manager import fastapi_users
 from app.actions import account as AccountActions
 from app.exceptions.resource import APIException
 from app.models.documents import Account
 from app.dependencies import get_account
+from app.schemas import account as AccountSchemas
 
 
 # APIRouter creates path operations for user module
@@ -53,3 +55,9 @@ async def delete_user(account: Account = Depends(get_account)):
         await AccountActions.delete_account(account)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Update current user account
+router.include_router(fastapi_users.get_users_router(AccountSchemas.Account, AccountSchemas.UpdateAccount),
+                      prefix="/accounts",
+                      tags=["Accounts"])

@@ -1,4 +1,5 @@
-from fastapi import Depends, Request, HTTPException
+from typing import Annotated
+from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
 from app.account_manager import current_active_user, get_current_active_user
 from app.models.documents import ResourceID, Workspace, Group, Account
 from app.utils import permissions as Permissions
@@ -18,6 +19,14 @@ async def get_account(account_id: ResourceID) -> Account:
     if not account:
         raise AccountExceptions.AccountNotFound(account_id)
     return account
+
+
+async def websocket_auth(
+    websocket: WebSocket,
+    session: Annotated[str | None, Cookie()] = None,
+    token: Annotated[str | None, Query()] = None,
+):
+    return {"cookie": session, "token": token}
 
 
 # Dependency for getting a workspace with the given id
