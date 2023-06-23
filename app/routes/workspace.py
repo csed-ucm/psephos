@@ -124,6 +124,7 @@ async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace_m
 
 # List all groups in the workspace
 @router.post("/{workspace_id}/groups",
+             status_code=201,
              response_description="Created Group",
              response_model=GroupSchemas.GroupCreateOutput)
 async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace_model),
@@ -158,9 +159,9 @@ async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-# Remove members from the workspace
+# Remove member from the workspace
 @router.delete("/{workspace_id}/members/{account_id}",
-               response_description="List removed members",
+               response_description="Updated list removed members",
                response_model_exclude_unset=True)
 async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.get_workspace_model),
                                   account_id: ResourceID = Path(..., description="Account ID of the member to remove")):
@@ -181,9 +182,9 @@ async def get_all_workspace_policies(workspace: Workspace = Depends(Dependencies
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-# List user's permissions in the workspace
+# List member's permissions in the workspace
 @router.get("/{workspace_id}/policy",
-            response_description="List user policy(permissions)",
+            response_description="List member policy(permissions)",
             response_model=PolicySchemas.PolicyOutput)
 async def get_workspace_policy(workspace: Workspace = Depends(Dependencies.get_workspace_model),
                                account_id: ResourceID | None = None):
@@ -193,7 +194,7 @@ async def get_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-# Set permissions for a user in a workspace
+# Set permissions for a member in a workspace
 @router.put("/{workspace_id}/policy",
             response_description="Updated permissions",
             response_model=PolicySchemas.PolicyOutput)

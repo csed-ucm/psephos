@@ -86,10 +86,11 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
     operationID = extract_action_from_path(request)
     groupID = extract_resourceID_from_path(request)
     # Get the workspace with the given id
-    group = await Group.get(groupID, fetch_links=True)
+    group = await Group.get(ResourceID(groupID), fetch_links=True)
     # Check if workspace exists
     if not group:
-        raise GroupExceptions.GroupNotFound(groupID)
+        e = GroupExceptions.GroupNotFound(groupID)
+        raise HTTPException(e.code, str(e))
     # Get the user policy for the workspace
     # print(group.members)
     user_permissions = await Permissions.get_all_permissions(group, account)
@@ -99,6 +100,8 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
         required_permission = Permissions.GroupPermissions[operationID]  # type: ignore
         if not Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
                                             required_permission):
-            raise GroupExceptions.UserNotAuthorized(account, group, operationID)
+            e = GroupExceptions.UserNotAuthorized(account, group, operationID)
+            raise HTTPException(e.code, str(e))
     except KeyError:
-        raise GroupExceptions.ActionNotFound(operationID)
+        e = GroupExceptions.ActionNotFound(operationID)
+        raise HTTPException(e.code, str(e))

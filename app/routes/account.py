@@ -10,7 +10,8 @@ router = APIRouter()
 
 
 # Delete current user account
-@router.delete("/me")
+@router.delete("/me",
+               status_code=status.HTTP_204_NO_CONTENT)
 async def delete_my_account():
     """
         ## Delete current user account
@@ -27,13 +28,13 @@ async def delete_my_account():
     """
     try:
         await AccountActions.delete_account()
-        return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
 # Delete user account by id
-@router.delete("/{id}")
+@router.delete("/{id}",
+               status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(account: Account = Depends(get_account)):
     """
         ## Delete current user account
@@ -50,6 +51,5 @@ async def delete_user(account: Account = Depends(get_account)):
     """
     try:
         await AccountActions.delete_account(account)
-        return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
