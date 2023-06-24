@@ -10,7 +10,7 @@ from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 # from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
 from src.utils.token_db import BeanieAccessTokenDatabase, BeanieBaseAccessToken
 # from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
-from src.utils.auth_strategy import AccessTokenDatabase, DatabaseStrategy
+from src.utils.auth_strategy import DatabaseStrategy
 from src.models.documents import Account
 from src.utils import colored_dbg
 
@@ -67,9 +67,7 @@ async def get_access_token_db():
     yield BeanieAccessTokenDatabase(AccessToken)  # type: ignore
 
 
-def get_database_strategy(
-        access_token_db: AccessTokenDatabase[AccessToken] = Depends(get_access_token_db)  # type: ignore
-        ) -> DatabaseStrategy:
+def get_database_strategy(access_token_db=Depends(get_access_token_db)) -> DatabaseStrategy:
     return DatabaseStrategy(access_token_db, lifetime_seconds=3600)
 
 
@@ -87,4 +85,4 @@ cookie_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[Account, PydanticObjectId](get_user_manager, [jwt_backend, cookie_backend])  # type: ignore
 
 get_current_active_user = fastapi_users.current_user(active=True)
-current_active_user: ContextVar = ContextVar("current_active_user")  # type: ignore
+current_active_user: ContextVar = ContextVar("current_active_user")

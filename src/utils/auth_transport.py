@@ -25,8 +25,8 @@ class BearerTransport(Transport):
         self.scheme = OAuth2PasswordBearer(tokenUrl, auto_error=False)
 
     async def get_login_response(self, token) -> Response:
-        bearer_response = BearerResponse(access_token=token.access_token,
-                                         refresh_token=token.refresh_token,
+        bearer_response = BearerResponse(access_token=token.access_token,  # type: ignore
+                                         refresh_token=token.refresh_token,  # type: ignore
                                          token_type="bearer",
                                          expires=3600)
         return JSONResponse(bearer_response.dict())

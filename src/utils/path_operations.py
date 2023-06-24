@@ -7,7 +7,7 @@ from src.utils.colored_dbg import print_error
 def extract_action_from_path(request: Request, extract_id: bool = True) -> str:
     # Extract path and operation_id from request
     try:
-        return request["route"].name
+        return str(request["route"].name)
     except Exception as e:
         print_error("Error extracting resource from path: ", str(e))
         raise e

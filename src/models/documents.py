@@ -46,9 +46,9 @@ class Resource(Document):
     def create_group(self) -> None:
         Debug.info(f'New {self.resource_type} "{self.id}" has been created')
 
-    async def add_member(self, workspace, account, permissions, save: bool = True) -> "Account":
+    async def add_member(self, workspace, account: "Account", permissions, save: bool = True) -> "Account":
         # Add the account to the group
-        self.members.append(account)
+        self.members.append(account)  # type: ignore
         # Create a policy for the new member
         new_policy = Policy(policy_holder_type='account',
                             policy_holder=(await create_link(account)),

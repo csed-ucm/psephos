@@ -51,7 +51,7 @@ def check_permission(user_permission, required_permission) -> bool:
     Returns:
         bool: True if the user has the required permission, False otherwise.
     """
-    return user_permission & required_permission == required_permission
+    return bool((user_permission & required_permission) == required_permission)
 
 
 async def get_all_permissions(resource, account):
