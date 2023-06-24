@@ -1,4 +1,4 @@
-name: Back-end Testing
+name: Tox Testing
 
 on:
   workflow_dispatch:
