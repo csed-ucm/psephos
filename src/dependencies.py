@@ -25,7 +25,7 @@ async def websocket_auth(
     websocket: WebSocket,
     session: Annotated[str | None, Cookie()] = None,
     token: Annotated[str | None, Query()] = None,
-):
+) -> dict:
     return {"cookie": session, "token": token}
 
 
@@ -66,6 +66,8 @@ async def check_workspace_permission(request: Request, account: Account = Depend
     # Get the workspace with the given id
     workspace = await Workspace.get(workspaceID, fetch_links=True)
 
+    e: Exception
+
     # Check if workspace exists
     if not workspace:
         e = WorkspaceExceptions.WorkspaceNotFound(workspaceID)
@@ -97,6 +99,7 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
     # Get the workspace with the given id
     group = await Group.get(ResourceID(groupID), fetch_links=True)
     # Check if workspace exists
+    e: Exception
     if not group:
         e = GroupExceptions.GroupNotFound(groupID)
         raise HTTPException(e.code, str(e))

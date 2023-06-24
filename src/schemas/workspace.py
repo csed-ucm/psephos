@@ -1,7 +1,7 @@
 
 # from bson import DBRef
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Optional
 from src.models.documents import ResourceID
 
 
@@ -33,7 +33,7 @@ class WorkspaceShort(BaseModel):
 # Schema for the response with a list of workspaces
 # It can be used to return a list of workspaces with basic info or full info
 class WorkspaceList(BaseModel):
-    workspaces: List[WorkspaceShort | Workspace]
+    workspaces: list[WorkspaceShort] | list[Workspace]
 
     class Config:
         schema_extra = {

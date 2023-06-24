@@ -85,7 +85,7 @@ class Resource(Document):
         return True
 
 
-class Account(BeanieBaseUser, Document):
+class Account(BeanieBaseUser, Document):  # type: ignore
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     first_name: str = Field(
         default_factory=str,

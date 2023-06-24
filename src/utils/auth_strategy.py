@@ -40,7 +40,7 @@ class DatabaseStrategy(
         except (exceptions.UserNotExists, exceptions.InvalidID):
             return None
 
-    async def write_token(self, user: models.UP) -> str:
+    async def write_token(self, user: models.UP):
         token_dict = self._create_access_token_dict(user)
         token = await self.database.create(token_dict)
         return token
@@ -52,7 +52,7 @@ class DatabaseStrategy(
 
     # Destroy all tokens for a user
     async def destroy_token_family(self, user: models.UP) -> None:
-        tokens = await self.database.get_token_family_by_user_id(user.id)
+        tokens = await self.database.get_token_family_by_user_id(user.id)  # type: ignore
         await tokens.delete()
 
     def _create_access_token_dict(self, user: models.UP) -> Dict[str, Any]:

@@ -1,6 +1,6 @@
 from fastapi import status
 from src.models.documents import Account, Resource
-from src.utils.colored_dbg import print_warning
+from src.utils import colored_dbg as Debug
 from beanie import PydanticObjectId
 
 
@@ -10,8 +10,15 @@ class APIException(Exception):
         self.detail = detail
 
     def __str__(self) -> str:
-        print_warning(self.detail)
+        Debug.print_error(self.detail)  # type: ignore
         return self.detail
+
+
+class InternalServerError(APIException):
+    def __init__(self, detail: str):
+        super().__init__(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         detail="Internal Server Error")
+        Debug.print_error(detail)  # type: ignore
 
 
 class NonUniqueName(APIException):

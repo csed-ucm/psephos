@@ -31,9 +31,9 @@ from src.utils import permissions as Permissions
 async def get_group(group: Group) -> GroupSchemas.Group:
     # Create a group list for output schema using the search results
     await group.fetch_all_links()
-    member_list = []
-    policy_list = []
-    group_list = []
+    member_list: list[Account] = []
+    policy_list: list[Policy] = []
+    group_list: list[Group] = []
     for member in group.members:
         member_list.append(AccountSchemas.AccountShort(**member.dict()))  # type: ignore
     for policy in group.policies:
@@ -134,6 +134,10 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
     else:
         account = current_active_user.get()
 
+    # Check if the account exists
+    if not account:
+        raise GenericExceptions.InternalServerError("remove_group_member() -> Account not found")
+
     if account.id not in [ResourceID(member.ref.id) for member in group.members]:
         raise GroupExceptions.UserNotMember(group, account)
     return await group.remove_member(account)
@@ -156,7 +160,10 @@ async def get_all_group_policies(group: Group) -> PolicySchemas.PolicyList:
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
-            raise GenericExceptions.APIException(code=500, detail='Unknown policy_holder_type')  # Should not happen
+            raise GenericExceptions.InternalServerError("Invalid policy_holder_type")
+
+        if not policy_holder:
+            raise GenericExceptions.InternalServerError("get_all_group_policies() => Policy holder not found")
 
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
@@ -178,6 +185,9 @@ async def get_group_policy(group: Group, account_id: ResourceID | None):
     else:
         account = current_active_user.get()
 
+    if not account:
+        raise GenericExceptions.InternalServerError("get_group_policy() => Account not found")
+
     # Check if account is a member of the group
     if account.id not in [member.ref.id for member in group.members]:
         raise GroupExceptions.UserNotMember(group, account)
@@ -192,13 +202,14 @@ async def get_group_policy(group: Group, account_id: ResourceID | None):
 async def set_group_policy(group: Group,
                            input_data: PolicySchemas.PolicyInput) -> PolicySchemas.PolicyOutput:
     policy: Policy | None = None
+    account: Account | None = None
     if input_data.policy_id:
         policy = await Policy.get(input_data.policy_id)
         if not policy:
             raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
         # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
         else:
-            account = Account.get(policy.policy_holder.ref.id)
+            account = await Account.get(policy.policy_holder.ref.id)
     else:
         if input_data.account_id:
             account = await Account.get(input_data.account_id)
@@ -206,6 +217,10 @@ async def set_group_policy(group: Group,
                 raise AccountExceptions.AccountNotFound(input_data.account_id)
         else:
             account = current_active_user.get()
+
+        if not account:
+            raise GenericExceptions.InternalServerError("set_group_policy() => Account not found")
+
         await group.fetch_link("policies")
         # Find the policy for the account
         # NOTE: To set a policy for a user, the user must be a member of the workspace, therefore the policy must exist

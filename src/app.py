@@ -76,5 +76,5 @@ async def on_startup() -> None:
 
     await init_beanie(
         database=mainDB,
-        document_models=DOCUMENT_MODELS,
+        document_models=DOCUMENT_MODELS,  # type: ignore
     )

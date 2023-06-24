@@ -47,7 +47,7 @@ class AccountManager(ObjectIDIDMixin, UserManager):
             f"Account {user.id} is going to be deleted, cleaning up their data.")
 
 
-class AccessToken(BeanieBaseAccessToken, Document):
+class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
     pass
 
 
@@ -87,4 +87,4 @@ cookie_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[Account, PydanticObjectId](get_user_manager, [jwt_backend, cookie_backend])  # type: ignore
 
 get_current_active_user = fastapi_users.current_user(active=True)
-current_active_user = ContextVar("current_active_user")
+current_active_user: ContextVar = ContextVar("current_active_user")  # type: ignore

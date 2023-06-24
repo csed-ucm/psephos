@@ -128,10 +128,11 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
     # Check if account_id is specified in request, if account_id is not specified, use the current user
     if account_id:
         account = await Account.get(account_id)  # type: ignore
-        if not account:
-            raise AccountExceptions.AccountNotFound(account_id)
     else:
         account = current_active_user.get()
+
+    if not account:
+        raise AccountExceptions.AccountNotFound(account_id)
 
     if account.id not in [ResourceID(member.ref.id) for member in workspace.members]:
         raise WorkspaceExceptions.UserNotMember(workspace, account)
@@ -213,7 +214,10 @@ async def get_all_workspace_policies(workspace: Workspace) -> PolicySchemas.Poli
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
-            raise GenericExceptions.APIException(code=500, detail='Unknown policy_holder_type')  # Should not happen
+            raise GenericExceptions.InternalServerError(str("Unknown policy_holder_type"))
+
+        if not policy_holder:
+            raise AccountExceptions.AccountNotFound(policy.policy_holder.ref.id)
 
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
@@ -249,13 +253,14 @@ async def get_workspace_policy(workspace: Workspace,
 async def set_workspace_policy(workspace: Workspace,
                                input_data: PolicySchemas.PolicyInput) -> PolicySchemas.PolicyOutput:
     policy: Policy | None = None
+    account: Account | None = None
     if input_data.policy_id:
         policy = await Policy.get(input_data.policy_id)
         if not policy:
             raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
         # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
         else:
-            account = Account.get(policy.policy_holder.ref.id)
+            account = await Account.get(policy.policy_holder.ref.id)
     else:
         if input_data.account_id:
             account = await Account.get(input_data.account_id)
@@ -263,20 +268,26 @@ async def set_workspace_policy(workspace: Workspace,
                 raise AccountExceptions.AccountNotFound(input_data.account_id)
         else:
             account = current_active_user.get()
-        await workspace.fetch_link(Workspace.policies)
-        # Find the policy for the account
-        # NOTE: To set a policy for a user, the user must be a member of the workspace, therefore the policy must exist
-        p: Policy
-        for p in workspace.policies:  # type: ignore
-            if p.policy_holder_type == "account":
-                if p.policy_holder.ref.id == account.id:
-                    policy = p
-                    break
-            # if not policy:
-            #     policy = Policy(policy_holder_type='account',
-            #                     policy_holder=(await create_link(account)),
-            #                     permissions=Permissions.WorkspacePermissions(0),
-            #                     workspace=workspace)
+        # Make sure the account is loaded
+        if not account:
+            raise GenericExceptions.APIException(code=500, detail='Unknown error')  # Should not happen
+
+        try:
+            # Find the policy for the account
+            await workspace.fetch_link(Workspace.policies)
+            p: Policy
+            for p in workspace.policies:  # type: ignore
+                if p.policy_holder_type == "account":
+                    if p.policy_holder.ref.id == account.id:
+                        policy = p
+                        break
+                # if not policy:
+                #     policy = Policy(policy_holder_type='account',
+                #                     policy_holder=(await create_link(account)),
+                #                     permissions=Permissions.WorkspacePermissions(0),
+                #                     workspace=workspace)
+        except Exception as e:
+            raise GenericExceptions.InternalServerError(str(e))
     new_permission_value = 0
     for i in input_data.permissions:
         try:

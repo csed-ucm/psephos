@@ -22,7 +22,7 @@ def parse_action_file(resource_type: str) -> Permissions:
     parsed_ast = ast.parse(Path("src/actions/" + resource_type + ".py").read_text())
     actions = [node.name for node in ast.walk(parsed_ast) if isinstance(
         node, (ast.FunctionDef, ast.AsyncFunctionDef))]
-    return Permissions(resource_type.capitalize() + "Permission", actions)
+    return IntFlag(resource_type.capitalize() + "Permission", actions)
 
 
 # Create permissions for each resource type

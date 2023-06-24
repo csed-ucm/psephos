@@ -1,5 +1,5 @@
+import motor.motor_asyncio  # type: ignore
 from typing import AsyncGenerator
-import motor.motor_asyncio
 from fastapi_users.db import BeanieUserDatabase
 from src.models import documents as Documents
 from src.config import get_settings

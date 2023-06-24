@@ -3,6 +3,7 @@ from typing import (
     Any,
     Dict,
     Generic,
+    # Literal,
     Optional,
     Type,
     TypeVar,
@@ -12,6 +13,7 @@ from beanie import Document, PydanticObjectId
 from fastapi_users.authentication.strategy.db import AccessTokenDatabase
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
+from beanie.odm.enums import SortDirection
 
 
 class BeanieBaseAccessToken(BaseModel):
@@ -32,7 +34,7 @@ class BeanieBaseAccessTokenDocument(BeanieBaseAccessToken, Document):  # type: i
 AP_BEANIE = TypeVar("AP_BEANIE", bound=BeanieBaseAccessTokenDocument)
 
 
-class BeanieAccessTokenDatabase(Generic[AP_BEANIE], AccessTokenDatabase[AP_BEANIE]):
+class BeanieAccessTokenDatabase(Generic[AP_BEANIE], AccessTokenDatabase[AP_BEANIE]):  # type: ignore
     """
     Access token database adapter for Beanie.
 
@@ -53,7 +55,8 @@ class BeanieAccessTokenDatabase(Generic[AP_BEANIE], AccessTokenDatabase[AP_BEANI
 
     # Returns find query (not a document)
     async def get_token_family_by_user_id(self, user_id: PydanticObjectId):
-        access_token = self.access_token_model.find({"user_id": user_id}, sort=[("created_at", -1)])
+        access_token = self.access_token_model.find({"user_id": user_id},
+                                                    sort=[("created_at", SortDirection.DESCENDING)])
         return access_token
 
     async def create(self, create_dict: Dict[str, Any]) -> AP_BEANIE:
@@ -66,8 +69,8 @@ class BeanieAccessTokenDatabase(Generic[AP_BEANIE], AccessTokenDatabase[AP_BEANI
     ) -> AP_BEANIE:
         for key, value in update_dict.items():
             setattr(access_token, key, value)
-        await access_token.save()
+        await access_token.save()  # type: ignore
         return access_token
 
     async def delete(self, access_token: AP_BEANIE) -> None:
-        await access_token.delete()
+        await access_token.delete()  # type: ignore
