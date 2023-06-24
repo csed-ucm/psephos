@@ -9,15 +9,14 @@ py-modules = ["app"]
 version = {attr = "app.config.VERSION"}
 
 [project]
-name = "polling_app_server"
-# version = "0.0.5"
+name = "unipoll-api"
 dynamic= ["version"]
 description = "My package description"
-authors = [{email = "mpisman@gmail.com"}, {name = "Michael Pisman"}]
+authors = [{email = "mpisman@unipol.cc"}, {name = "Michael Pisman"}]
 readme = "README.md"
-requires-python = ">=3.9"
-keywords = ["one", "two"]
-license = {text = "BSD 3-Clause License"}
+requires-python = ">=3.11"
+# keywords = ["one", "two"]
+license = {text = "MIT"}
 classifiers = [
     "Framework :: FastAPI",
     "Programming Language :: Python :: 3",
