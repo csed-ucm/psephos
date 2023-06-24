@@ -1,10 +1,11 @@
-name: Tox Testing
+name: Testing with Tox
 
 on:
   workflow_dispatch:
-  # pull_request:
+  pull_request:
   push:
     branches:
+      - "Development"
       - "test_tox"
 
 jobs:
@@ -24,16 +25,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      # - name: Start MongoDB
-      #   uses: supercharge/mongodb-github-action@1.6.0
-      #   with:
-      #     mongodb-version: ${{ matrix.mongodb-version }}
-
-      # - name: Use Node.js ${{ matrix.node-version }}
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.8.0
