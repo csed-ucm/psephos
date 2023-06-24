@@ -58,6 +58,4 @@ async def delete_user(account: Account = Depends(get_account)):
 
 
 # Update current user account
-router.include_router(fastapi_users.get_users_router(AccountSchemas.Account, AccountSchemas.UpdateAccount),
-                      prefix="/accounts",
-                      tags=["Accounts"])
+router.include_router(fastapi_users.get_users_router(AccountSchemas.Account, AccountSchemas.UpdateAccount))
