@@ -16,31 +16,7 @@ from app.utils.auth_strategy import DatabaseStrategy
 router = APIRouter()
 
 
-router.include_router(fastapi_users.get_register_router(AccountSchemas.Account, AccountSchemas.CreateAccount))
 # TODO: Invalidate all tokens associated with the user when they delete their account or reset their passwords
-router.include_router(fastapi_users.get_reset_password_router())
-router.include_router(fastapi_users.get_verify_router(AccountSchemas.Account))
-
-# The Auth router is not included because we will be using our own custom auth router
-# router.include_router(fastapi_users.get_auth_router(jwt_backend), prefix="/jwt")
-
-
-@router.post("/jwt/refresh")
-async def refresh_jwt(response: Response,
-                      authorization: Annotated[str | None, Header()] = None,
-                      refresh_token: Annotated[str | None, Header()] = None,
-                      token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
-                      strategy: DatabaseStrategy = Depends(get_database_strategy)):
-    """Refresh the access token using the refresh token.
-
-    Headers:
-        authorization: `Authorization` header with the access token
-        refresh_token: `Refresh-Token` header with the refresh token
-    """
-    try:
-        return await AuthActions.refresh_token(authorization, refresh_token, token_db, strategy)
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=e.detail)
 
 
 login_responses: OpenAPIResponseType = {
@@ -90,3 +66,28 @@ async def login(
     #     )
 
     return await jwt_backend.login(strategy, user)
+
+
+# Refresh the access token using the refresh token
+@router.post("/jwt/refresh")
+async def refresh_jwt(response: Response,
+                      authorization: Annotated[str | None, Header()] = None,
+                      refresh_token: Annotated[str | None, Header()] = None,
+                      token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
+                      strategy: DatabaseStrategy = Depends(get_database_strategy)):
+    """Refresh the access token using the refresh token.
+
+    Headers:
+        authorization: `Authorization` header with the access token
+        refresh_token: `Refresh-Token` header with the refresh token
+    """
+    try:
+        return await AuthActions.refresh_token(authorization, refresh_token, token_db, strategy)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=e.detail)
+
+
+# Include prebuilt routes for authentication
+router.include_router(fastapi_users.get_register_router(AccountSchemas.Account, AccountSchemas.CreateAccount))
+router.include_router(fastapi_users.get_reset_password_router())
+router.include_router(fastapi_users.get_verify_router(AccountSchemas.Account))
