@@ -4,7 +4,6 @@ from beanie import PydanticObjectId, Document
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
-                                        #   BearerTransport, 
                                           CookieTransport)
 from app.utils.auth_transport import BearerTransport
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin

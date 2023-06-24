@@ -29,7 +29,6 @@ class DatabaseStrategy(
             max_age = datetime.now(timezone.utc) - timedelta(
                 seconds=self.lifetime_seconds
             )
-            print("max_age", max_age)
 
         access_token = await self.database.get_by_token(token, max_age)
         if access_token is None:
