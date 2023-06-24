@@ -1,10 +1,11 @@
 name: Back-end Testing
 
 on:
-  pull_request:
-  push:
-    branches:
-      - "Development"
+  workflow_dispatch:
+  # pull_request:
+  # push:
+  #   branches:
+  #     - "Development"
 
 jobs:
   test:
@@ -24,15 +25,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.6.0
-        with:
-          mongodb-version: ${{ matrix.mongodb-version }}
+      # - name: Start MongoDB
+      #   uses: supercharge/mongodb-github-action@1.6.0
+      #   with:
+      #     mongodb-version: ${{ matrix.mongodb-version }}
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
+      # - name: Use Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.8.0
@@ -51,18 +52,17 @@ jobs:
       
       - name: Test with tox
         run: |
-          ls
           tox run
 
-      - name: Delete MongoDB
-        run: |
-          docker stop mongodb
-          docker rm mongodb
-          docker system prune -f
+      # - name: Delete MongoDB
+      #   run: |
+      #     docker stop mongodb
+      #     docker rm mongodb
+      #     docker system prune -f
       
-      - name: 'Cleanup build folder'
-        run: |
-          ls -la ./
-          rm -rf ./* || true
-          rm -rf ./.??* || true
-          ls -la ./
+      # - name: 'Cleanup build folder'
+      #   run: |
+      #     ls -la ./
+      #     rm -rf ./* || true
+      #     rm -rf ./.??* || true
+      #     ls -la ./

@@ -2,11 +2,12 @@
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-py-modules = ["app"]
+# [tool.setuptools]
+# py-modules = ["app"]
+# packages = ["app"]
 
 [tool.setuptools.dynamic]
-version = {attr = "app.config.VERSION"}
+version = {attr = "config.VERSION"}
 
 [project]
 name = "unipoll-api"
@@ -57,7 +58,7 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-mypy_path = "app"
+# mypy_path = "src"
 check_untyped_defs = true
 disallow_untyped_defs = true
 ignore_missing_imports = true

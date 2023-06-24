@@ -8,13 +8,13 @@ from pydantic import BaseModel
 from httpx import AsyncClient
 from beanie.operators import In
 # from pydantic import BaseSettings
-from app.app import app
-from app.utils import colored_dbg
-from app.models.documents import Account, ResourceID
+from src import app
+from src.utils import colored_dbg
+from src.models.documents import Account, ResourceID
 # from app.exceptions.group import GroupNotFound
 from . import test_1_accounts
 from .test_2_workspaces import create_random_user, TestWorkspace
-from app.utils import permissions as Permissions
+from src.utils import permissions as Permissions
 
 # import pytest
 # from faker import Faker

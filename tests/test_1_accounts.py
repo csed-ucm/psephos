@@ -5,10 +5,10 @@ import pytest
 # from devtools import debug
 from httpx import AsyncClient
 from pydantic import BaseModel
-from app.app import app
+from src.app import app
 # from app.models.user import Account
-from app.utils import colored_dbg
-from app.models.documents import ResourceID
+from src.utils import colored_dbg
+from src.models.documents import ResourceID
 
 
 fake = Faker()

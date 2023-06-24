@@ -5,12 +5,12 @@ from fastapi import status
 from pydantic import BaseModel
 from httpx import AsyncClient
 from beanie.operators import In
-from app.app import app
-from app.utils import colored_dbg
-from app.models.documents import ResourceID, Account
+from src import app
+from src.utils import colored_dbg
+from src.models.documents import ResourceID, Account
 # from app.schemas import workspace as WorkspaceSchema
 from . import test_1_accounts
-from app.utils import permissions as Permissions
+from src.utils import permissions as Permissions
 
 
 fake = Faker()
