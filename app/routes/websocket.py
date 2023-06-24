@@ -1,10 +1,10 @@
 # Handle WebSocket connections
 from typing import Annotated
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from app.models.documents import Account
+# from app.models.documents import Account
 from app.websocket_manager import WebSocketManager
 from app.dependencies import websocket_auth
-from app.account_manager import AccessToken
+# from app.account_manager import AccessToken
 
 
 router = APIRouter()
