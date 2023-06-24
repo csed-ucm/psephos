@@ -50,7 +50,9 @@ jobs:
           pip install tox tox-gh-actions --root-user-action=ignore
       
       - name: Test with tox
-        run: tox run
+        run: |
+          ls
+          tox run
 
       - name: Delete MongoDB
         run: |
