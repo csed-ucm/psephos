@@ -29,7 +29,8 @@ jobs:
           name: package
           path: dist/*.tar.gz
   release-package:
-    runs-on: ${{matrix.os}}
+    runs-on: arc-runner-k8s
+    # runs-on: ${{matrix.os}}
     needs: build-package
     steps:
       - uses: actions/checkout@v3
