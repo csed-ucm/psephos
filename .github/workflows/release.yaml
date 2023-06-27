@@ -1,6 +1,7 @@
 name: Automatically build and release package
 
 on: 
+  workflow_dispatch:
   pull_request:
     branches:
       - "main"
