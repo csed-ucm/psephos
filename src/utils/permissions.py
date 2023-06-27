@@ -39,7 +39,7 @@ GROUP_BASIC_PERMISSIONS = (GroupPermissions["get_group"])  # type: ignore
 
 
 # Check if a user has a permission
-def check_permission(user_permission, required_permission) -> bool:
+def check_permission(user_permission: Permissions, required_permission: Permissions) -> bool:
     """Check if a user has a right provided in the permission argument.
     If the user is not found or has no permission, the default permission NONE is used.
     In which case the function returns False, unless the required permission is also NONE.
@@ -54,7 +54,7 @@ def check_permission(user_permission, required_permission) -> bool:
     return bool((user_permission & required_permission) == required_permission)
 
 
-async def get_all_permissions(resource, account):
+async def get_all_permissions(resource, account) -> Permissions:
     permission_sum = 0
     # print("resource: ", resource.name)
     # await resource.fetch_link("policies")
@@ -89,4 +89,4 @@ async def get_all_permissions(resource, account):
                     permission_sum |= policy.permissions
                     # print("Group permissions: ", policy.permissions)
 
-    return permission_sum
+    return permission_sum  # type: ignore
