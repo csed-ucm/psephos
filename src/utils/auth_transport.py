@@ -1,5 +1,3 @@
-from typing import Optional, no_type_check, no_type_check_decorator
-from beanie import PydanticObjectId
 from fastapi_users.authentication.transport.base import (
     Transport,
     TransportLogoutNotSupportedError,
@@ -8,7 +6,6 @@ from fastapi_users.openapi import OpenAPIResponseType
 from fastapi import Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 from src.schemas.authentication import LoginResponse
 
 

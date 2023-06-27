@@ -68,7 +68,7 @@ async def get_workspace(workspace: Workspace) -> Workspace:
 
 
 # Update a workspace
-async def update_workspace(workspace: Workspace, 
+async def update_workspace(workspace: Workspace,
                            input_data: WorkspaceSchemas.WorkspaceCreateInput) -> Workspace:
     # Check if any of the fields are changed
     if workspace.name != input_data.name or workspace.description != input_data.description:
@@ -114,7 +114,7 @@ async def add_workspace_members(workspace: Workspace,
     accounts = set(member_data.accounts)
 
     # Remove existing members from the accounts set
-    accounts = accounts.difference({member.id for member in workspace.members})
+    accounts = accounts.difference({member.id for member in workspace.members})  # type: ignore
 
     # Find the accounts from the database
     account_list = await Account.find(In(Account.id, accounts)).to_list()
@@ -241,7 +241,7 @@ async def get_workspace_policy(workspace: Workspace,
         raise AccountExceptions.AccountNotFound(account_id)
 
     # Check if account is a member of the workspace
-    if account.id not in [member.id for member in workspace.members]:
+    if account.id not in [member.id for member in workspace.members]:  # type: ignore
         raise WorkspaceExceptions.UserNotMember(workspace, account)
 
     user_permissions = await Permissions.get_all_permissions(workspace, account)
@@ -276,9 +276,9 @@ async def set_workspace_policy(workspace: Workspace,
         try:
             # Find the policy for the account
             for p in workspace.policies:  # type: ignore
-                if p.policy_holder_type == "account":
-                    if p.policy_holder.ref.id == account.id:
-                        policy = p
+                if p.policy_holder_type == "account":  # type: ignore
+                    if p.policy_holder.ref.id == account.id:  # type: ignore
+                        policy = p  # type: ignore
                         break
                 # if not policy:
                 #     policy = Policy(policy_holder_type='account',

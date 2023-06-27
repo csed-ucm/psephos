@@ -9,7 +9,6 @@ from src.exceptions import authentication as AuthExceptions
 from src.exceptions import account as AccountExceptions
 from src.utils import colored_dbg as Debug
 from src.account_manager import jwt_backend, get_database_strategy, get_access_token_db
-from src.config import get_settings
 
 
 async def refresh_token(authorization: str,

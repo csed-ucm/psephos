@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from fastapi_users.db import BeanieUserDatabase
 from src.models import documents as Documents
 from src.config import get_settings
-from src.account_manager import AccessToken
+from src.account_manager import AccessToken  # type: ignore [attr-defined]
 
 settings = get_settings()
 

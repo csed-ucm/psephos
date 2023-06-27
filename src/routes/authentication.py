@@ -1,6 +1,5 @@
-import re
 from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Header, Request, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, models
 from fastapi_users.openapi import OpenAPIResponseType
@@ -9,11 +8,10 @@ from fastapi_users.authentication import Strategy
 
 from src.account_manager import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
 from src.actions import authentication as AuthActions
-from src.schemas import authentication as AuthSchemas
+# from src.schemas import authentication as AuthSchemas
 from src.schemas import account as AccountSchemas
 from src.exceptions.resource import APIException
 from src.utils.token_db import BeanieAccessTokenDatabase
-from src.utils.auth_strategy import DatabaseStrategy
 router = APIRouter()
 
 

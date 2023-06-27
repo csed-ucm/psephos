@@ -1,6 +1,6 @@
 from contextvars import ContextVar
 from typing import Optional, AsyncGenerator
-from beanie import PydanticObjectId, Document
+from beanie import PydanticObjectId
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
