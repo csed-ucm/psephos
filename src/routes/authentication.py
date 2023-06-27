@@ -1,5 +1,6 @@
+import re
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Header, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, models
 from fastapi_users.openapi import OpenAPIResponseType
@@ -8,15 +9,12 @@ from fastapi_users.authentication import Strategy
 
 from src.account_manager import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
 from src.actions import authentication as AuthActions
+from src.schemas import authentication as AuthSchemas
 from src.schemas import account as AccountSchemas
 from src.exceptions.resource import APIException
-# from app.schemas import authentication as AuthSchemas
 from src.utils.token_db import BeanieAccessTokenDatabase
 from src.utils.auth_strategy import DatabaseStrategy
 router = APIRouter()
-
-
-# TODO: Invalidate all tokens associated with the user when they delete their account or reset their passwords
 
 
 login_responses: OpenAPIResponseType = {
@@ -45,13 +43,12 @@ login_responses: OpenAPIResponseType = {
     "/jwt/login",
     name=f"auth:{jwt_backend.name}.login",
     responses=login_responses,
+    response_model_exclude_unset=True
 )
-async def login(
-    request: Request,
-    credentials: OAuth2PasswordRequestForm = Depends(),
-    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
-    strategy: Strategy[models.UP, models.ID] = Depends(jwt_backend.get_strategy),
-):
+async def login(credentials: OAuth2PasswordRequestForm = Depends(),
+                user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+                token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
+                strategy: Strategy = Depends(get_database_strategy)):
     user = await user_manager.authenticate(credentials)
 
     if user is None or not user.is_active:
@@ -69,12 +66,11 @@ async def login(
 
 
 # Refresh the access token using the refresh token
-@router.post("/jwt/refresh")
-async def refresh_jwt(response: Response,
-                      authorization: Annotated[str | None, Header()] = None,
-                      refresh_token: Annotated[str | None, Header()] = None,
+@router.post("/jwt/refresh", responses=login_responses, response_model_exclude_unset=True)
+async def refresh_jwt(authorization: Annotated[str, Header(...)],
+                      refresh_token: Annotated[str, Header(...)],
                       token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
-                      strategy: DatabaseStrategy = Depends(get_database_strategy)):
+                      strategy: Strategy = Depends(get_database_strategy)):
     """Refresh the access token using the refresh token.
 
     Headers:
@@ -82,12 +78,37 @@ async def refresh_jwt(response: Response,
         refresh_token: `Refresh-Token` header with the refresh token
     """
     try:
-        return await AuthActions.refresh_token(authorization, refresh_token, token_db, strategy)
+        return await AuthActions.refresh_token(authorization, refresh_token)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=e.detail)
+
+
+# Refresh the access token using the refresh token and Client ID
+@router.post("/jwt/postman_refresh", responses=login_responses, response_model_exclude_unset=True)
+async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
+                                     body: Annotated[str, Body(...)],
+                                     token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
+                                     strategy: Strategy = Depends(get_database_strategy)):
+    """Refresh the access token using the refresh token.
+
+    Headers:
+        authorization: `Authorization` header with the access token
+    Body:
+        refresh_token: `Refresh-Token` header with the refresh token
+    """
+    try:
+        # import json
+        # print(body.decode('utf-8'))
+        # body = json.loads(body.decode('utf-8'))
+        # print(body)
+        # AuthSchemas.PostmanRefreshTokenRequest(**body)
+        return await AuthActions.refresh_token_with_clientID(authorization, body, token_db, strategy)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=e.detail)
 
 
 # Include prebuilt routes for authentication
-router.include_router(fastapi_users.get_register_router(AccountSchemas.Account, AccountSchemas.CreateAccount))
+router.include_router(fastapi_users.get_register_router(
+    AccountSchemas.Account, AccountSchemas.CreateAccount))
 router.include_router(fastapi_users.get_reset_password_router())
 router.include_router(fastapi_users.get_verify_router(AccountSchemas.Account))

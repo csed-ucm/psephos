@@ -44,12 +44,16 @@ class BeanieAccessTokenDatabase(Generic[AP_BEANIE], AccessTokenDatabase[AP_BEANI
     def __init__(self, access_token_model: Type[AP_BEANIE]):
         self.access_token_model = access_token_model
 
-    async def get_by_token(
-        self, token: str, max_age: Optional[datetime] = None
-    ) -> Optional[AP_BEANIE]:
+    async def get_by_token(self, token: str,
+                           max_age: Optional[datetime] = None) -> Optional[AP_BEANIE]:
         query: Dict[str, Any] = {"access_token": token}
         if max_age is not None:
             query["created_at"] = {"$gte": max_age}
+        res = await self.access_token_model.find_one(query)
+        return res
+
+    async def get_by_refresh_token(self, token: str) -> Optional[AP_BEANIE]:
+        query: Dict[str, Any] = {"refresh_token": token}
         res = await self.access_token_model.find_one(query)
         return res
 

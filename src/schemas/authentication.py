@@ -1,8 +1,17 @@
+from typing import Optional
+from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 
-class LoginOutput(BaseModel):
+class LoginResponse(BaseModel):
     access_token: str
+    token_type: str = "Bearer"
+    scope: Optional[str]
+    client_id: Optional[str]
+    expires_in: int = 3600
     refresh_token: str
-    token_type: str = "bearer"
-    expires: int = 3600
+
+
+class PostmanRefreshTokenRequest(BaseModel):
+    refresh_token: str
+    grant_type: str = "refresh_token"

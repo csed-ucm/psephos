@@ -25,3 +25,9 @@ class refreshTokenExpired(resource.APIException):
     def __init__(self):
         super().__init__(code=status.HTTP_401_UNAUTHORIZED,
                          detail="Refresh token expired; Please login again")
+
+
+class InvalidClientID(resource.APIException):
+    def __init__(self):
+        super().__init__(code=status.HTTP_401_UNAUTHORIZED,
+                         detail="Invalid Client ID")
