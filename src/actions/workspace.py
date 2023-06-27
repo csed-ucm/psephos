@@ -63,26 +63,31 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
-async def get_workspace(workspace: Workspace) -> WorkspaceSchemas.WorkspaceShort:
-    await workspace.fetch_all_links()
-    return WorkspaceSchemas.WorkspaceShort(**workspace.dict())
+async def get_workspace(workspace: Workspace) -> Workspace:
+    return workspace
 
 
 # Update a workspace
-async def update_workspace(workspace: Workspace, input_data: WorkspaceSchemas.WorkspaceCreateInput):
+async def update_workspace(workspace: Workspace, 
+                           input_data: WorkspaceSchemas.WorkspaceCreateInput) -> Workspace:
+    # Check if any of the fields are changed
     if workspace.name != input_data.name or workspace.description != input_data.description:
+        # Check if workspace name is unique
         if await Workspace.find_one({"name": input_data.name}) and workspace.name != input_data.name:
             raise WorkspaceExceptions.NonUniqueName(input_data.name)
+
+        # Update the new values
         workspace.name = input_data.name
         workspace.description = input_data.description
         await Workspace.save(workspace)
-    return WorkspaceSchemas.WorkspaceShort(**workspace.dict())
+    # Return the updated workspace
+    return workspace
 
 
 # Delete a workspace
 async def delete_workspace(workspace: Workspace):
-    # await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
-    await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
+    await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
+    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
     await Policy.find(Policy.workspace.id == workspace.id).delete()  # type: ignore
@@ -91,7 +96,6 @@ async def delete_workspace(workspace: Workspace):
 
 # List all members of a workspace
 async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberList:
-    await workspace.fetch_link(Workspace.members)
     member_list = []
     member: Account
     # NOTE: The type test cannot check the type of the link, so we ignore it
@@ -110,7 +114,7 @@ async def add_workspace_members(workspace: Workspace,
     accounts = set(member_data.accounts)
 
     # Remove existing members from the accounts set
-    accounts = accounts.difference({member.ref.id for member in workspace.members})
+    accounts = accounts.difference({member.id for member in workspace.members})
 
     # Find the accounts from the database
     account_list = await Account.find(In(Account.id, accounts)).to_list()
@@ -141,7 +145,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
 
 # Get a list of groups where the account is a member
 async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
-    await workspace.fetch_link(Workspace.groups)
+    # await workspace.fetch_link(Workspace.groups)
     account = current_active_user.get()
     group_list = []
 
@@ -163,7 +167,6 @@ async def create_group(workspace: Workspace,
     account = current_active_user.get()
 
     # Check if group name is unique
-    await workspace.fetch_link(Workspace.groups)
     group: Group  # For type hinting, until Link type is supported
     for group in workspace.groups:  # type: ignore
         if group.name == input_data.name:
@@ -198,9 +201,8 @@ async def create_group(workspace: Workspace,
 
 
 # Get all policies of a workspace
-async def get_all_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
+async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
     policy_list = []
-    await workspace.fetch_link(Workspace.policies)
     policy: Policy
     for policy in workspace.policies:  # type: ignore
         permissions = Permissions.WorkspacePermissions(policy.permissions).name.split('|')  # type: ignore
@@ -239,10 +241,9 @@ async def get_workspace_policy(workspace: Workspace,
         raise AccountExceptions.AccountNotFound(account_id)
 
     # Check if account is a member of the workspace
-    if account.id not in [member.ref.id for member in workspace.members]:
+    if account.id not in [member.id for member in workspace.members]:
         raise WorkspaceExceptions.UserNotMember(workspace, account)
 
-    await workspace.fetch_link(Workspace.policies)
     user_permissions = await Permissions.get_all_permissions(workspace, account)
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.WorkspacePermissions(user_permissions).name.split('|'),  # type: ignore
@@ -274,8 +275,6 @@ async def set_workspace_policy(workspace: Workspace,
 
         try:
             # Find the policy for the account
-            await workspace.fetch_link(Workspace.policies)
-            p: Policy
             for p in workspace.policies:  # type: ignore
                 if p.policy_holder_type == "account":
                     if p.policy_holder.ref.id == account.id:

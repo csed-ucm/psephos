@@ -35,9 +35,11 @@ async def get_workspace_model(workspace_id: ResourceID) -> Workspace:
     Returns a workspace with the given id.
     """
     workspace = await Workspace.get(workspace_id)
-    if not workspace:
-        raise WorkspaceExceptions.WorkspaceNotFound(workspace_id)
-    return workspace
+
+    if workspace:
+        await workspace.fetch_all_links()
+        return workspace
+    raise WorkspaceExceptions.WorkspaceNotFound(workspace_id)
 
 
 # Dependency to get a group by id and verify it exists
