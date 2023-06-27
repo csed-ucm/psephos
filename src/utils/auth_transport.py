@@ -1,21 +1,15 @@
-from fastapi import Response, status
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
-
-
+from typing import Optional, no_type_check, no_type_check_decorator
+from beanie import PydanticObjectId
 from fastapi_users.authentication.transport.base import (
     Transport,
     TransportLogoutNotSupportedError,
 )
 from fastapi_users.openapi import OpenAPIResponseType
-
-
-class BearerResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-    expires: int
+from fastapi import Response, status
+from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+from src.schemas.authentication import LoginResponse
 
 
 class BearerTransport(Transport):
@@ -25,11 +19,10 @@ class BearerTransport(Transport):
         self.scheme = OAuth2PasswordBearer(tokenUrl, auto_error=False)
 
     async def get_login_response(self, token) -> Response:
-        bearer_response = BearerResponse(access_token=token.access_token,  # type: ignore
-                                         refresh_token=token.refresh_token,  # type: ignore
-                                         token_type="bearer",
-                                         expires=3600)
-        return JSONResponse(bearer_response.dict())
+        bearer_response = LoginResponse(access_token=token.access_token,  # type: ignore
+                                        refresh_token=token.refresh_token,  # type: ignore
+                                        client_id=str(token.user_id))  # type: ignore
+        return JSONResponse(bearer_response.dict(exclude_none=True))
 
     async def get_logout_response(self) -> Response:
         raise TransportLogoutNotSupportedError()
@@ -38,7 +31,7 @@ class BearerTransport(Transport):
     def get_openapi_login_responses_success() -> OpenAPIResponseType:
         return {
             status.HTTP_200_OK: {
-                "model": BearerResponse,
+                "model": LoginResponse,
                 "content": {
                     "application/json": {
                         "example": {
@@ -53,7 +46,17 @@ class BearerTransport(Transport):
                             "11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ."
                             "M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI",
                             "token_type": "bearer",
-                            "expires": 3600,
+                            "expires_in": 3600,
+                            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1"
+                            "c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2Z"
+                            "DMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS"
+                            "11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ."
+                            "M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI",
+                            "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1"
+                            "c2VyX2lkIjoiOTIyMWZmYzktNjQwZi00MzcyLTg2Z"
+                            "DMtY2U2NDJjYmE1NjAzIiwiYXVkIjoiZmFzdGFwaS"
+                            "11c2VyczphdXRoIiwiZXhwIjoxNTcxNTA0MTkzfQ."
+                            "M10bjOe45I5Ncu_uXvOmVV8QxnL-nZfcH96U90JaocI",
                         }
                     }
                 },

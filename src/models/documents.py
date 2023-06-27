@@ -7,6 +7,7 @@ from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from src.utils import colored_dbg as Debug
 from src.utils.permissions import Permissions  # WorkspacePermissions
+from src.utils.token_db import BeanieBaseAccessToken
 
 
 # Create a link to the Document model
@@ -25,6 +26,10 @@ class ResourceID(PydanticObjectId):
             type="string",
             example="5eb7cf5a86d9755df3a6c593",
         )
+
+
+class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
+    pass
 
 
 class Resource(Document):
