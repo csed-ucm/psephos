@@ -23,7 +23,7 @@ router = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
 # Get group info by id
 @router.get("/{group_id}",
             response_description="Get a group",
-            response_model=GroupSchemas.GroupShort)
+            response_model=GroupSchemas.Group)
 async def get_group(group: Group = Depends(Dependencies.get_group_model)):
     try:
         return await GroupActions.get_group(group)
