@@ -206,7 +206,7 @@ async def test_add_members_to_workspace(client_test: AsyncClient):
     for account in accounts[1:]:  # Skip the first account since it is the creator of the workspace
         account = await test_1_accounts.test_register(client_test, account)  # test_register returns the new account id
         members.append(account.id)
-        colored_dbg.test_info("Account {} + {} ({}) has registered".format(
+        colored_dbg.test_info("Account {} {} ({}) has registered".format(
             account.first_name, account.last_name, account.email))
 
     # Post the members to the workspace
@@ -390,7 +390,7 @@ async def test_set_permissions(client_test: AsyncClient):
 # Attempt to remove a member from non existing workspace
 async def test_delete_non_existing_workspace(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Testing workspace deletion from non existing workspace")
+    colored_dbg.test_info("Testing deletion of non existing workspace")
     active_user = accounts[1]
 
     random_workspace_id = ResourceID()

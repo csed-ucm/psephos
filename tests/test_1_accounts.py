@@ -102,8 +102,9 @@ async def test_login(client_test: AsyncClient, new_user: TestAccount = new_user)
                                       data={"username": new_user.email, "password": new_user.password})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response.get("token_type") == "bearer"
+    assert response.get("token_type") == "Bearer"
     assert response.get("access_token") is not None
+    assert response.get("refresh_token") is not None
     new_user.token = response.get("access_token")
     colored_dbg.test_success("New user has successfully logged in and received a token: ", new_user.token)
 
