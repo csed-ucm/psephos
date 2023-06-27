@@ -6,15 +6,17 @@ from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
                                           CookieTransport)
 from src.utils.auth_transport import BearerTransport
+from src.config import get_settings
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 # from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
-from src.utils.token_db import BeanieAccessTokenDatabase, BeanieBaseAccessToken
+from src.utils.token_db import BeanieAccessTokenDatabase
 # from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
 from src.utils.auth_strategy import DatabaseStrategy
-from src.models.documents import Account
+from src.models.documents import Account, AccessToken
 from src.utils import colored_dbg
 
-SECRET = "SECRET"
+
+SECRET = get_settings().secrete_key
 
 UserManager = BaseUserManager[Account, PydanticObjectId]  # type: ignore
 
@@ -45,10 +47,6 @@ class AccountManager(ObjectIDIDMixin, UserManager):
                                request: Optional[Request] = None) -> None:
         colored_dbg.info(
             f"Account {user.id} is going to be deleted, cleaning up their data.")
-
-
-class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
-    pass
 
 
 async def get_account_db() -> AsyncGenerator:
