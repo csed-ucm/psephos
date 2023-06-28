@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+# [tool.setuptools]
+# py-modules = ["app"]
+# packages = ["app"]
+
+[tool.setuptools.dynamic]
+version = {attr = "config.VERSION"}
+
+[project]
+name = "unipoll-api"
+dynamic= ["version"]
+description = "My package description"
+authors = [{email = "mpisman@unipol.cc"}, {name = "Michael Pisman"}]
+readme = "README.md"
+requires-python = ">=3.11"
+# keywords = ["one", "two"]
+license = {text = "MIT"}
+classifiers = [
+    "Framework :: FastAPI",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    'fastapi[all]',
+    'uvicorn[all]',
+    'fastapi-users[beanie]',
+    'beanie',
+]
+
+[project.optional-dependencies]
+testings = [
+    'pytest',
+    'pytest-cov',
+    'faker',
+    'flake8',
+    'tox',
+    'mypy',
+]
+
+[optional.package_data]
+polling_app_server = [
+    "py.typed",
+]
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.pytest.ini_options]
+addopts = "--cov=polling_app_server"
+testpaths = ["tests"]
+asyncio_mode="auto"
+filterwarnings = [
+    "ignore:'cgi' is deprecated:DeprecationWarning",
+    "ignore:'crypt' is deprecated:DeprecationWarning",
+    "ignore::pytest.PytestCollectionWarning"
+]
+
+[tool.mypy]
+# mypy_path = "src"
+check_untyped_defs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unreachable = true
+no_implicit_reexport = true
+plugins = [
+  "pydantic.mypy"
+]

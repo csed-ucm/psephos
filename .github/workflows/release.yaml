@@ -1,0 +1,53 @@
+name: Automatically build and release package
+
+on: 
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build-package:
+    runs-on: arc-runner-k8s
+    strategy:
+      fail-fast: false
+      matrix:
+        # os: [ubuntu-latest]  # [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.11']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Install build
+        run: python -m pip install --upgrade build
+      - name: Build the package
+        run: python -m build .
+      - name: Upload the package
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: dist/*.tar.gz
+  release-package:
+    runs-on: arc-runner-k8s
+    # runs-on: ${{matrix.os}}
+    needs: build-package
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download the package
+        uses: actions/download-artifact@v3
+        with:
+          name: package
+          path: dist
+      - name: Create a release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          draft: true
+          prerelease: true
+          tag_name: ${{ github.run_number }}
+          name: Release ${{ github.ref }}
+          files: dist/*.tar.gz
+    
