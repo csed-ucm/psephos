@@ -2,7 +2,7 @@ from pydantic import BaseSettings, EmailStr, Field
 from functools import lru_cache
 
 
-VERSION = "0.0.7"
+VERSION = "0.7.43"
 
 
 class Settings(BaseSettings):
