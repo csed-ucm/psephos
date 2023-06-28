@@ -43,11 +43,9 @@ app.include_router(AccountRoutes.router,
                    prefix="/accounts",
                    tags=["Accounts"],
                    dependencies=[Depends(set_active_user)])
-
 app.include_router(AuthenticationRoutes.router,
                    prefix="/auth",
                    tags=["Authentication"])
-
 app.include_router(WebSocketRoutes.router,
                    prefix="/ws",
                    tags=["WebSocket"])

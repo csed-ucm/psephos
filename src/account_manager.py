@@ -7,7 +7,7 @@ from fastapi_users.authentication import (AuthenticationBackend,
                                           CookieTransport)
 from src.utils.auth_transport import BearerTransport
 from src.config import get_settings
-from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
+from fastapi_users_db_beanie import BeanieUserDatabase, ObjectIDIDMixin
 # from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
 from src.utils.token_db import BeanieAccessTokenDatabase
 # from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
