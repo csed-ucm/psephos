@@ -1,6 +1,7 @@
 name: Automatically build Postman documentation
 
-on: release
+on: 
+  workflow_dispatch:
 
 jobs:
   automated-api-tests:
