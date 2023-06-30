@@ -1,13 +1,26 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools", "setuptools-scm", "build"]
 build-backend = "setuptools.build_meta"
 
-# [tool.setuptools]
-# py-modules = ["app"]
-# packages = ["app"]
+# [tool.setuptools_scm]
+# write_to = "app/_version.py"
+# version_scheme = "python-simplified-semver"
 
-[tool.setuptools.dynamic]
-version = {attr = "config.VERSION"}
+# [tool.setuptools.dynamic]
+# version = {file = "version.txt"}
+
+
+[tool.semantic_release]
+version_source = "tag"
+branch = "main"
+upload_to_pypi = false
+upload_to_repository = false
+upload_to_release = true
+commit_version_number = false
+changelog_file = "CHANGELOG.md"
+build_command = "python -m build ."
+# commit_message = "chore(release): v{version} [skip ci]"
+
 
 [project]
 name = "unipoll-api"
