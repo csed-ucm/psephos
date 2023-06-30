@@ -2,6 +2,13 @@
 
 
 
+## v0.6.1 (2023-06-30)
+
+### Fix
+
+* fix: Fix no tag issue ([`d0120cd`](https://github.com/unipoll/API/commit/d0120cd160650ea7e89ffba91c5499409683fbc3))
+
+
 ## v0.6.0 (2023-06-30)
 
 ### Ci
