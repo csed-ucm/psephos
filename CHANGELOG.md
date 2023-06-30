@@ -1,15 +1,19 @@
 # CHANGELOG
 
 
-## Unreleased
+
+## v0.6.0 (2023-06-30)
 
 ### Ci
+
+* ci: Updated setup config and changelog ([`c3a74b3`](https://github.com/unipoll/API/commit/c3a74b32be59b76a72f83a41d81e1d0fca098ce2))
 
 * ci: Add upload to repository ([`aec6992`](https://github.com/unipoll/API/commit/aec699219665c51fba2e2e12f0ddc4bd868a11d5))
 
 * ci: Added git installation before checkout ([`7f49834`](https://github.com/unipoll/API/commit/7f4983424a630063079fa7cafada1667e33b1125))
 
-## v0.7.43 (2023-06-30)
+
+## v0.5.0 (2023-06-30)
 
 ### Ci
 
