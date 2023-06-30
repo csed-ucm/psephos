@@ -2,7 +2,14 @@
 
 
 
-## v0.0.0 (2023-06-30)
+## v0.8.0 (2023-06-30)
+
+### Ci
+
+* ci: Added git installation before checkout ([`7f49834`](https://github.com/unipoll/API/commit/7f4983424a630063079fa7cafada1667e33b1125))
+
+
+## v0.7.43 (2023-06-30)
 
 ### Ci
 
