@@ -2,7 +2,7 @@
 requires = ["setuptools", "setuptools-scm", "build"]
 build-backend = "setuptools.build_meta"
 
-# [tool.setuptools_scm]
+[tool.setuptools_scm]
 # write_to = "app/_version.py"
 # version_scheme = "python-simplified-semver"
 
