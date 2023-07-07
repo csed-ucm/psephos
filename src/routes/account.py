@@ -11,6 +11,16 @@ from src.schemas import account as AccountSchemas
 router = APIRouter()
 
 
+@router.get("",
+            response_model=AccountSchemas.AccountList)
+async def get_all_accounts():
+    try:
+        accounts = [AccountSchemas.AccountShort(**account.dict()) for account in await Account.find_all().to_list()]
+        return AccountSchemas.AccountList(accounts=accounts)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
 # Delete current user account
 @router.delete("/me",
                status_code=status.HTTP_204_NO_CONTENT)

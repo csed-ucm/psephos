@@ -35,6 +35,10 @@ class AccountShort(BaseModel):
     last_name: str
 
 
+class AccountList(BaseModel):
+    accounts: list[AccountShort]
+
+
 class CreateAccount(schemas.BaseUserCreate):
     email: EmailStr = Field(...)
     first_name: str = Field(
