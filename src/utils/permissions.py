@@ -31,7 +31,12 @@ GroupPermissions = parse_action_file("group")
 
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
-WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"])  # type: ignore
+# WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"])  # type: ignore
+WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"] +  # type: ignore
+                               WorkspacePermissions["get_workspace_members"] +  # type: ignore
+                               WorkspacePermissions["get_workspace_policy"] +  # type: ignore
+                               WorkspacePermissions["get_workspace_policies"] +  # type: ignore
+                               WorkspacePermissions["get_groups"])  # type: ignore
 # Example: (WorkspacePermissions["get_workspace"] + WorkspacePermissions["get_workspace_members"])
 
 GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
