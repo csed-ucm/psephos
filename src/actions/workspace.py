@@ -138,7 +138,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
     if not account:
         raise AccountExceptions.AccountNotFound(account_id)
 
-    if account.id not in [ResourceID(member.ref.id) for member in workspace.members]:
+    if account.id not in [ResourceID(member.id) for member in workspace.members]:
         raise WorkspaceExceptions.UserNotMember(workspace, account)
     return await workspace.remove_member(account)
 
