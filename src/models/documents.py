@@ -70,13 +70,13 @@ class Resource(Document):
         # Remove the account from the group
         # await self.fetch_link("members")
         for i, member in enumerate(self.members):
-            if account.id == member.ref.id:
+            if account.id == member.id:
                 self.members.remove(member)
-                Debug.info(f"Removed member {member.ref.id} from {self.resource_type} {self.id}")  # type: ignore
+                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the group
-        await self.fetch_link("policies")
+        # await self.fetch_link("policies")
         for policy in self.policies:
             # pc = await policy.policy_holder.fetch()  # type: ignore
             pc = policy.policy_holder  # type: ignore

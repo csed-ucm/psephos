@@ -11,11 +11,11 @@ build-backend = "setuptools.build_meta"
 
 
 [tool.semantic_release]
-version_source = "tag"
+version_source = "tag_only"
 branch = "main"
 major_on_zero = true
 upload_to_pypi = false
-upload_to_repository = true
+# upload_to_repository = true
 upload_to_release = true
 commit_version_number = true
 tag_commit = true
