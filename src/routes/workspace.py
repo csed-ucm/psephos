@@ -2,6 +2,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from src.actions import workspace as WorkspaceActions
+from src.actions import permissions as PermissionsActions
 from src.exceptions.resource import APIException
 from src.models.documents import Workspace, ResourceID
 from src.schemas import workspace as WorkspaceSchemas
@@ -272,6 +273,6 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
                  response_model=PolicySchemas.PermissionList)
 async def get_workspace_permissions():
     try:
-        return await WorkspaceActions.get_workspace_permissions()
+        return await PermissionsActions.get_workspace_permissions()
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

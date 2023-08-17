@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from src import dependencies as Dependencies
 from src.actions import group as GroupActions
+from src.actions import permissions as PermissionsActions
 from src.exceptions.resource import APIException
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
@@ -140,6 +141,6 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group_model),
                  response_model=PolicySchemas.PermissionList)
 async def get_group_permissions():
     try:
-        return await GroupActions.get_group_permissions()
+        return await PermissionsActions.get_group_permissions()
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

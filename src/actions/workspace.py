@@ -300,8 +300,3 @@ async def set_workspace_policy(workspace: Workspace,
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
     raise WorkspaceExceptions.UserNotMember(workspace, account)
-
-
-# Get All Workspace Permissions
-async def get_workspace_permissions() -> PolicySchemas.PermissionList:
-    return PolicySchemas.PermissionList(permissions=Permissions.WORKSPACE_ALL_PERMISSIONS.name.split('|'))

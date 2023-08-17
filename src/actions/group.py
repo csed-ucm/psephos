@@ -242,8 +242,3 @@ async def set_group_policy(group: Group,
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.GroupPermissions(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
-
-
-# Get all possible group permissions 
-async def get_group_permissions() -> PolicySchemas.PermissionList:
-    return PolicySchemas.PermissionList(permissions=Permissions.GROUP_ALL_PERMISSIONS.name.split('|'))
