@@ -40,12 +40,12 @@ async def get_group(group: Group) -> GroupSchemas.Group:
         policy_list.append(PolicySchemas.PolicyShort(**policy.dict(exclude={"policy_holder"}),  # type: ignore
                                                      policy_holder=policy.policy_holder))  # type: ignore
 
-    res = GroupSchemas.Group(id=group.id, name=group.name, description=group.description,
-                             workspace=WorkspaceSchema.WorkspaceShort(**group.workspace.dict()),  # type: ignore
-                             members=member_list,
-                             policies=policy_list,
-                             groups=group_list)
-    return res
+    return GroupSchemas.Group(id=group.id, name=group.name, description=group.description,
+                              workspace=WorkspaceSchema.WorkspaceShort(
+                                  **group.workspace.dict()),  # type: ignore
+                              members=member_list,
+                              policies=policy_list,
+                              groups=group_list)
 
 
 # Update a group
@@ -242,3 +242,8 @@ async def set_group_policy(group: Group,
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.GroupPermissions(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
+
+
+# Get all possible group permissions 
+async def get_group_permissions() -> PolicySchemas.PermissionList:
+    return PolicySchemas.PermissionList(permissions=Permissions.GROUP_ALL_PERMISSIONS.name.split('|'))

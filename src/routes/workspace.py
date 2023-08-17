@@ -264,3 +264,14 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
         return await WorkspaceActions.set_workspace_policy(workspace, permissions)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get All Workspace Permissions
+@open_router.get("/permissions",
+                 response_description="List of all workspace permissions",
+                 response_model=PolicySchemas.PermissionList)
+async def get_workspace_permissions():
+    try:
+        return await WorkspaceActions.get_workspace_permissions()
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))

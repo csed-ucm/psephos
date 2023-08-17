@@ -138,7 +138,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
     if not account:
         raise AccountExceptions.AccountNotFound(account_id)
 
-    if account.id not in [ResourceID(member.id) for member in workspace.members]:
+    if account.id not in [ResourceID(member.id) for member in workspace.members]:  # type: ignore
         raise WorkspaceExceptions.UserNotMember(workspace, account)
     return await workspace.remove_member(account)
 
@@ -300,3 +300,8 @@ async def set_workspace_policy(workspace: Workspace,
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
     raise WorkspaceExceptions.UserNotMember(workspace, account)
+
+
+# Get All Workspace Permissions
+async def get_workspace_permissions() -> PolicySchemas.PermissionList:
+    return PolicySchemas.PermissionList(permissions=Permissions.WORKSPACE_ALL_PERMISSIONS.name.split('|'))

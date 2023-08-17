@@ -132,3 +132,14 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group_model),
         return await GroupActions.set_group_policy(group, permissions)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get All Group Permissions
+@open_router.get("/permissions",
+                 response_description="List of all Group permissions",
+                 response_model=PolicySchemas.PermissionList)
+async def get_group_permissions():
+    try:
+        return await GroupActions.get_group_permissions()
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
