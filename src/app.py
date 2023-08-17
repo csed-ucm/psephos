@@ -32,6 +32,10 @@ app.include_router(WorkspaceRoutes.router,
                    prefix="/workspaces",
                    tags=["Workspaces"],
                    dependencies=[Depends(set_active_user)])
+app.include_router(GroupRoutes.open_router,
+                   prefix="/groups",
+                   tags=["Groups"],
+                   dependencies=[Depends(set_active_user)])
 app.include_router(GroupRoutes.router,
                    prefix="/groups",
                    tags=["Groups"],
