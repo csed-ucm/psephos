@@ -287,16 +287,26 @@ async def set_workspace_policy(workspace: Workspace,
                 #                     workspace=workspace)
         except Exception as e:
             raise GenericExceptions.InternalServerError(str(e))
+    
+    # Calculate the new permission value from request
     new_permission_value = 0
     for i in input_data.permissions:
         try:
             new_permission_value += Permissions.WorkspacePermissions[i].value  # type: ignore
         except KeyError:
             raise GenericExceptions.InvalidPermission(i)
+    # Update permissions
     policy.permissions = Permissions.WorkspacePermissions(new_permission_value)  # type: ignore
     await Policy.save(policy)
 
+    # Get Account or Group from policy_holder link
+    # HACK: Have to do it manualy, as Beanie cannot fetch policy_holder link of mixed types (Account | Group)
+    if policy.policy_holder_type == "account":  # type: ignore
+        policy_holder = await Account.get(policy.policy_holder.ref.id)  # type: ignore
+    elif policy.policy_holder_type == "group":  # type: ignore
+        policy_holder = await Group.get(policy.policy_holder.ref.id)  # type: ignore
+
+    # Return the updated policy
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**account.dict()))  # type: ignore
-    raise WorkspaceExceptions.UserNotMember(workspace, account)
+        policy_holder=MemberSchemas.Member(**policy_holder.dict()))  # type: ignore
