@@ -144,7 +144,7 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
 
 
 # Get all policies of a group
-async def get_all_group_policies(group: Group) -> PolicySchemas.PolicyList:
+async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
     policy_list = []
     await group.fetch_link("policies")
     policy: Policy
