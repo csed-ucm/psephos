@@ -163,7 +163,7 @@ async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
             raise GenericExceptions.InternalServerError("Invalid policy_holder_type")
 
         if not policy_holder:
-            raise GenericExceptions.InternalServerError("get_all_group_policies() => Policy holder not found")
+            raise GenericExceptions.InternalServerError("get_group_policies() => Policy holder not found")
 
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore

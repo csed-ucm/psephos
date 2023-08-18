@@ -96,7 +96,7 @@ async def remove_group_member(group: Group = Depends(Dependencies.get_group_mode
 @router.get("/{group_id}/policies",
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
-async def get_all_group_policies(group: Group = Depends(Dependencies.get_group_model)):
+async def get_group_policies(group: Group = Depends(Dependencies.get_group_model)):
     try:
         return await GroupActions.get_group_policies(group)
     except APIException as e:
