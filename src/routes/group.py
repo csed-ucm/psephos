@@ -98,7 +98,7 @@ async def remove_group_member(group: Group = Depends(Dependencies.get_group_mode
             response_model=PolicySchemas.PolicyList)
 async def get_all_group_policies(group: Group = Depends(Dependencies.get_group_model)):
     try:
-        return await GroupActions.get_all_group_policies(group)
+        return await GroupActions.get_group_policies(group)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
