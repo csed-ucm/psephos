@@ -1,5 +1,6 @@
 # FastAPI
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
+from typing import Annotated, Literal
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from src import dependencies as Dependencies
 from src.actions import group as GroupActions
 from src.actions import permissions as PermissionsActions
@@ -8,6 +9,8 @@ from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import member as MemberSchemas
 from src.models.documents import Group, ResourceID
+from src.account_manager import current_active_user
+from src.utils import permissions as Permissions
 
 
 # APIRouter creates path operations for user module
@@ -21,13 +24,43 @@ router = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
 #     return await GroupActions.get_all_groups()
 
 
+query_params = list[Literal["policies", "members", "all"]]
+
+
 # Get group info by id
 @router.get("/{group_id}",
             response_description="Get a group",
             response_model=GroupSchemas.Group)
-async def get_group(group: Group = Depends(Dependencies.get_group_model)):
+async def get_group(group: Group = Depends(Dependencies.get_group_model),
+                    include: Annotated[query_params | None, Query()] = None
+                    ):
     try:
-        return await GroupActions.get_group(group)
+        account = current_active_user.get()
+        members = None
+        policies = None
+
+        if include:
+            # Get the permissions(allowed actions) of the current user
+            permissions = await Permissions.get_all_permissions(group, account)
+            # If "all" is in the list, include all resources
+            if "all" in include:
+                include = ["policies", "members"]
+            # Fetch the resources if the user has the required permissions
+            if "members" in include:
+                req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
+                if Permissions.check_permission(permissions, req_permissions):
+                    members = (await GroupActions.get_group_members(group)).members
+            if "policies" in include:
+                req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
+                if Permissions.check_permission(permissions, req_permissions):
+                    policies = (await GroupActions.get_group_policies(group)).policies
+        # Return the workspace with the fetched resources
+        return GroupSchemas.Group(id=group.id,
+                                  name=group.name,
+                                  description=group.description,
+                                  workspace=group.workspace,
+                                  members=members,
+                                  policies=policies)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -95,8 +128,8 @@ async def remove_group_member(group: Group = Depends(Dependencies.get_group_mode
 # List all policies in the workspace
 @router.get("/{group_id}/policies",
             response_description="List of all policies",
-            response_model=PolicySchemas.PolicyList)
-async def get_group_policies(group: Group = Depends(Dependencies.get_group_model)):
+            response_model=PolicySchemas.PolicyList,)
+async def get_group_policies(group: Group = Depends(Dependencies.get_group_model)) -> PolicySchemas.PolicyList:
     try:
         return await GroupActions.get_group_policies(group)
     except APIException as e:
