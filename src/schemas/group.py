@@ -8,7 +8,7 @@ class Group(BaseModel):
     name: Optional[str]
     description: Optional[str]
     workspace: Optional[Any]
-    groups: Optional[list]
+    # groups: Optional[list]
     members: Optional[list]
     policies: Optional[list]
 
