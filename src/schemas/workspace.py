@@ -68,6 +68,20 @@ class WorkspaceCreateInput(BaseModel):
         }
 
 
+# Schema for the request to update a workspace
+class WorkspaceUpdateRequest(BaseModel):
+    name: Optional[str] = Field(title="Name")
+    description: Optional[str] = Field(title="Description")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Workspace 01",
+                "description": "This is an example workspace",
+            }
+        }
+
+
 # Schema for the response when a workspace is created
 class WorkspaceCreateOutput(BaseModel):
     id: ResourceID = Field(title="ID")
