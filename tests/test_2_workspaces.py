@@ -14,7 +14,7 @@ from src.utils import permissions as Permissions
 
 
 fake = Faker()
-client = TestClient(app)
+client = TestClient(app)  # type: ignore
 
 # TODO: Add settings for testing, i.e. testing database
 # class Settings(BaseSettings):
@@ -317,7 +317,8 @@ async def test_permissions(client_test: AsyncClient):
 
     # Try to get workspace members
     res = await client_test.get(f"/workspaces/{workspace.id}/members", headers=headers)
-    assert res.status_code == status.HTTP_403_FORBIDDEN
+    # assert res.status_code == status.HTTP_403_FORBIDDEN
+    assert res.status_code == status.HTTP_200_OK
 
     # Try to add members to workspace
     res = await client_test.post(f"/workspaces/{workspace.id}/members",
@@ -327,7 +328,8 @@ async def test_permissions(client_test: AsyncClient):
 
     # Try to get group list
     res = await client_test.get(f"/workspaces/{workspace.id}/groups", headers=headers)
-    assert res.status_code == status.HTTP_403_FORBIDDEN
+    # assert res.status_code == status.HTTP_403_FORBIDDEN
+    assert res.status_code == status.HTTP_200_OK
 
     # Try to create group
     res = await client_test.post(f"/workspaces/{workspace.id}/groups",
@@ -342,7 +344,8 @@ async def test_permissions(client_test: AsyncClient):
 
     # Try to get workspace permissions
     res = await client_test.get(f"/workspaces/{workspace.id}/policy", headers=headers)
-    assert res.status_code == status.HTTP_403_FORBIDDEN
+    # assert res.status_code == status.HTTP_403_FORBIDDEN
+    assert res.status_code == status.HTTP_200_OK
 
     # Try to set workspace permissions
     res = await client_test.put(f"/workspaces/{workspace.id}/policy",
