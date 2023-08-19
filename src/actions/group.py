@@ -5,7 +5,7 @@ from src.models.documents import Policy, ResourceID, Workspace, Group, Account
 from src.schemas import account as AccountSchemas
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
-from src.schemas import workspace as WorkspaceSchema
+# from src.schemas import workspace as WorkspaceSchema
 from src.schemas import member as MemberSchemas
 from src.exceptions import account as AccountExceptions
 from src.exceptions import group as GroupExceptions
@@ -27,61 +27,43 @@ from src.utils import permissions as Permissions
 #     return GroupSchemas.GroupList(groups=group_list)
 
 
-# Get group by id
+# Get group
 async def get_group(group: Group) -> GroupSchemas.Group:
-    # Create a group list for output schema using the search results
-    await group.fetch_all_links()
-    member_list: list[Account] = []
-    policy_list: list[Policy] = []
-    group_list: list[Group] = []
-    for member in group.members:
-        member_list.append(AccountSchemas.AccountShort(**member.dict()))  # type: ignore
-    for policy in group.policies:
-        policy_list.append(PolicySchemas.PolicyShort(**policy.dict(exclude={"policy_holder"}),  # type: ignore
-                                                     policy_holder=policy.policy_holder))  # type: ignore
-
-    return GroupSchemas.Group(id=group.id, name=group.name, description=group.description,
-                              workspace=WorkspaceSchema.WorkspaceShort(
-                                  **group.workspace.dict()),  # type: ignore
-                              members=member_list,
-                              policies=policy_list,
-                              groups=group_list)
+    return GroupSchemas.Group(**group.dict())
 
 
 # Update a group
-async def update_group(group: Group, group_data: GroupSchemas.GroupUpdateIn) -> GroupSchemas.Group:
-    # workspace = await Workspace.get(group.workspace)
-    await group.fetch_link(Group.workspace)
+async def update_group(group: Group, 
+                       group_data: GroupSchemas.GroupUpdateRequest) -> GroupSchemas.Group:
+    save_changes = False
     workspace: Workspace = group.workspace  # type: ignore
-
     # The group must belong to a workspace
     if not workspace:
         raise WorkspaceExceptions.WorkspaceNotFound(workspace)
 
-    # Check if no updates are provided
-    if not group_data.name and not group_data.description:
-        return GroupSchemas.Group(**group.dict())
-
-    # Update the group
-    if group_data.name:
+    # Check if group name is provided
+    if group_data.name and group_data.name != group.name:
         # Check if group name is unique
-        # NOTE: This is causing error because the links are fetched already
-        # await workspace.fetch_link("groups")
         for g in workspace.groups:
             if g.name == group_data.name:  # type: ignore
                 raise GroupExceptions.NonUniqueName(group)
         group.name = group_data.name  # Update the group name
-    if group_data.description:
+        save_changes = True
+    # Check if group description is provided
+    if group_data.description and group_data.description != group.description:
         group.description = group_data.description  # Update the group description
+        save_changes = True
 
     # Save the updates
-    await Group.save(group)
+    if save_changes:
+        await Group.save(group)
+    # Return the updated group
     return GroupSchemas.Group(**group.dict())
 
 
 # Delete a group
 async def delete_group(group: Group):
-    await group.fetch_link(Group.workspace)
+    # await group.fetch_link(Group.workspace)
     workspace: Workspace = group.workspace  # type: ignore
     workspace.groups = [g for g in workspace.groups if g.id != group.id]  # type: ignore
     workspace.policies = [p for p in workspace.policies if p.policy_holder.ref.id != group.id]  # type: ignore
@@ -94,32 +76,27 @@ async def delete_group(group: Group):
 
 # Get list of members of a group
 async def get_group_members(group: Group) -> MemberSchemas.MemberList:
-    await group.fetch_link(Group.members)
-
     member_list = []
     member: Account
     for member in group.members:  # type: ignore
         member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
         member_scheme = MemberSchemas.Member(**member_data)
         member_list.append(member_scheme)
+    # Return the list of members
     return MemberSchemas.MemberList(members=member_list)
 
 
 # Add groups/members to group
 async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
     accounts = set(member_data.accounts)
-
     # Remove existing members from the accounts set
-    accounts = accounts.difference({member.ref.id for member in group.members})
-
+    accounts = accounts.difference({member.id for member in group.members})  # type: ignore
     # Find the accounts from the database
     account_list = await Account.find(In(Account.id, accounts)).to_list()
-
     # Add the accounts to the group member list with default permissions
     for account in account_list:
         await group.add_member(group.workspace, account, Permissions.GROUP_BASIC_PERMISSIONS)
     await Group.save(group)
-
     # Return the list of members added to the group
     return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
 
@@ -133,38 +110,35 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
             raise AccountExceptions.AccountNotFound(account_id)
     else:
         account = current_active_user.get()
-
     # Check if the account exists
     if not account:
         raise GenericExceptions.InternalServerError("remove_group_member() -> Account not found")
-
+    # Check if account is a member of the group
     if account.id not in [ResourceID(member.ref.id) for member in group.members]:
         raise GroupExceptions.UserNotMember(group, account)
-    return await group.remove_member(account)
+    # Remove the account from the group
+    if await group.remove_member(account):
+        member_list = [MemberSchemas.Member(**account.dict()) for account in group.members]  # type: ignore
+        return MemberSchemas.MemberList(members=member_list)
+    raise GroupExceptions.ErrorWhileRemovingMember(group, account)
 
 
 # Get all policies of a group
 async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
     policy_list = []
-    await group.fetch_link("policies")
     policy: Policy
     for policy in group.policies:  # type: ignore
         permissions = Permissions.GroupPermissions(policy.permissions).name.split('|')  # type: ignore
-        # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
-        # BUG: Group type is selected by default, so it cannot find Account in the Group collection
-        # await policy.fetch_link(Policy.policy_holder)
-
-        # FIXME: This is a workaround for the above bug
+        # Get the policy_holder
         if policy.policy_holder_type == 'account':
             policy_holder = await Account.get(policy.policy_holder.ref.id)
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
             raise GenericExceptions.InternalServerError("Invalid policy_holder_type")
-
         if not policy_holder:
+            # TODO: Replace with custom exception
             raise GenericExceptions.InternalServerError("get_group_policies() => Policy holder not found")
-
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
         policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
@@ -189,10 +163,11 @@ async def get_group_policy(group: Group, account_id: ResourceID | None):
         raise GenericExceptions.InternalServerError("get_group_policy() => Account not found")
 
     # Check if account is a member of the group
-    if account.id not in [member.ref.id for member in group.members]:
+    # if account.id not in [member.id for member in group.members]:
+    if account not in group.members:
         raise GroupExceptions.UserNotMember(group, account)
 
-    await group.fetch_link(Group.policies)
+    # await group.fetch_link(Group.policies)
     user_permissions = await Permissions.get_all_permissions(group, account)
     res = {'permissions': Permissions.GroupPermissions(user_permissions).name.split('|'),  # type: ignore
            'account': AccountSchemas.AccountShort(**account.dict())}
@@ -217,19 +192,20 @@ async def set_group_policy(group: Group,
                 raise AccountExceptions.AccountNotFound(input_data.account_id)
         else:
             account = current_active_user.get()
-
+        # Make sure the account is loaded
         if not account:
             raise GenericExceptions.InternalServerError("set_group_policy() => Account not found")
-
-        await group.fetch_link("policies")
-        # Find the policy for the account
-        # NOTE: To set a policy for a user, the user must be a member of the workspace, therefore the policy must exist
-        p: Policy
-        for p in group.policies:  # type: ignore
-            if p.policy_holder_type == "account":
-                if p.policy_holder.ref.id == account.id:
-                    policy = p
-                    break
+        try:
+            # Find the policy for the account
+            # NOTE: To set a policy for a user, the user must be a member of the group, therefore the policy must exist
+            p: Policy
+            for p in group.policies:  # type: ignore
+                if p.policy_holder_type == "account":
+                    if p.policy_holder.ref.id == account.id:
+                        policy = p
+                        break
+        except Exception as e:
+            raise GenericExceptions.InternalServerError(str(e))
     # Calculate the new permission value
     new_permission_value = 0
     for i in input_data.permissions:

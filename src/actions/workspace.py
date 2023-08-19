@@ -69,19 +69,24 @@ async def get_workspace(workspace: Workspace) -> Workspace:
 
 # Update a workspace
 async def update_workspace(workspace: Workspace,
-                           input_data: WorkspaceSchemas.WorkspaceCreateInput) -> Workspace:
-    # Check if any of the fields are changed
-    if workspace.name != input_data.name or workspace.description != input_data.description:
+                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest) -> WorkspaceSchemas.Workspace:
+    save_changes = False
+    # Check if user suplied a name
+    if input_data.name and input_data.name != workspace.name:
         # Check if workspace name is unique
         if await Workspace.find_one({"name": input_data.name}) and workspace.name != input_data.name:
             raise WorkspaceExceptions.NonUniqueName(input_data.name)
-
-        # Update the new values
-        workspace.name = input_data.name
-        workspace.description = input_data.description
+        workspace.name = input_data.name  # Update the name
+        save_changes = True
+    # Check if user suplied a description
+    if input_data.description and input_data.description != workspace.description:    
+        workspace.description = input_data.description  # Update the description
+        save_changes = True
+    # Save the updated workspace
+    if save_changes:
         await Workspace.save(workspace)
     # Return the updated workspace
-    return workspace
+    return WorkspaceSchemas.Workspace(**workspace.dict())
 
 
 # Delete a workspace
@@ -98,12 +103,10 @@ async def delete_workspace(workspace: Workspace):
 async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberList:
     member_list = []
     member: Account
-    # NOTE: The type test cannot check the type of the link, so we ignore it
     for member in workspace.members:  # type: ignore
         member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
         member_scheme = MemberSchemas.Member(**member_data)
         member_list.append(member_scheme)
-
     # Return the list of members
     return MemberSchemas.MemberList(members=member_list)
 
@@ -112,18 +115,15 @@ async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberLis
 async def add_workspace_members(workspace: Workspace,
                                 member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
     accounts = set(member_data.accounts)
-
     # Remove existing members from the accounts set
     accounts = accounts.difference({member.id for member in workspace.members})  # type: ignore
-
     # Find the accounts from the database
     account_list = await Account.find(In(Account.id, accounts)).to_list()
-
     # Add the accounts to the group member list with basic permissions
     for account in account_list:
         await workspace.add_member(workspace, account, Permissions.WORKSPACE_BASIC_PERMISSIONS, save=False)
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
-
+    # Return the list of members added to the group
     return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
 
 
@@ -134,13 +134,18 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
         account = await Account.get(account_id)  # type: ignore
     else:
         account = current_active_user.get()
-
+    # Check if the account exists
     if not account:
         raise AccountExceptions.AccountNotFound(account_id)
-
+    # Check if the account is a member of the workspace
     if account.id not in [ResourceID(member.id) for member in workspace.members]:  # type: ignore
         raise WorkspaceExceptions.UserNotMember(workspace, account)
-    return await workspace.remove_member(account)
+    # Remove the account from the workspace
+    if await workspace.remove_member(account):
+        # Return the list of members added to the group
+        member_list = [MemberSchemas.Member(**account.dict()) for account in workspace.members]  # type: ignore
+        return MemberSchemas.MemberList(members=member_list)
+    raise WorkspaceExceptions.ErrorWhileRemovingMember(workspace, account)
 
 
 # Get a list of groups where the account is a member
@@ -206,21 +211,16 @@ async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyLi
     policy: Policy
     for policy in workspace.policies:  # type: ignore
         permissions = Permissions.WorkspacePermissions(policy.permissions).name.split('|')  # type: ignore
-        # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
-        # BUG: Group type is selected by default, so it cannot find Account in the Group collection
-        # await policy.fetch_link(Policy.policy_holder)
-
-        # FIXME: This is a workaround for the above bug
+        # Get policy_holder
         if policy.policy_holder_type == 'account':
             policy_holder = await Account.get(policy.policy_holder.ref.id)
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
             raise GenericExceptions.InternalServerError(str("Unknown policy_holder_type"))
-
         if not policy_holder:
+            # TODO: Replace with a custom exception
             raise AccountExceptions.AccountNotFound(policy.policy_holder.ref.id)
-
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
         policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
@@ -275,10 +275,11 @@ async def set_workspace_policy(workspace: Workspace,
 
         try:
             # Find the policy for the account
+            p: Policy
             for p in workspace.policies:  # type: ignore
-                if p.policy_holder_type == "account":  # type: ignore
-                    if p.policy_holder.ref.id == account.id:  # type: ignore
-                        policy = p  # type: ignore
+                if p.policy_holder_type == "account":
+                    if p.policy_holder.ref.id == account.id:
+                        policy = p
                         break
                 # if not policy:
                 #     policy = Policy(policy_holder_type='account',
@@ -287,7 +288,7 @@ async def set_workspace_policy(workspace: Workspace,
                 #                     workspace=workspace)
         except Exception as e:
             raise GenericExceptions.InternalServerError(str(e))
-    
+
     # Calculate the new permission value from request
     new_permission_value = 0
     for i in input_data.permissions:
