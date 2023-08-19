@@ -70,7 +70,7 @@ class Resource(Document):
         # Remove the account from the group
         # await self.fetch_link("members")
         for i, member in enumerate(self.members):
-            if account.id == member.id:
+            if account.id == member.id:  # type: ignore
                 self.members.remove(member)
                 Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
                 break

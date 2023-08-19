@@ -135,9 +135,10 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
 
 
 # Update a workspace with the given id
-@router.patch("/{workspace_id}", response_description="Updated workspace")
+@router.patch("/{workspace_id}", response_description="Updated workspace", response_model=WorkspaceSchemas.Workspace)
 async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                           input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)):
+                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)
+                           ):
     """
     Updates the workspace with the given id.
     Query parameters:

@@ -47,7 +47,7 @@ class GroupCreateOutput(BaseModel):
 
 
 # Schema for the request to add a user to a group
-class GroupUpdateIn(BaseModel):
+class GroupUpdateRequest(BaseModel):
     name: Optional[str] = Field(title="Name", min_length=3, max_length=50)
     description: Optional[str] = Field(default="", title="Description", max_length=300)
 

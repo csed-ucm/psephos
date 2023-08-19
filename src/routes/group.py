@@ -35,6 +35,7 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
                     include: Annotated[query_params | None, Query()] = None
                     ):
     try:
+        # await group.fetch_all_links()
         account = current_active_user.get()
         members = None
         policies = None
@@ -69,7 +70,7 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
 @router.patch("/{group_id}",
               response_description="Update a group",
               response_model=GroupSchemas.GroupShort)
-async def update_group(group_data: GroupSchemas.GroupUpdateIn,
+async def update_group(group_data: GroupSchemas.GroupUpdateRequest,
                        group: Group = Depends(Dependencies.get_group_model)):
     try:
         return await GroupActions.update_group(group, group_data)
