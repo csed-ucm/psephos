@@ -48,3 +48,9 @@ class ActionNotFound(resource.ActionNotFound):
 class UserNotMember(resource.UserNotMember):
     def __init__(self, group: Group, user: Account):
         super().__init__(group, user)
+
+
+# Error while removing a member
+class ErrorWhileRemovingMember(resource.ErrorWhileRemovingMember):
+    def __init__(self, group: Group, user: Account):
+        super().__init__(group, user)
