@@ -1,9 +1,7 @@
 from enum import IntFlag
 import ast
 from pathlib import Path
-# from src.exceptions.resource import UserNotMember
 
-# from src.models.documents import Policy
 
 # Define the permissions base class as an IntFlag Enum
 # The enumerator entries are combination of key: value (permission: #value) pairs,
@@ -32,11 +30,11 @@ GroupPermissions = parse_action_file("group")
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
 # WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"])  # type: ignore
-WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"] +  # type: ignore
-                               WorkspacePermissions["get_workspace_members"] +  # type: ignore
-                               WorkspacePermissions["get_workspace_policy"] +  # type: ignore
-                               WorkspacePermissions["get_workspace_policies"] +  # type: ignore
-                               WorkspacePermissions["get_groups"])  # type: ignore
+WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(WorkspacePermissions["get_workspace"] +  # type: ignore
+                                                   WorkspacePermissions["get_workspace_members"] +  # type: ignore
+                                                   WorkspacePermissions["get_workspace_policy"] +  # type: ignore
+                                                   WorkspacePermissions["get_workspace_policies"] +  # type: ignore
+                                                   WorkspacePermissions["get_groups"])  # type: ignore
 # Example: (WorkspacePermissions["get_workspace"] + WorkspacePermissions["get_workspace_members"])
 
 GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
@@ -59,6 +57,7 @@ def check_permission(user_permission: Permissions, required_permission: Permissi
     return bool((user_permission & required_permission) == required_permission)
 
 
+# TODO: Rename
 async def get_all_permissions(resource, account) -> Permissions:
     permission_sum = 0
     # print("resource: ", resource.name)
