@@ -54,7 +54,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = B
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-Workspace_resources = list[Literal["policies", "groups", "members", "all"]]
+query_params = list[Literal["policies", "groups", "members", "all"]]
 
 
 # Get a workspace with the given id
@@ -64,24 +64,36 @@ Workspace_resources = list[Literal["policies", "groups", "members", "all"]]
             response_model_exclude_defaults=True
             )
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                        include: Annotated[Workspace_resources | None, Query()] = None
+                        include: Annotated[query_params | None, Query()] = None
                         ) -> WorkspaceSchemas.Workspace:
     """
+    ### Description:
     Endpoint to get a workspace with the given id.
     By default, it returns the basic information of the workspace such as id, name, and description.
     The user can specify other resources to include in the response using the query parameters.
+
     For example, to include groups and members in the response, the user can send the following GET request:
     > `/workspaces/6497fdbafe12e8ff9017f253?include=groups&include=members`
 
-    Path parameters:
+    To include all resources, the user can send the following GET request:
+    > `/workspaces/6497fdbafe12e8ff9017f253?include=all`
+
+    To get basic information of the workspace, the user can send the following GET request:
+    > `/workspaces/6497fdbafe12e8ff9017f253`
+
+    ### Path parameters:
     - **workspace_id** (str): id of the workspace
 
-    Query parameters:
-    - **groups** (bool): include groups in the response
-    - **members** (bool): include members in the response
-    - **policies** (bool): include policies in the response
-    - **all** (bool): include all resources in the response
+    ### Query parameters:
+    - **include** (str): resources to include in the response
 
+        #### Possible values:
+        - **groups**: include groups in the response
+        - **members**: include members in the response
+        - **policies**: include policies in the response
+        - **all**: include all resources in the response
+
+    ### Response:
     Returns a workspace with the given id.
     """
     try:
