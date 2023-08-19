@@ -32,7 +32,7 @@ from src.utils import permissions as Permissions
 
 
 fake = Faker()
-client = TestClient(app)
+client = TestClient(app)  # type: ignore
 
 # TODO: Add settings for testing, i.e. testing database
 # class Settings(BaseSettings):
