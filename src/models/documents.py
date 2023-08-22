@@ -37,7 +37,7 @@ class Resource(Document):
     resource_type = ""
     name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
     # Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
-    description: str = Field(default="", title="Description", max_length=300)
+    description: str = Field(default="", title="Description", max_length=1000)
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
     policies: list[Link["Policy"]] = []
