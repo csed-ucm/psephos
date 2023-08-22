@@ -5,6 +5,7 @@ from src import dependencies as Dependencies
 from src.actions import group as GroupActions
 from src.actions import permissions as PermissionsActions
 from src.exceptions.resource import APIException
+from src.schemas import workspace as WorkspaceSchema
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import member as MemberSchemas
@@ -30,7 +31,9 @@ query_params = list[Literal["policies", "members", "all"]]
 # Get group info by id
 @router.get("/{group_id}",
             response_description="Get a group",
-            response_model=GroupSchemas.Group)
+            response_model=GroupSchemas.Group,
+            response_model_exclude_defaults=True,
+            response_model_exclude_none=True)
 async def get_group(group: Group = Depends(Dependencies.get_group_model),
                     include: Annotated[query_params | None, Query()] = None
                     ):
@@ -55,11 +58,14 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
                 req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
                 if Permissions.check_permission(permissions, req_permissions):
                     policies = (await GroupActions.get_group_policies(group)).policies
+
+        workspace = WorkspaceSchema.Workspace(**group.workspace.dict(exclude={"members", "policies", "groups"}))  # type: ignore
+
         # Return the workspace with the fetched resources
         return GroupSchemas.Group(id=group.id,
                                   name=group.name,
                                   description=group.description,
-                                  workspace=group.workspace,
+                                  workspace=workspace,
                                   members=members,
                                   policies=policies)
     except APIException as e:
