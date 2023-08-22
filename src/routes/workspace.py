@@ -61,8 +61,8 @@ query_params = list[Literal["policies", "groups", "members", "all"]]
 @router.get("/{workspace_id}",
             response_description="Workspace data",
             response_model=WorkspaceSchemas.Workspace,
-            response_model_exclude_defaults=True
-            )
+            response_model_exclude_defaults=True,
+            response_model_exclude_none=True)
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
                         include: Annotated[query_params | None, Query()] = None
                         ) -> WorkspaceSchemas.Workspace:
