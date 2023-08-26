@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
 from src.account_manager import current_active_user, get_current_active_user
-from src.models.documents import ResourceID, Workspace, Group, Account
+from src.documents import ResourceID, Workspace, Group, Account
 from src.utils import permissions as Permissions
 # Exceptions
 from src.exceptions import workspace as WorkspaceExceptions

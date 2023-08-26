@@ -3,7 +3,7 @@
 from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from src.account_manager import current_active_user
-from src.models.documents import Group, ResourceID, Workspace, Account, Policy, create_link
+from src.documents import Group, ResourceID, Workspace, Account, Policy, create_link
 from src.schemas import workspace as WorkspaceSchemas
 # from app.schemas import account as AccountSchemas
 from src.schemas import group as GroupSchemas
@@ -79,7 +79,7 @@ async def update_workspace(workspace: Workspace,
         workspace.name = input_data.name  # Update the name
         save_changes = True
     # Check if user suplied a description
-    if input_data.description and input_data.description != workspace.description:    
+    if input_data.description and input_data.description != workspace.description:
         workspace.description = input_data.description  # Update the description
         save_changes = True
     # Save the updated workspace

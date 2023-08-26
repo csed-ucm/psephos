@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from src.app import app
 # from app.models.user import Account
 from src.utils import colored_dbg
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 fake = Faker()

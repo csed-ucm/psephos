@@ -2,7 +2,7 @@
 # from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import Optional
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 # Schema for the response with basic workspace info (name and role)

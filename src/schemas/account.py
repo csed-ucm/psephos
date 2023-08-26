@@ -1,6 +1,6 @@
 from fastapi_users import schemas
 from pydantic import BaseModel, Field, EmailStr
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 class Account(schemas.BaseUser[ResourceID]):

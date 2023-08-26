@@ -1,5 +1,5 @@
 # Account actions
-from src.models import documents as Documents
+from src import documents as Documents
 from src.account_manager import current_active_user
 from src.exceptions import account as AccountExceptions
 

@@ -1,4 +1,4 @@
-from src.models.documents import ResourceID, Account, Group
+from src.documents import ResourceID, Account, Group
 from src.exceptions import resource
 
 

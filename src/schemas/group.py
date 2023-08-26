@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Any, Optional
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 class Group(BaseModel):

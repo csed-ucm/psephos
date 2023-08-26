@@ -1,4 +1,4 @@
-from src.models.documents import ResourceID, Workspace, Account
+from src.documents import ResourceID, Workspace, Account
 from src.exceptions import resource
 
 

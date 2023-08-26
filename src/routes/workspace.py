@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from src.actions import workspace as WorkspaceActions
 from src.actions import permissions as PermissionsActions
 from src.exceptions.resource import APIException
-from src.models.documents import Workspace, ResourceID
+from src.documents import Workspace, ResourceID
 from src.schemas import workspace as WorkspaceSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import group as GroupSchemas

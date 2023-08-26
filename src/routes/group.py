@@ -9,7 +9,7 @@ from src.schemas import workspace as WorkspaceSchema
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import member as MemberSchemas
-from src.models.documents import Group, ResourceID
+from src.documents import Group, ResourceID
 from src.account_manager import current_active_user
 from src.utils import permissions as Permissions
 
@@ -59,7 +59,9 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
                 if Permissions.check_permission(permissions, req_permissions):
                     policies = (await GroupActions.get_group_policies(group)).policies
 
-        workspace = WorkspaceSchema.Workspace(**group.workspace.dict(exclude={"members", "policies", "groups"}))  # type: ignore
+        workspace = WorkspaceSchema.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
+                                                                              "policies",
+                                                                              "groups"}))
 
         # Return the workspace with the fetched resources
         return GroupSchemas.Group(id=group.id,

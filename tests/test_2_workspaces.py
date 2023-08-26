@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from beanie.operators import In
 from src import app
 from src.utils import colored_dbg
-from src.models.documents import ResourceID, Account
+from src.documents import ResourceID, Account
 # from app.schemas import workspace as WorkspaceSchema
 from . import test_1_accounts
 from src.utils import permissions as Permissions

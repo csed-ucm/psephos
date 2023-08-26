@@ -1,5 +1,5 @@
 from fastapi import status
-from src.models.documents import Account, Resource
+from src.documents import Account, Resource
 from src.utils import colored_dbg as Debug
 from beanie import PydanticObjectId
 

@@ -83,7 +83,7 @@ async def get_all_permissions(resource, account) -> Permissions:
             # BUG: sometimes links are not fetched properly
             # If fetching policy holder is not working, find the group manually
             if not group:
-                from src.models.documents import Group
+                from src.documents import Group
                 group = await Group.get(policy.policy_holder.ref.id)
 
             if group:

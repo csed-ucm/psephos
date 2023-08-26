@@ -1,7 +1,7 @@
 from beanie import DeleteRules
 from beanie.operators import In
 from src.account_manager import current_active_user
-from src.models.documents import Policy, ResourceID, Workspace, Group, Account
+from src.documents import Policy, ResourceID, Workspace, Group, Account
 from src.schemas import account as AccountSchemas
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
@@ -33,7 +33,7 @@ async def get_group(group: Group) -> GroupSchemas.Group:
 
 
 # Update a group
-async def update_group(group: Group, 
+async def update_group(group: Group,
                        group_data: GroupSchemas.GroupUpdateRequest) -> GroupSchemas.Group:
     save_changes = False
     workspace: Workspace = group.workspace  # type: ignore

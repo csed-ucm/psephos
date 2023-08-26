@@ -1,5 +1,5 @@
 from src.exceptions import resource
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 class AccountNotFound(resource.ResourceNotFound):

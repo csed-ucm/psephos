@@ -1,6 +1,6 @@
 from typing import Literal, Any, Optional
 from pydantic import BaseModel, Field
-from src.models.documents import ResourceID, Account, Group
+from src.documents import ResourceID, Account, Group
 from src.utils.permissions import Permissions
 
 
