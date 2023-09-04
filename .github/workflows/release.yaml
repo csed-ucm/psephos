@@ -22,7 +22,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Python Semantic Release
-      uses: relekang/python-semantic-release@8.0.x
+      uses: relekang/python-semantic-release@8.0.8
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish package to GitHub Release
