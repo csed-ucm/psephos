@@ -1,6 +1,7 @@
 # PollingApp 
 
 ![Tests](https://github.com/mike-pisman/PollingAPI/actions/workflows/tests.yaml/badge.svg?branch=Development)
+[![Coverage Status](https://coveralls.io/repos/github/unipoll/API/badge.svg?branch=development)](https://coveralls.io/github/unipoll/API?branch=development)
 
 **This is the Development Branch**
 
