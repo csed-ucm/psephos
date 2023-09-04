@@ -2,6 +2,147 @@
 
 
 
+## v0.7.0 (2023-09-04)
+
+### Build
+
+* build: Added setuptools-scm package ([`7c2a914`](https://github.com/unipoll/API/commit/7c2a914082cf573c1b146d253827d1a63bb1626a))
+
+* build: Updated the dependencies ([`0608158`](https://github.com/unipoll/API/commit/06081584660f479818c3858646785af1c00f3893))
+
+* build: Deleted pytest.ini
+
+Deleted pytest.ini, the config was moved to pyproject.toml ([`88874c5`](https://github.com/unipoll/API/commit/88874c59da1f2d2575c9a2d1f5a925c8d957e8b9))
+
+### Ci
+
+* ci: replaced semantic-release version from 8.0.x to 8.0.8 ([`329dafe`](https://github.com/unipoll/API/commit/329dafe248ec39dc68ea1fafac8ac15ab83939a5))
+
+* ci: Added permisions to semantic-release action ([`ef15984`](https://github.com/unipoll/API/commit/ef159841af4aaf333e3de567f9e9f9153c612d1f))
+
+* ci: Changed tests action trigger
+
+Trigger tests action on pull requests into main branch ([`ebf3b66`](https://github.com/unipoll/API/commit/ebf3b6680220c063d8affba8da900b54cb2efb6e))
+
+* ci: Updated semantic_release config ([`0e92f50`](https://github.com/unipoll/API/commit/0e92f505ce3d766e5547b228505dcf6be6cd89fb))
+
+* ci: Added tag_commit option ([`a6276b9`](https://github.com/unipoll/API/commit/a6276b9e91ca6dc4535af2117a747d683338a8cf))
+
+### Feature
+
+* feat: Add coveralls action ([`48f6883`](https://github.com/unipoll/API/commit/48f68832a1da197ab817be64ee75c85a6b4424dd))
+
+* feat: Added xml coverage report when testing ([`33a43e2`](https://github.com/unipoll/API/commit/33a43e227ff9850bd5bae1dff0f66bcd44c8eb0a))
+
+* feat: Added exception for error when removing a member ([`b14b2c1`](https://github.com/unipoll/API/commit/b14b2c1c146730f9977cef189672aa483721486e))
+
+* feat: Added schema for PATCH request to Update Workspace ([`0362849`](https://github.com/unipoll/API/commit/036284971ab5f9b4ff27b39c0b8afebbee73a763))
+
+* feat: Added query params to GET Group request
+
+Added query param include, to get policies and/or members of the groups, when calling GET Group request ([`ac5b739`](https://github.com/unipoll/API/commit/ac5b7399a89d94a4835e2c1a78e52202ab398a96))
+
+* feat: Added the enpoints to get all possible permissions
+
+Created route endpoints and actions for getting Groups and Workspace
+permissions list
+
+Closes #50 ([`738f59b`](https://github.com/unipoll/API/commit/738f59b7e469936c869181d5a0cb71f597f9e245))
+
+* feat: Included Group open_router
+
+Added open_router from Group routes to the app ([`ac70686`](https://github.com/unipoll/API/commit/ac70686c67fcc888a1668ac43f85134fbd9a2050))
+
+* feat: Added enpoint to get list of all accounts ([`e42a3e4`](https://github.com/unipoll/API/commit/e42a3e404caa9b88d6de653c7a04dfa587b08415))
+
+### Fix
+
+* fix: Fixed build command for semantic-release ([`1f14bab`](https://github.com/unipoll/API/commit/1f14bab8ec9247effb7567e1d44866be40ef5c31))
+
+* fix: Fixed repo name of semantic-release action ([`85fa9b1`](https://github.com/unipoll/API/commit/85fa9b1b21995cf18d059ac40c7864399af879f9))
+
+* fix: Changed coverage file format to lcov ([`1f5a8bf`](https://github.com/unipoll/API/commit/1f5a8bf0cae553b36e196626396b140d249859c3))
+
+* fix: Added path to coverage file ([`bb2da33`](https://github.com/unipoll/API/commit/bb2da33de044f2bd7c5644fb6a8033b6f2de6a55))
+
+* fix: Fixed issue with mypy
+
+Fixed issue with mypy not parsing BaseSettings type ([`d540f7f`](https://github.com/unipoll/API/commit/d540f7fa22d0602a9a2e9b00411a89982a336197))
+
+* fix: Fixed issue with setuptools-scm ([`1a63883`](https://github.com/unipoll/API/commit/1a63883482d1a222bf06e0cb03d7573c09d7c4dd))
+
+* fix: [BUG]: Functions return hashed passwords #52 ([`89f98ef`](https://github.com/unipoll/API/commit/89f98ef02b9bed1c28239bc39df8217e7ebdca0b))
+
+* fix: Fixed issue with WorkspacePermissions ([`35b0e0a`](https://github.com/unipoll/API/commit/35b0e0a59d5153571646487d3c7e08b8146dde53))
+
+* fix: Removed group field from Group Schema ([`873c048`](https://github.com/unipoll/API/commit/873c0488bc3dfad19adf051b6e1bb137c7539856))
+
+* fix: Fixed bug when returning output of update policy ([`af13f6f`](https://github.com/unipoll/API/commit/af13f6ff72c6ead22f64d77eba06cbd70fdd3089))
+
+* fix: Fixed error when removing members ([`2a20596`](https://github.com/unipoll/API/commit/2a20596b50bbb70226567d2b44333278be749f06))
+
+### Refactor
+
+* refactor: Deleted empty models directory ([`88913a0`](https://github.com/unipoll/API/commit/88913a04f2aa098d25660154628f41ba0d4a771e))
+
+* refactor: Moved documents.py from model to src ([`7244b4a`](https://github.com/unipoll/API/commit/7244b4a940a683339ff692604f8d975027d7d34b))
+
+* refactor: Removed empty fields from response schema ([`bb893cd`](https://github.com/unipoll/API/commit/bb893cd838d59c8979686c0292e32fd33e01d8b4))
+
+* refactor: Changed description max length to 1000 ([`b82dbc2`](https://github.com/unipoll/API/commit/b82dbc272dd9efa562d21b6991a8313ce25fe227))
+
+* refactor: Changed few test according to default permissions ([`32d513e`](https://github.com/unipoll/API/commit/32d513e4936ba10b96f2734ec60ec4fd665ac426))
+
+* refactor: Tested Workspace and Group actions, minor fixes ([`eec6c74`](https://github.com/unipoll/API/commit/eec6c746dc16783512e0c69be01a61565a670baf))
+
+* refactor: Renamed get_all_group_policies action
+
+Renamed get_all_group_policies action to get_group_policies ([`4dc2b3c`](https://github.com/unipoll/API/commit/4dc2b3cd9ad5c87ddc583ae7ae3385900eff37ea))
+
+* refactor: Renamed get_all_group_policies action
+
+Renamed get_all_group_policies action to get_group_policies ([`4f65216`](https://github.com/unipoll/API/commit/4f652162dea01c81614ff6cc739cb16d25f618f0))
+
+* refactor: Renamed get_all_group_policies action
+
+Renamed get_all_group_policies action to get_group_policies ([`8ff77f1`](https://github.com/unipoll/API/commit/8ff77f15ba1871a41cc035e2932118e69c6920b6))
+
+* refactor: Moved action to get all permissions
+
+Moved action to get all permissions to a separate action file, so
+getting list of permissions does not require a permission ([`5d24b40`](https://github.com/unipoll/API/commit/5d24b40ea8ce626da87d04809190f7f1ca24fa1c))
+
+* refactor: Changed default permissions for new policies ([`2436c4d`](https://github.com/unipoll/API/commit/2436c4d2cf4e8d3da9a7ddcd1f0c2a7b071d598f))
+
+### Style
+
+* style: Code cleanup and reorganization ([`1c1ee52`](https://github.com/unipoll/API/commit/1c1ee5225bcc228d8148532ca3c94abcce5254cf))
+
+* style: Ignore typing ([`d262c3b`](https://github.com/unipoll/API/commit/d262c3bcbae0814e1d9f2825301def0e294081e2))
+
+* style: Cleanup, renamed few variables ([`3bdec3f`](https://github.com/unipoll/API/commit/3bdec3f9127dd3928fedbe6c9b7755d29241f1f4))
+
+* style: Updated route description
+
+Expanded GET workspace request descriptions, renamed Workspace_resources to query_params ([`d381846`](https://github.com/unipoll/API/commit/d3818467f75995dd20c3559d68250e6da1f3ec34))
+
+### Unknown
+
+* Update README.md
+
+Added coverage badge ([`8d85ad4`](https://github.com/unipoll/API/commit/8d85ad4b630a3f3ef5276b74ef75046ed29ef6b3))
+
+* Merge pull request #54 from unipoll/development
+
+Development ([`b134f05`](https://github.com/unipoll/API/commit/b134f053e50fbed398f933336e40ed09e6624a24))
+
+* revert: Replaced file argument to path-to-lcov ([`a603c1d`](https://github.com/unipoll/API/commit/a603c1dc6a6c54959f50d7d3b68db0df6b7667f4))
+
+* Merge pull request #49 from unipoll/front-end
+
+Updates for Front End ([`d45e8fc`](https://github.com/unipoll/API/commit/d45e8fc9b70eed6ef980af16d6cca64527fad98d))
+
+
 ## v0.6.1 (2023-06-30)
 
 ### Fix
