@@ -29,13 +29,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y git
           echo "GIT Version: $(git --version)"
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           fetch-tags: true
+
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
@@ -55,15 +58,5 @@ jobs:
         run: |
           tox run
 
-      # - name: Delete MongoDB
-      #   run: |
-      #     docker stop mongodb
-      #     docker rm mongodb
-      #     docker system prune -f
-      
-      # - name: 'Cleanup build folder'
-      #   run: |
-      #     ls -la ./
-      #     rm -rf ./* || true
-      #     rm -rf ./.??* || true
-      #     ls -la ./
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
