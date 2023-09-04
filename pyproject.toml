@@ -1,34 +1,11 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "build"]
+requires = ["setuptools", "setuptools-scm[toml]>=7.1", "build"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-# write_to = "app/_version.py"
-# version_scheme = "python-simplified-semver"
-
-# [tool.setuptools.dynamic]
-# version = {file = "version.txt"}
-
-
-[tool.semantic_release]
-version_source = "tag_only"
-branch = "main"
-major_on_zero = true
-upload_to_pypi = false
-# upload_to_repository = true
-upload_to_release = true
-commit_version_number = true
-tag_commit = true
-
-changelog_file = "CHANGELOG.md"
-build_command = "python -m build ."
-# commit_message = "chore(release): v{version} [skip ci]"
-
 
 [project]
 name = "unipoll-api"
 dynamic= ["version"]
-description = "My package description"
+description = "Unipoll API"
 authors = [{email = "mpisman@unipol.cc"}, {name = "Michael Pisman"}]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -56,9 +33,27 @@ testings = [
 ]
 
 [optional.package_data]
-unipoll_api = [
+unipoll-api = [
     "py.typed",
 ]
+
+[tool.setuptools_scm]
+# version_scheme = "python-simplified-semver"
+
+
+[tool.semantic_release]
+version_source = "tag_only"
+branch = "main"
+major_on_zero = true
+upload_to_pypi = false
+# upload_to_repository = true
+upload_to_release = true
+commit_version_number = true
+tag_commit = true
+
+changelog_file = "CHANGELOG.md"
+build_command = "python -m build ."
+# commit_message = "chore(release): v{version} [skip ci]"
 
 [tool.flake8]
 max-line-length = 120
