@@ -2,7 +2,7 @@
 # from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import Optional
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 # Schema for the response with basic workspace info (name and role)
@@ -58,6 +58,20 @@ class WorkspaceList(BaseModel):
 class WorkspaceCreateInput(BaseModel):
     name: str = Field(title="Name")
     description: str = Field(title="Description")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Workspace 01",
+                "description": "This is an example workspace",
+            }
+        }
+
+
+# Schema for the request to update a workspace
+class WorkspaceUpdateRequest(BaseModel):
+    name: Optional[str] = Field(title="Name")
+    description: Optional[str] = Field(title="Description")
 
     class Config:
         schema_extra = {

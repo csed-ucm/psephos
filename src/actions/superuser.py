@@ -1,4 +1,4 @@
-from src.models.documents import Workspace
+from src.documents import Workspace
 from src.schemas import workspace as WorkspaceSchemas
 
 

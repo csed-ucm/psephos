@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Any, Optional
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 class Group(BaseModel):
@@ -8,7 +8,7 @@ class Group(BaseModel):
     name: Optional[str]
     description: Optional[str]
     workspace: Optional[Any]
-    groups: Optional[list]
+    # groups: Optional[list]
     members: Optional[list]
     policies: Optional[list]
 
@@ -47,7 +47,7 @@ class GroupCreateOutput(BaseModel):
 
 
 # Schema for the request to add a user to a group
-class GroupUpdateIn(BaseModel):
+class GroupUpdateRequest(BaseModel):
     name: Optional[str] = Field(title="Name", min_length=3, max_length=50)
     description: Optional[str] = Field(default="", title="Description", max_length=300)
 

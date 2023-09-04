@@ -1,5 +1,5 @@
 from fastapi import Request
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 from src.utils.colored_dbg import print_error
 
 

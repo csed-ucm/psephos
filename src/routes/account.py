@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from src.account_manager import fastapi_users
 from src.actions import account as AccountActions
 from src.exceptions.resource import APIException
-from src.models.documents import Account
+from src.documents import Account
 from src.dependencies import get_account
 from src.schemas import account as AccountSchemas
 

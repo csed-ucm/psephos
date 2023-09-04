@@ -132,3 +132,4 @@ dmypy.json
 # vscode history
 .history/
 .vscode/settings.json
+coverage.lcov

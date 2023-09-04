@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
-from src.models.documents import ResourceID
+from src.documents import ResourceID
 
 
 # Schema for the response with basic member info

@@ -1,5 +1,5 @@
 import motor.motor_asyncio  # type: ignore
-from src.models import documents as Documents
+from src import documents as Documents
 from src.config import get_settings
 
 settings = get_settings()

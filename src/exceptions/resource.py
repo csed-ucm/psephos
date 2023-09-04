@@ -1,5 +1,5 @@
 from fastapi import status
-from src.models.documents import Account, Resource
+from src.documents import Account, Resource
 from src.utils import colored_dbg as Debug
 from beanie import PydanticObjectId
 
@@ -78,3 +78,10 @@ class AddingExistingMember(APIException):
     def __init__(self, resource: Resource, user: Account):
         super().__init__(code=status.HTTP_400_BAD_REQUEST,
                          detail=f"User {user.email} is already a member of {resource.name} #{resource.id}")
+
+
+# Error while removing member
+class ErrorWhileRemovingMember(APIException):
+    def __init__(self, resource: Resource, user: Account):
+        super().__init__(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                         detail=f"Error while removing user {user.email} from {resource.name} #{resource.id}")

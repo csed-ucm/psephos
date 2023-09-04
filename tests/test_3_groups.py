@@ -10,7 +10,7 @@ from beanie.operators import In
 # from pydantic import BaseSettings
 from src import app
 from src.utils import colored_dbg
-from src.models.documents import Account, ResourceID
+from src.documents import Account, ResourceID
 # from app.exceptions.group import GroupNotFound
 from . import test_1_accounts
 from .test_2_workspaces import create_random_user, TestWorkspace
@@ -32,7 +32,7 @@ from src.utils import permissions as Permissions
 
 
 fake = Faker()
-client = TestClient(app)
+client = TestClient(app)  # type: ignore
 
 # TODO: Add settings for testing, i.e. testing database
 # class Settings(BaseSettings):

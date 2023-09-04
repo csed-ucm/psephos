@@ -1,4 +1,4 @@
-from src.models.documents import ResourceID, Workspace, Account
+from src.documents import ResourceID, Workspace, Account
 from src.exceptions import resource
 
 
@@ -48,3 +48,9 @@ class UserNotAuthorized(resource.UserNotAuthorized):
 class ActionNotFound(resource.ActionNotFound):
     def __init__(self, action: str):
         super().__init__('workspace', action)
+
+
+# Error while removing member
+class ErrorWhileRemovingMember(resource.ErrorWhileRemovingMember):
+    def __init__(self, workspace: Workspace, user: Account):
+        super().__init__(workspace, user)

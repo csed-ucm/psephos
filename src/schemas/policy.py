@@ -1,6 +1,6 @@
 from typing import Literal, Any, Optional
 from pydantic import BaseModel, Field
-from src.models.documents import ResourceID, Account, Group
+from src.documents import ResourceID, Account, Group
 from src.utils.permissions import Permissions
 
 
@@ -21,6 +21,7 @@ class PolicyShort(BaseModel):
 class PolicyInput(BaseModel):
     policy_id: Optional[ResourceID] = Field(title="Policy ID")
     account_id: Optional[ResourceID] = Field(title="Account ID")
+    group_id: Optional[ResourceID] = Field(title="Group ID")
     permissions: list[str] = Field(title="Permissions")
 
     class Config:
@@ -123,6 +124,33 @@ class AddPermission(BaseModel):
                         "id": "3a4b5c6d7e8f9g0h1i2j",
                         "permission": "1",
                     },
+                ]
+            }
+        }
+
+
+# Schema for returning a list of permissions
+class PermissionList(BaseModel):
+    permissions: list[str] = Field(title="Permissions")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "permissions": [
+                    "get_workspaces",
+                    "create_workspace",
+                    "get_workspace",
+                    "update_workspace",
+                    "delete_workspace",
+                    "get_workspace_members",
+                    "add_workspace_members",
+                    "remove_workspace_member",
+                    "get_groups",
+                    "create_group",
+                    "get_workspace_policies",
+                    "get_workspace_policy",
+                    "set_workspace_policy",
+                    "get_workspace_permissions"
                 ]
             }
         }

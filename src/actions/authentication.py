@@ -4,7 +4,7 @@ from beanie import PydanticObjectId
 
 from fastapi import Depends
 
-from src.models.documents import Account
+from src.documents import Account
 from src.exceptions import authentication as AuthExceptions
 from src.exceptions import account as AccountExceptions
 from src.utils import colored_dbg as Debug

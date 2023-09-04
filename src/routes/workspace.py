@@ -2,8 +2,9 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from src.actions import workspace as WorkspaceActions
+from src.actions import permissions as PermissionsActions
 from src.exceptions.resource import APIException
-from src.models.documents import Workspace, ResourceID
+from src.documents import Workspace, ResourceID
 from src.schemas import workspace as WorkspaceSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import group as GroupSchemas
@@ -53,34 +54,46 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = B
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-Workspace_resources = list[Literal["policies", "groups", "members", "all"]]
+query_params = list[Literal["policies", "groups", "members", "all"]]
 
 
 # Get a workspace with the given id
 @router.get("/{workspace_id}",
             response_description="Workspace data",
             response_model=WorkspaceSchemas.Workspace,
-            response_model_exclude_defaults=True
-            )
+            response_model_exclude_defaults=True,
+            response_model_exclude_none=True)
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                        include: Annotated[Workspace_resources | None, Query()] = None
+                        include: Annotated[query_params | None, Query()] = None
                         ) -> WorkspaceSchemas.Workspace:
     """
+    ### Description:
     Endpoint to get a workspace with the given id.
     By default, it returns the basic information of the workspace such as id, name, and description.
     The user can specify other resources to include in the response using the query parameters.
+
     For example, to include groups and members in the response, the user can send the following GET request:
     > `/workspaces/6497fdbafe12e8ff9017f253?include=groups&include=members`
 
-    Path parameters:
+    To include all resources, the user can send the following GET request:
+    > `/workspaces/6497fdbafe12e8ff9017f253?include=all`
+
+    To get basic information of the workspace, the user can send the following GET request:
+    > `/workspaces/6497fdbafe12e8ff9017f253`
+
+    ### Path parameters:
     - **workspace_id** (str): id of the workspace
 
-    Query parameters:
-    - **groups** (bool): include groups in the response
-    - **members** (bool): include members in the response
-    - **policies** (bool): include policies in the response
-    - **all** (bool): include all resources in the response
+    ### Query parameters:
+    - **include** (str): resources to include in the response
 
+        #### Possible values:
+        - **groups**: include groups in the response
+        - **members**: include members in the response
+        - **policies**: include policies in the response
+        - **all**: include all resources in the response
+
+    ### Response:
     Returns a workspace with the given id.
     """
     try:
@@ -122,9 +135,10 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
 
 
 # Update a workspace with the given id
-@router.patch("/{workspace_id}", response_description="Updated workspace")
+@router.patch("/{workspace_id}", response_description="Updated workspace", response_model=WorkspaceSchemas.Workspace)
 async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                           input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)):
+                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)
+                           ):
     """
     Updates the workspace with the given id.
     Query parameters:
@@ -262,5 +276,16 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
     """
     try:
         return await WorkspaceActions.set_workspace_policy(workspace, permissions)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get All Workspace Permissions
+@open_router.get("/permissions",
+                 response_description="List of all workspace permissions",
+                 response_model=PolicySchemas.PermissionList)
+async def get_workspace_permissions():
+    try:
+        return await PermissionsActions.get_workspace_permissions()
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

@@ -1,4 +1,4 @@
-from src.models.documents import ResourceID, Account, Group
+from src.documents import ResourceID, Account, Group
 from src.exceptions import resource
 
 
@@ -46,5 +46,11 @@ class ActionNotFound(resource.ActionNotFound):
 
 # User is not a member of the group
 class UserNotMember(resource.UserNotMember):
+    def __init__(self, group: Group, user: Account):
+        super().__init__(group, user)
+
+
+# Error while removing a member
+class ErrorWhileRemovingMember(resource.ErrorWhileRemovingMember):
     def __init__(self, group: Group, user: Account):
         super().__init__(group, user)

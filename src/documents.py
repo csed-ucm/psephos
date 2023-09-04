@@ -37,7 +37,7 @@ class Resource(Document):
     resource_type = ""
     name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
     # Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
-    description: str = Field(default="", title="Description", max_length=300)
+    description: str = Field(default="", title="Description", max_length=1000)
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
     policies: list[Link["Policy"]] = []
@@ -70,7 +70,7 @@ class Resource(Document):
         # Remove the account from the group
         # await self.fetch_link("members")
         for i, member in enumerate(self.members):
-            if account.id == member.id:
+            if account.id == member.id:  # type: ignore
                 self.members.remove(member)
                 Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
                 break

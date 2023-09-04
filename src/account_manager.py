@@ -12,7 +12,7 @@ from fastapi_users_db_beanie import BeanieUserDatabase, ObjectIDIDMixin
 from src.utils.token_db import BeanieAccessTokenDatabase
 # from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
 from src.utils.auth_strategy import DatabaseStrategy
-from src.models.documents import Account, AccessToken
+from src.documents import Account, AccessToken
 from src.utils import colored_dbg
 
 
