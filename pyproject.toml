@@ -59,7 +59,7 @@ build_command = "python -m build ."
 max-line-length = 120
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-report xml"
+addopts = "--cov --cov-report lcov"
 testpaths = ["tests"]
 asyncio_mode="auto"
 filterwarnings = [
