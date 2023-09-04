@@ -3,10 +3,8 @@ name: Testing with Tox
 on:
   workflow_dispatch:
   pull_request:
-  push:
     branches:
-      - "Development"
-      - "test_tox"
+      - "main"
 
 jobs:
   test:
