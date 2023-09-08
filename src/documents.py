@@ -38,10 +38,6 @@ class Resource(Document):
     name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
     # Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=1000)
-    members: list[Link["Account"]] = []
-    groups: list[Link["Group"]] = []
-    policies: list[Link["Policy"]] = []
-
     # If the resource is a root resource, all derived resources will be stored in the same collection
     # However, the benefits of this are unclear
     # class Settings:
@@ -106,12 +102,18 @@ class Account(BeanieBaseUser, Document):  # type: ignore
 
 class Workspace(Resource):
     resource_type = "workspace"
+    members: list[Link["Account"]] = []
+    groups: list[Link["Group"]] = []
+    policies: list[Link["Policy"]] = []
 
 
 class Group(Resource):
     resource_type = "group"
     workspace: Link["Workspace"]
     # workspace: list[BackLink[Workspace]] = Field(original_field="groups")
+    members: list[Link["Account"]] = []
+    groups: list[Link["Group"]] = []
+    policies: list[Link["Policy"]] = []
 
 
 class Policy(Document):
@@ -123,6 +125,12 @@ class Policy(Document):
     # policy_holder: list[Link["Account"]]
     # policy_holder: Link[Resource]
     permissions: Permissions
+
+
+class Poll(Resource):
+    id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    workspace: Link["Workspace"]
+    resource_type = "poll"
 
 
 # NOTE: ForwardRef is used to avoid circular imports
