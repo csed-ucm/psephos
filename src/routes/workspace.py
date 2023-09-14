@@ -301,7 +301,8 @@ async def get_workspace_permissions():
 # Get Workspace Polls
 @router.get("/{workspace_id}/polls",
             response_description="List of all polls in the workspace",
-            response_model=PollSchemas.PollList)
+            response_model=PollSchemas.PollList,
+            response_model_exclude_none=True)
 async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     try:
         return await WorkspaceActions.get_polls(workspace)

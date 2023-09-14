@@ -319,11 +319,11 @@ async def set_workspace_policy(workspace: Workspace,
 
 
 # Get a list of polls in a workspace
-async def get_polls(workspace: Workspace):
+async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
     poll_list = []
     poll: Poll
     for poll in workspace.polls:  # type: ignore
-        poll_list.append(PollSchemas.Poll(**poll.dict()))
+        poll_list.append(PollSchemas.PollShort(**poll.dict(exclude={'questions', 'policies'})))
     return PollSchemas.PollList(polls=poll_list)
 
 
