@@ -18,3 +18,7 @@ class MultipleChoiceQuestion(Question):
 
 class OpenQuestion(Question):
     question_type: str = "open"
+
+
+class QuestionList(BaseModel):
+    questions: list[Question]
