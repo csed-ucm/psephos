@@ -8,6 +8,7 @@ from pydantic import Field
 from src.utils import colored_dbg as Debug
 from src.utils.permissions import Permissions  # WorkspacePermissions
 from src.utils.token_db import BeanieBaseAccessToken
+# from src.schemas.question import Question
 
 
 # Create a link to the Document model
@@ -38,6 +39,7 @@ class Resource(Document):
     name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
     # Field(default="", min_length=3, max_length=50, regex="^[A-Z][A-Za-z]{2,}([ ]([0-9]+|[A-Z][A-Za-z]*))*$")
     description: str = Field(default="", title="Description", max_length=1000)
+    policies: list[Link["Policy"]] = []
     # If the resource is a root resource, all derived resources will be stored in the same collection
     # However, the benefits of this are unclear
     # class Settings:
@@ -104,7 +106,7 @@ class Workspace(Resource):
     resource_type = "workspace"
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
-    policies: list[Link["Policy"]] = []
+    polls: list[Link["Poll"]] = []
 
 
 class Group(Resource):
@@ -113,7 +115,6 @@ class Group(Resource):
     # workspace: list[BackLink[Workspace]] = Field(original_field="groups")
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
-    policies: list[Link["Policy"]] = []
 
 
 class Policy(Document):
@@ -131,6 +132,9 @@ class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     workspace: Link["Workspace"]
     resource_type = "poll"
+    published: bool
+    questions: list
+    policies: list[Link["Policy"]]
 
 
 # NOTE: ForwardRef is used to avoid circular imports
@@ -138,3 +142,5 @@ Resource.update_forward_refs()
 Workspace.update_forward_refs()
 Group.update_forward_refs()
 Policy.update_forward_refs()
+Poll.update_forward_refs()
+# Question.update_forward_refs()

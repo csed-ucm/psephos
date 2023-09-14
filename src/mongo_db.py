@@ -17,5 +17,6 @@ DOCUMENT_MODELS = [
     Documents.Account,
     Documents.Group,
     Documents.Workspace,
-    Documents.Policy
+    Documents.Policy,
+    Documents.Poll,
 ]
