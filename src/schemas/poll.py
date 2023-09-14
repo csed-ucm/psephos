@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Any
 from pydantic import BaseModel
 from src.documents import ResourceID
 from src.schemas.question import Question
@@ -6,8 +6,11 @@ from src.schemas.question import Question
 
 class Poll(BaseModel):
     id: Optional[ResourceID]
+    # workspace: Optional[Union['Workspace', 'WorkspaceShort']]
+    workspace: Optional[Any]
     name: str
     description: str
+    public: bool
     published: bool
     questions: list[Question]
     policies: Optional[list]
@@ -27,6 +30,7 @@ class PollShort(BaseModel):
     id: ResourceID
     name: str
     description: str
+    public: bool
     published: bool
 
     class Config:
@@ -64,3 +68,9 @@ class PollList(BaseModel):
                 ]
             }
         }
+
+
+# Forward references
+from src.schemas.workspace import Workspace, WorkspaceShort   # noqa: E402
+Workspace.update_forward_refs()
+WorkspaceShort.update_forward_refs()
