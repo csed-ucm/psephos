@@ -8,6 +8,7 @@ from src.routes import group as GroupRoutes
 from src.routes import account as AccountRoutes
 from src.routes import websocket as WebSocketRoutes
 from src.routes import authentication as AuthenticationRoutes
+from src.routes import poll as PollRoutes
 from src.config import get_settings
 from src.dependencies import set_active_user
 
@@ -39,6 +40,10 @@ app.include_router(GroupRoutes.open_router,
 app.include_router(GroupRoutes.router,
                    prefix="/groups",
                    tags=["Groups"],
+                   dependencies=[Depends(set_active_user)])
+app.include_router(PollRoutes.router,
+                   prefix="/polls",
+                   tags=["Polls"],
                    dependencies=[Depends(set_active_user)])
 app.include_router(WebSocketRoutes.router,
                    prefix="/ws",
