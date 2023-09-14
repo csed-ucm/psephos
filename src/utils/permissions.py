@@ -26,6 +26,7 @@ def parse_action_file(resource_type: str) -> Permissions:
 # Create permissions for each resource type
 WorkspacePermissions = parse_action_file("workspace")
 GroupPermissions = parse_action_file("group")
+PollPermissions = parse_action_file("poll")
 
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
@@ -39,6 +40,9 @@ WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(WorkspacePermissions["get_wor
 
 GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
 GROUP_BASIC_PERMISSIONS = (GroupPermissions["get_group"])  # type: ignore
+
+POLL_ALL_PERMISSIONS = PollPermissions(-1)  # type: ignore
+POLL_BASIC_PERMISSIONS = (PollPermissions["get_poll"])  # type: ignore
 
 
 # Check if a user has a permission
