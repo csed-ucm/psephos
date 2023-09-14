@@ -12,6 +12,7 @@ class Workspace(BaseModel):
     members: Optional[list]
     groups: Optional[list]
     policies: Optional[list]
+    polls: Optional[list]
 
     class Config:
         schema_extra = {
