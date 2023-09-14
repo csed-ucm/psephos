@@ -132,6 +132,7 @@ class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     workspace: Link["Workspace"]
     resource_type = "poll"
+    public: bool
     published: bool
     questions: list
     policies: list[Link["Policy"]]
