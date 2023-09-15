@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class Question(BaseModel):
     id: int
+    question: str
     question_type: str
     options: list[str]
     correct_answer: list[int]
