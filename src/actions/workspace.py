@@ -339,8 +339,10 @@ async def create_poll(workspace: Workspace, input_data: PollSchemas.Poll):
     new_poll = Poll(name=input_data.name,
                     description=input_data.description,
                     workspace=workspace,  # type: ignore
+                    public=input_data.public,
                     published=input_data.published,
-                    questions=input_data.questions)
+                    questions=input_data.questions,
+                    policies=[])
 
     # Check if poll was created
     if not new_poll:
