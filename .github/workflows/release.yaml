@@ -3,9 +3,6 @@ name: Release Package
 on:
   workflow_dispatch:
 
-matrix:
-  
-
 jobs:
   release:
     runs-on: arc-runner-k8s
