@@ -116,4 +116,4 @@ jobs:
     steps:
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      if: steps.release.outputs.released == 'true'
+      if: needs.release.outputs.released == 'true'
