@@ -3,7 +3,7 @@ requires = ["setuptools", "build<0.10.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unipoll-api"
+name = "unipoll_api"
 version = "0.7.1"
 description = "Unipoll API"
 authors = [{email = "help@unipol.cc"}, {name = "University Polling"}]
@@ -31,12 +31,6 @@ testings = [
     'mypy',
 ]
 
-[tool.setuptools.package_data]
-unipoll-api = [
-    "py.typed",
-]
-
-
 [tool.semantic_release]
 version_toml = [
     "pyproject.toml:project.version",
@@ -47,9 +41,8 @@ upload_to_pypi = false
 upload_to_release = true
 commit_version_number = true
 tag_commit = true
-
 changelog_file = "CHANGELOG.md"
-build_command = "python -m pip install build && python -m build ."
+build_command = "python -m pip install build && python -m build"
 
 [tool.flake8]
 max-line-length = 120
