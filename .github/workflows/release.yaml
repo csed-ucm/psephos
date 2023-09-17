@@ -26,7 +26,11 @@ jobs:
       with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           force: "patch"
-          build_command: "python -m pip install build && python -m build"
+    - name: Debug release
+      run: |
+        echo "Released: ${{ steps.release.outputs.released }}"
+        echo "Version: ${{ steps.release.outputs.version }}"
+        echo "Tag: ${{ steps.release.outputs.tag }}"
     - name: Publish package to GitHub Release
       uses: python-semantic-release/upload-to-gh-release@main
       if: ${{ steps.release.outputs.released }} == 'true'
@@ -58,4 +62,4 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        tags: unipoll/api:${{ steps.release.outputs.tag }}, unipoll/api:latest
+        tags: unipoll/api:${{ steps.release.outputs.version }}, unipoll/api:latest
