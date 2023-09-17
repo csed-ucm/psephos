@@ -31,12 +31,17 @@ jobs:
         echo "Released: ${{ steps.release.outputs.released }}"
         echo "Version: ${{ steps.release.outputs.version }}"
         echo "Tag: ${{ steps.release.outputs.tag }}"
+    - name: Debug release without Brackets
+      run: |
+        echo "Released: steps.release.outputs.released"
+        echo "Version: steps.release.outputs.version"
+        echo "Tag: steps.release.outputs.tag"
     - name: Publish package to GitHub Release
       uses: python-semantic-release/upload-to-gh-release@main
-      if: ${{ steps.release.outputs.released }} == 'true'
+      if: steps.release.outputs.released == 'true'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.release.outputs.tag }}
+        tag: steps.release.outputs.tag
   docker:
     needs: release
     runs-on: arc-runner-k8s
