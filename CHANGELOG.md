@@ -2,6 +2,23 @@
 
 
 
+## v0.7.1 (2023-09-17)
+
+### Ci
+
+* ci: Removed matrix value ([`48304f8`](https://github.com/unipoll/API/commit/48304f85d6803b7331f76b38ad4097c66ac5f592))
+
+* ci: Updated release action
+
+Added build command and forced patch version ([`08ede08`](https://github.com/unipoll/API/commit/08ede08687fd19aeeef35e7c20b908b93834332b))
+
+* ci: Made jobs run sequentially ([`f912c06`](https://github.com/unipoll/API/commit/f912c06d2c0d7e0aa999875bfb41cd3853976d08))
+
+* ci: Updated release actions
+
+Added additional step to rebuild package manualy, added job to release Docker image using release output ([`937f218`](https://github.com/unipoll/API/commit/937f218af1a5ecd026d3ee699ee7fbaa94ea4f14))
+
+
 ## v0.7.0 (2023-09-04)
 
 ### Build
