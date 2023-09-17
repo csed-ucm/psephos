@@ -2,6 +2,13 @@
 
 
 
+## v0.7.4 (2023-09-17)
+
+### Ci
+
+* ci: Added id to the release step ([`19bcc00`](https://github.com/unipoll/API/commit/19bcc00b744367631ada21cba0cf09a127c39a93))
+
+
 ## v0.7.3 (2023-09-17)
 
 ### Ci
