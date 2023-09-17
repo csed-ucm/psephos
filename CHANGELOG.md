@@ -2,6 +2,13 @@
 
 
 
+## v0.7.3 (2023-09-17)
+
+### Ci
+
+* ci: Testing output variables without brackets ([`4d9894e`](https://github.com/unipoll/API/commit/4d9894eea496d84d90f09051ff64cb5e7ebe6cd1))
+
+
 ## v0.7.2 (2023-09-17)
 
 ### Build
