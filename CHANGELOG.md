@@ -2,6 +2,23 @@
 
 
 
+## v0.7.2 (2023-09-17)
+
+### Build
+
+* build: Removed package_data as not supported ([`46e9ea2`](https://github.com/unipoll/API/commit/46e9ea254bd25e6fb679b6704b954927a1a582fd))
+
+* build: Updated pyproject.toml
+
+Removed setuptools_scm, provided version manualy, updated email ([`67cd4a8`](https://github.com/unipoll/API/commit/67cd4a870af4457bc065323d3d3bca2ef7561d91))
+
+### Ci
+
+* ci: Updated release action
+
+Added debug message to see the output variables, changed docker tag from output.tag to output.version ([`eb989c0`](https://github.com/unipoll/API/commit/eb989c054ce8dc8facd0fae7269902fb7bb1f0a4))
+
+
 ## v0.7.1 (2023-09-17)
 
 ### Ci
