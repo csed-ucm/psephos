@@ -2,6 +2,15 @@
 
 
 
+## v0.7.5 (2023-09-17)
+
+### Ci
+
+* ci: Updated actions
+
+Added test job to release action, deleted docker action as it&#39;s moved to release, updated trigger for tests actions ([`93423ad`](https://github.com/unipoll/API/commit/93423ad6fd5e7ecc0d5493000df48164d631a229))
+
+
 ## v0.7.4 (2023-09-17)
 
 ### Ci
