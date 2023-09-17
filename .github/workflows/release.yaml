@@ -52,6 +52,7 @@ jobs:
           path-to-lcov: coverage.lcov
   release:
     runs-on: arc-runner-k8s
+    needs: test
     concurrency: release
     permissions:
       id-token: write
