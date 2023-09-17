@@ -110,3 +110,10 @@ jobs:
       with:
         push: true
         tags: unipoll/api:${{ needs.release.outputs.version }}, unipoll/api:latest
+  pypi:
+    needs: release
+    runs-on: arc-runner-k8s
+    steps:
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: steps.release.outputs.released == 'true'
