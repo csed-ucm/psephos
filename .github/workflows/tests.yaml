@@ -1,10 +1,10 @@
-name: Testing with Tox
+name: Run tests with Tox 
 
 on:
   workflow_dispatch:
   pull_request:
     branches:
-      - "main"
+      - "dev"
 
 jobs:
   test:
