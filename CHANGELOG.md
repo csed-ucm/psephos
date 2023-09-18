@@ -2,6 +2,37 @@
 
 
 
+## v0.7.6 (2023-09-18)
+
+### Ci
+
+* ci: Fixed released condition for pypi job ([`e100810`](https://github.com/unipoll/API/commit/e100810683acdd2612681334645f8ec01af6fc45))
+
+* ci: Added step to publish package to PyPI ([`441bd3a`](https://github.com/unipoll/API/commit/441bd3a05c00d06b9c40d66e8821e57f036de639))
+
+* ci: Added test trigger on pull into main ([`df99d9e`](https://github.com/unipoll/API/commit/df99d9e7922fb2152609f48489fa2f463290aa5b))
+
+* ci: Removed debug message from release step ([`aef429c`](https://github.com/unipoll/API/commit/aef429c353cd3529473f9df28299f3bfb5896031))
+
+* ci: Added test as a requirement for release action ([`b91ff0a`](https://github.com/unipoll/API/commit/b91ff0ab4d3b79d5f79fe0210a7cf6eef904ae8d))
+
+### Unknown
+
+* Update README.md
+
+Updated tests badge ([`d8ee875`](https://github.com/unipoll/API/commit/d8ee8750089f6f87905eab22b32a2edd0130a7f4))
+
+* Update README.md
+
+Changed color of version badge ([`9c0e7c7`](https://github.com/unipoll/API/commit/9c0e7c771f576bc691d1efe147cefa9602f625fb))
+
+* Merge branch &#39;main&#39; of github.com:unipoll/API ([`a79a75b`](https://github.com/unipoll/API/commit/a79a75b1709c596c3f55dc90a90083604ea799a7))
+
+* Update README.md
+
+Added badges for GitHub release and Docker Image ([`5be3a4a`](https://github.com/unipoll/API/commit/5be3a4ad9c498e31ef9480f06ff0f935fe218325))
+
+
 ## v0.7.5 (2023-09-17)
 
 ### Ci
