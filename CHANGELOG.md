@@ -2,6 +2,13 @@
 
 
 
+## v0.7.8 (2023-09-18)
+
+### Fix
+
+* fix: Added matrix to pypi release step ([`629f080`](https://github.com/unipoll/API/commit/629f0807f3553e90d0f838fb680538904691ee27))
+
+
 ## v0.7.7 (2023-09-18)
 
 ### Build
