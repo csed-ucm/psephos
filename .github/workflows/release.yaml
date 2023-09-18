@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Test with tox
     runs-on: arc-runner-k8s
     strategy:
       fail-fast: false
@@ -51,6 +52,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.lcov
   release:
+    name: Release Package to GitHub
     runs-on: arc-runner-k8s
     needs: test
     concurrency: release
@@ -85,6 +87,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ steps.release.outputs.tag }}
   docker:
+    name: Build and push Docker image
     needs: release
     runs-on: arc-runner-k8s
     steps:
@@ -111,9 +114,25 @@ jobs:
         push: true
         tags: unipoll/api:${{ needs.release.outputs.version }}, unipoll/api:latest
   pypi:
+    name: Publish to PyPI
     needs: release
     runs-on: arc-runner-k8s
+    environment:
+      name: pypi
+      url: https://pypi.org/p/unipoll-api
+    permissions:
+      id-token: write
     steps:
+    - name: Set up Python ${{matrix.python-version}}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{matrix.python-version}}
+    - name: Install dependencies
+      run: |
+        python -m pip install build
+    - name: Build package distributions
+      run: |
+        python -m build
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       if: needs.release.outputs.released == 'true'
