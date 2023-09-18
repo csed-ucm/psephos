@@ -3,7 +3,7 @@ requires = ["setuptools", "build<0.10.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unipoll_api"
+name = "unipoll-api"
 version = "0.7.6"
 description = "Unipoll API"
 authors = [{email = "help@unipol.cc"}, {name = "University Polling"}]
