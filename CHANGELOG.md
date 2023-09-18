@@ -2,6 +2,17 @@
 
 
 
+## v0.7.7 (2023-09-18)
+
+### Build
+
+* build: Changed name to unipoll-api ([`ffe4b80`](https://github.com/unipoll/API/commit/ffe4b80367cabed03a2bad0fe03c572c54aa014e))
+
+### Ci
+
+* ci: Updated PyPI release step ([`4bbf66c`](https://github.com/unipoll/API/commit/4bbf66cca421cbd731d95ccf354701d42646698d))
+
+
 ## v0.7.6 (2023-09-18)
 
 ### Ci
