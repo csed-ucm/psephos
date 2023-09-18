@@ -1,4 +1,4 @@
-name: Run tests with Tox 
+name: Publish to PyPI
 
 on:
   workflow_dispatch:
