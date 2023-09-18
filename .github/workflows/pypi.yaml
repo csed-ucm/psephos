@@ -6,7 +6,7 @@ on:
 jobs:
   pypi:
     name: Publish to PyPI
-    runs-on: arc-runner-k8s
+    runs-on: ubuntu-latest 
     strategy:
       matrix:
         python-version: ['3.11']
