@@ -2,6 +2,17 @@
 
 
 
+## v0.7.9 (2023-09-18)
+
+### Ci
+
+* ci: Added checkout step to PyPI release job ([`2f61e81`](https://github.com/unipoll/API/commit/2f61e819562bb50d92d9ae5ae3a0684b21348610))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of github.com:unipoll/API ([`ba57603`](https://github.com/unipoll/API/commit/ba57603162131f788b8bb7eefab86f6397cfe811))
+
+
 ## v0.7.8 (2023-09-18)
 
 ### Fix
