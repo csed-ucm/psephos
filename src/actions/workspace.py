@@ -328,7 +328,7 @@ async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
 
 
 # Create a new poll in a workspace
-async def create_poll(workspace: Workspace, input_data: PollSchemas.Poll):
+async def create_poll(workspace: Workspace, input_data: PollSchemas.PollResponse):
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
     for poll in workspace.polls:  # type: ignore
@@ -353,4 +353,4 @@ async def create_poll(workspace: Workspace, input_data: PollSchemas.Poll):
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
     # Return the new poll
-    return PollSchemas.Poll(**new_poll.dict())
+    return PollSchemas.PollResponse(**new_poll.dict())

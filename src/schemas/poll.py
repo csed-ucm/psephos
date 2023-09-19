@@ -4,7 +4,7 @@ from src.documents import ResourceID
 from src.schemas.question import Question
 
 
-class Poll(BaseModel):
+class PollResponse(BaseModel):
     id: Optional[ResourceID]
     # workspace: Optional[Union['Workspace', 'WorkspaceShort']]
     workspace: Optional[Any]
@@ -12,7 +12,7 @@ class Poll(BaseModel):
     description: str
     public: bool
     published: bool
-    questions: list[Question]
+    questions: Optional[list[Question]]
     policies: Optional[list]
 
     class Config:
@@ -66,6 +66,31 @@ class PollList(BaseModel):
                         "published": True
                     }
                 ]
+            }
+        }
+
+
+class CreatePollRequest(BaseModel):
+    name: str
+    description: str
+    public: bool
+    published: bool
+    questions: list[Question]
+
+
+class UpdatePollRequest(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    public: Optional[bool]
+    published: Optional[bool]
+    questions: Optional[list[Question]]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Poll 01",
+                "description": "This is an example poll",
+                "published": True
             }
         }
 

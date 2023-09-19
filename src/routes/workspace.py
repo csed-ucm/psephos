@@ -314,9 +314,9 @@ async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace_mo
 @router.post("/{workspace_id}/polls",
              response_description="Created poll",
              status_code=201,
-             response_model=PollSchemas.Poll)
+             response_model=PollSchemas.PollResponse)
 async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                      input_data: PollSchemas.Poll = Body(...)):
+                      input_data: PollSchemas.CreatePollRequest = Body(...)):
     try:
         return await WorkspaceActions.create_poll(workspace, input_data)
     except APIException as e:
