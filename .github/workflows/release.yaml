@@ -116,7 +116,9 @@ jobs:
   pypi:
     name: Publish to PyPI
     needs: release
-    runs-on: arc-runner-k8s
+    # This action is not supported on self-hosted runners
+    # runs-on: arc-runner-k8s
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.11']
