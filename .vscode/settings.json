@@ -63,7 +63,7 @@
     "files.exclude": {
         ".vscode": true,
         "**.egg-info": true,
-        "**/__init__.py": true,
+        "**/__pycache__": true,
         "**/.coverage": true,
         "**/.history": true,
         "**/.mypy_cache": true,
