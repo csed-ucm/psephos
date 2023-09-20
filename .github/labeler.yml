@@ -1,0 +1,10 @@
+bug:
+  - '(bug|BUG)'
+new feature:
+  - '(new feature|FEATURE|FEAT)'
+improvement:
+  - '(improvement|IMPROVEMENT)'
+documentation:
+  - '(docs|DOCS|documentation|DOCUMENTATION)'
+question:
+  - '(question|QUESTION)'
