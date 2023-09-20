@@ -140,6 +140,7 @@ async def check_poll_permission(request: Request, account: Account = Depends(get
     # Get the poll with the given id
     poll = await Poll.get(ResourceID(pollID), fetch_links=True)
     # Check if poll exists
+    e: Exception
     if not poll:
         e = PollExceptions.PollNotFound(pollID)
         raise HTTPException(e.code, str(e))

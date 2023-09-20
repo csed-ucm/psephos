@@ -1,4 +1,4 @@
-from typing import Optional, Union, Any
+from typing import Optional, Any
 from pydantic import BaseModel
 from src.documents import ResourceID
 from src.schemas.question import Question

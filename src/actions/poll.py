@@ -1,4 +1,3 @@
-from typing import Literal
 from src.documents import Poll, Policy, Group, Account
 from src.schemas import poll as PollSchemas
 from src.schemas import question as QuestionSchemas
@@ -23,11 +22,11 @@ async def get_poll(poll: Poll, include: list[str]) -> PollSchemas.PollResponse:
             include = ["policies", "questions"]
         # Fetch the resources if the user has the required permissions
         if "questions" in include:
-            req_permissions = Permissions.PollPermissions["get_poll_questions"]
+            req_permissions = Permissions.PollPermissions["get_poll_questions"]  # type: ignore
             if Permissions.check_permission(permissions, req_permissions) or poll.public:
                 questions = (await get_poll_questions(poll)).questions
         if "policies" in include:
-            req_permissions = Permissions.PollPermissions["get_poll_policies"]
+            req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore
             if Permissions.check_permission(permissions, req_permissions):
                 policies = (await get_poll_policies(poll)).policies
 

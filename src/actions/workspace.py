@@ -328,7 +328,7 @@ async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
 
 
 # Create a new poll in a workspace
-async def create_poll(workspace: Workspace, input_data: PollSchemas.PollResponse):
+async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRequest) -> PollSchemas.PollResponse:
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
     for poll in workspace.polls:  # type: ignore
