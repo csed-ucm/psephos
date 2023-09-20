@@ -1,12 +1,13 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
 from src.account_manager import current_active_user, get_current_active_user
-from src.documents import ResourceID, Workspace, Group, Account
+from src.documents import ResourceID, Workspace, Group, Account, Poll
 from src.utils import permissions as Permissions
 # Exceptions
 from src.exceptions import workspace as WorkspaceExceptions
 from src.exceptions import group as GroupExceptions
 from src.exceptions import account as AccountExceptions
+from src.exceptions import poll as PollExceptions
 from src.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
@@ -50,6 +51,17 @@ async def get_group_model(group_id: ResourceID) -> Group:
         # await group.fetch_all_links()
         return group
     raise GroupExceptions.GroupNotFound(group_id)
+
+
+# Dependency to get a poll by id and verify it exists
+async def get_poll_model(poll_id: ResourceID) -> Poll:
+    """
+    Returns a poll with the given id.
+    """
+    poll = await Poll.get(poll_id, fetch_links=True)
+    if poll:
+        return poll
+    raise GroupExceptions.GroupNotFound(poll_id)
 
 
 # Dependency to get a user by id and verify it exists
@@ -117,4 +129,36 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
             raise HTTPException(e.code, str(e))
     except KeyError:
         e = GroupExceptions.ActionNotFound(operationID)
+        raise HTTPException(e.code, str(e))
+
+
+# Check if the current user has permissions to access the poll and perform requested actions
+async def check_poll_permission(request: Request, account: Account = Depends(get_current_active_user)):
+    # Extract requested action(operationID) and id of the workspace from the path
+    operationID = extract_action_from_path(request)
+    pollID = extract_resourceID_from_path(request)
+    # Get the poll with the given id
+    poll = await Poll.get(ResourceID(pollID), fetch_links=True)
+    # Check if poll exists
+    e: Exception
+    if not poll:
+        e = PollExceptions.PollNotFound(pollID)
+        raise HTTPException(e.code, str(e))
+
+    # Check if the poll is public
+    if poll.public:
+        return
+
+    # Get the user policy for the poll
+    user_permissions = await Permissions.get_all_permissions(poll, account)
+
+    # Check that the user has the required permission
+    try:
+        required_permission = Permissions.PollPermissions[operationID]  # type: ignore
+        if not Permissions.check_permission(Permissions.PollPermissions(user_permissions),  # type: ignore
+                                            required_permission):
+            e = PollExceptions.UserNotAuthorized(account, poll, operationID)
+            raise HTTPException(e.code, str(e))
+    except KeyError:
+        e = PollExceptions.ActionNotFound(operationID)
         raise HTTPException(e.code, str(e))

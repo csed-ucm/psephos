@@ -9,6 +9,7 @@ from src.schemas import workspace as WorkspaceSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import group as GroupSchemas
 from src.schemas import member as MemberSchemas
+from src.schemas import poll as PollSchemas
 from src import dependencies as Dependencies
 from src.utils import permissions as Permissions
 from src.account_manager import current_active_user
@@ -54,7 +55,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = B
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-query_params = list[Literal["policies", "groups", "members", "all"]]
+query_params = list[Literal["all", "policies", "groups", "members", "polls"]]
 
 
 # Get a workspace with the given id
@@ -102,13 +103,14 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
         groups = None
         members = None
         policies = None
+        polls = None
 
         if include:
             # Get the permissions(allowed actions) of the current user
             permissions = await Permissions.get_all_permissions(workspace, account)
             # If "all" is in the list, include all resources
             if "all" in include:
-                include = ["policies", "groups", "members"]
+                include = ["policies", "groups", "members", "polls"]
             # Fetch the resources if the user has the required permissions
             if "groups" in include:
                 req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
@@ -122,13 +124,18 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
                 req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
                 if Permissions.check_permission(permissions, req_permissions):
                     policies = (await WorkspaceActions.get_workspace_policies(workspace)).policies
+            if "polls" in include:
+                req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
+                if Permissions.check_permission(permissions, req_permissions):
+                    polls = (await WorkspaceActions.get_polls(workspace)).polls
         # Return the workspace with the fetched resources
         return WorkspaceSchemas.Workspace(id=workspace.id,
                                           name=workspace.name,
                                           description=workspace.description,
                                           groups=groups,
                                           members=members,
-                                          policies=policies)
+                                          policies=policies,
+                                          polls=polls)
 
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
@@ -287,5 +294,30 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
 async def get_workspace_permissions():
     try:
         return await PermissionsActions.get_workspace_permissions()
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get Workspace Polls
+@router.get("/{workspace_id}/polls",
+            response_description="List of all polls in the workspace",
+            response_model=PollSchemas.PollList,
+            response_model_exclude_none=True)
+async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
+    try:
+        return await WorkspaceActions.get_polls(workspace)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Create a new poll in the workspace
+@router.post("/{workspace_id}/polls",
+             response_description="Created poll",
+             status_code=201,
+             response_model=PollSchemas.PollResponse)
+async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace_model),
+                      input_data: PollSchemas.CreatePollRequest = Body(...)):
+    try:
+        return await WorkspaceActions.create_poll(workspace, input_data)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

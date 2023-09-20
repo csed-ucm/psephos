@@ -1,4 +1,3 @@
-
 # from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -13,6 +12,7 @@ class Workspace(BaseModel):
     members: Optional[list]
     groups: Optional[list]
     policies: Optional[list]
+    polls: Optional[list]
 
     class Config:
         schema_extra = {

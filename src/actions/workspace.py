@@ -3,18 +3,23 @@
 from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from src.account_manager import current_active_user
-from src.documents import Group, ResourceID, Workspace, Account, Policy, create_link
+from src.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
+from src.utils import permissions as Permissions
+
+# Schemas
 from src.schemas import workspace as WorkspaceSchemas
-# from app.schemas import account as AccountSchemas
 from src.schemas import group as GroupSchemas
 from src.schemas import policy as PolicySchemas
 from src.schemas import member as MemberSchemas
+from src.schemas import poll as PollSchemas
+
+# Exceptions
 from src.exceptions import workspace as WorkspaceExceptions
 from src.exceptions import account as AccountExceptions
 from src.exceptions import group as GroupExceptions
 from src.exceptions import resource as GenericExceptions
 from src.exceptions import policy as PolicyExceptions
-from src.utils import permissions as Permissions
+from src.exceptions import poll as PollExceptions
 
 
 # Get a list of workspaces where the account is a owner/member
@@ -311,3 +316,41 @@ async def set_workspace_policy(workspace: Workspace,
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=MemberSchemas.Member(**policy_holder.dict()))  # type: ignore
+
+
+# Get a list of polls in a workspace
+async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
+    poll_list = []
+    poll: Poll
+    for poll in workspace.polls:  # type: ignore
+        poll_list.append(PollSchemas.PollShort(**poll.dict(exclude={'questions', 'policies'})))
+    return PollSchemas.PollList(polls=poll_list)
+
+
+# Create a new poll in a workspace
+async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRequest) -> PollSchemas.PollResponse:
+    # Check if poll name is unique
+    poll: Poll  # For type hinting, until Link type is supported
+    for poll in workspace.polls:  # type: ignore
+        if poll.name == input_data.name:
+            raise PollExceptions.NonUniqueName(poll)
+
+    # Create a new poll
+    new_poll = Poll(name=input_data.name,
+                    description=input_data.description,
+                    workspace=workspace,  # type: ignore
+                    public=input_data.public,
+                    published=input_data.published,
+                    questions=input_data.questions,
+                    policies=[])
+
+    # Check if poll was created
+    if not new_poll:
+        raise PollExceptions.ErrorWhileCreating(new_poll)
+
+    # Add the poll to the workspace
+    workspace.polls.append(new_poll)  # type: ignore
+    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
+
+    # Return the new poll
+    return PollSchemas.PollResponse(**new_poll.dict())
