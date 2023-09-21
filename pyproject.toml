@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools", "build<0.10.0"]
+requires = ["setuptools", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "unipoll-api"
 version = "0.7.9"
 description = "Unipoll API"
-authors = [{email = "help@unipol.cc"}, {name = "University Polling"}]
+authors = [{email = "help@unipoll.cc"}, {name = "University Polling"}]
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -15,14 +15,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    'fastapi[all]',
-    'uvicorn[all]',
-    'fastapi-users[beanie]',
-    'beanie',
+    'fastapi==0.98.0',
+    'uvicorn[standard]==0.22.0',
+    'fastapi-users[beanie]==11.0.0',
+    'beanie==1.19.0',
+    'colorama==0.4.6',
 ]
 
+[project.scripts]
+unipoll-api = "unipoll_api.app:run"
+
 [project.optional-dependencies]
-testings = [
+dev = [
     'pytest',
     'pytest-cov',
     'faker',
@@ -31,10 +35,17 @@ testings = [
     'mypy',
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["unipoll-api*"]
+exclude = ["docs*", "tests*", "postman*"]
+
 [tool.semantic_release]
-version_toml = [
-    "pyproject.toml:project.version",
-]
+version_variables = ["unipoll_api/__version__.py:version"]
+version_toml = ["pyproject.toml:project.version"]
 branch = "main"
 major_on_zero = true
 upload_to_pypi = false
@@ -48,8 +59,8 @@ build_command = "python -m pip install build && python -m build"
 max-line-length = 120
 
 [tool.pytest.ini_options]
+pythonpath = ["src"]
 addopts = "--cov --cov-report lcov"
-testpaths = ["tests"]
 asyncio_mode="auto"
 filterwarnings = [
     'ignore:cgi is deprecated:DeprecationWarning',
@@ -59,7 +70,6 @@ filterwarnings = [
 ]
 
 [tool.mypy]
-# mypy_path = "src"
 check_untyped_defs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true

@@ -62,18 +62,13 @@
     ],
     "files.exclude": {
         ".vscode": true,
-        "**.egg-info": true,
-        "**/__init__.py": true,
+        "**/__pycache__": true,
         "**/.coverage": true,
         "**/.history": true,
         "**/.mypy_cache": true,
         "**/.postman": true,
         "**/.pytest_cache": true,
         "**/.tox": true,
-        "**/*.egg-info": true,
-        "**/build": true,
-        "**/dist": true,
-        "**/postman": true,
         "**/venv": true
     },
 }
