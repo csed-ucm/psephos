@@ -1,6 +1,6 @@
 from fastapi import Request
-from src.documents import ResourceID
-from src.utils.colored_dbg import print_error
+from unipoll_api.documents import ResourceID
+from unipoll_api.utils.colored_dbg import print_error
 
 
 # Extract resource from request

@@ -8,13 +8,13 @@ from pydantic import BaseModel
 from httpx import AsyncClient
 from beanie.operators import In
 # from pydantic import BaseSettings
-from src import app
-from src.utils import colored_dbg
-from src.documents import Account, ResourceID
+from unipoll_api import app
+from unipoll_api.utils import colored_dbg
+from unipoll_api.documents import Account, ResourceID
 # from app.exceptions.group import GroupNotFound
-from . import test_1_accounts
-from .test_2_workspaces import create_random_user, TestWorkspace
-from src.utils import permissions as Permissions
+import test_1_accounts
+from test_2_workspaces import create_random_user, TestWorkspace
+from unipoll_api.utils import permissions as Permissions
 
 # import pytest
 # from faker import Faker
@@ -27,7 +27,7 @@ from src.utils import permissions as Permissions
 # from app.utils import colored_dbg
 # from app.models.documents import ResourceID, Account
 # # from app.schemas import group as WorkspaceSchema
-# from . import test_1_accounts
+# from unipoll_api. import test_1_accounts
 # from app.utils import permissions as Permissions
 
 

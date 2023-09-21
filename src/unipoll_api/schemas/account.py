@@ -1,6 +1,6 @@
 from fastapi_users import schemas
 from pydantic import BaseModel, Field, EmailStr
-from src.documents import ResourceID
+from unipoll_api.documents import ResourceID
 
 
 class Account(schemas.BaseUser[ResourceID]):

@@ -1,5 +1,5 @@
 from fastapi import status
-from src.exceptions import resource
+from unipoll_api.exceptions import resource
 # from app.models.documents import ResourceID
 
 

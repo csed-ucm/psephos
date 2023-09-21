@@ -1,16 +1,13 @@
-from fastapi import FastAPI, Depends
+import uvicorn
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
-from src.mongo_db import mainDB, DOCUMENT_MODELS
-from src.routes import workspace as WorkspaceRoutes
-from src.routes import group as GroupRoutes
-from src.routes import account as AccountRoutes
-from src.routes import websocket as WebSocketRoutes
-from src.routes import authentication as AuthenticationRoutes
-from src.routes import poll as PollRoutes
-from src.config import get_settings
-from src.dependencies import set_active_user
+from unipoll_api.routes import router
+from unipoll_api.mongo_db import mainDB, DOCUMENT_MODELS
+from unipoll_api.config import get_settings
+from unipoll_api.__version__ import version
+from unipoll_api.utils import cli_args, colored_dbg
 
 
 # Apply setting from configuration file
@@ -23,46 +20,13 @@ app = FastAPI(
     version=settings.app_version,          # Version of the application
 )
 
-
 # Add endpoints defined in the routes directory
-app.include_router(WorkspaceRoutes.open_router,
-                   prefix="/workspaces",
-                   tags=["Workspaces"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(WorkspaceRoutes.router,
-                   prefix="/workspaces",
-                   tags=["Workspaces"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(GroupRoutes.open_router,
-                   prefix="/groups",
-                   tags=["Groups"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(GroupRoutes.router,
-                   prefix="/groups",
-                   tags=["Groups"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(PollRoutes.router,
-                   prefix="/polls",
-                   tags=["Polls"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(WebSocketRoutes.router,
-                   prefix="/ws",
-                   tags=["WebSocket"])
-app.include_router(AccountRoutes.router,
-                   prefix="/accounts",
-                   tags=["Accounts"],
-                   dependencies=[Depends(set_active_user)])
-app.include_router(AuthenticationRoutes.router,
-                   prefix="/auth",
-                   tags=["Authentication"])
-app.include_router(WebSocketRoutes.router,
-                   prefix="/ws",
-                   tags=["WebSocket"])
-
+app.include_router(router)
 
 # Add CORS middleware to allow cross-origin requests
-origins = ["*"]
+origins = settings.origins
 
+# Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -85,3 +49,14 @@ async def on_startup() -> None:
         database=mainDB,
         document_models=DOCUMENT_MODELS,  # type: ignore
     )
+
+
+# Run the application
+def start_server(host: str = settings.host, port: int = settings.port, reload: bool = settings.reload):
+    uvicorn.run('unipoll_api.app:app', reload=reload, host=host, port=port)
+
+
+def run():
+    args = cli_args.parse_args()
+    colored_dbg.info("University Polling API v{}".format(version))
+    start_server(args.host, args.port, args.reload)

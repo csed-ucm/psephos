@@ -1,7 +1,7 @@
 from typing import Literal, Any, Optional
 from pydantic import BaseModel, Field
-from src.documents import ResourceID, Account, Group
-from src.utils.permissions import Permissions
+from unipoll_api.documents import ResourceID, Account, Group
+from unipoll_api.utils.permissions import Permissions
 
 
 class Policy(BaseModel):

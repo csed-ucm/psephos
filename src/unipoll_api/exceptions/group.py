@@ -1,5 +1,5 @@
-from src.documents import ResourceID, Account, Group
-from src.exceptions import resource
+from unipoll_api.documents import ResourceID, Account, Group
+from unipoll_api.exceptions import resource
 
 
 # Exception for when a Group with the same name already exists

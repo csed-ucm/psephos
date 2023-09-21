@@ -1,18 +1,18 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
-from src.actions import workspace as WorkspaceActions
-from src.actions import permissions as PermissionsActions
-from src.exceptions.resource import APIException
-from src.documents import Workspace, ResourceID
-from src.schemas import workspace as WorkspaceSchemas
-from src.schemas import policy as PolicySchemas
-from src.schemas import group as GroupSchemas
-from src.schemas import member as MemberSchemas
-from src.schemas import poll as PollSchemas
-from src import dependencies as Dependencies
-from src.utils import permissions as Permissions
-from src.account_manager import current_active_user
+from unipoll_api.actions import workspace as WorkspaceActions
+from unipoll_api.actions import permissions as PermissionsActions
+from unipoll_api.exceptions.resource import APIException
+from unipoll_api.documents import Workspace, ResourceID
+from unipoll_api.schemas import workspace as WorkspaceSchemas
+from unipoll_api.schemas import policy as PolicySchemas
+from unipoll_api.schemas import group as GroupSchemas
+from unipoll_api.schemas import member as MemberSchemas
+from unipoll_api.schemas import poll as PollSchemas
+from unipoll_api import dependencies as Dependencies
+from unipoll_api.utils import permissions as Permissions
+from unipoll_api.account_manager import current_active_user
 
 # APIRouter creates path operations for user module
 open_router = APIRouter()

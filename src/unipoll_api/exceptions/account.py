@@ -1,5 +1,5 @@
-from src.exceptions import resource
-from src.documents import ResourceID
+from unipoll_api.exceptions import resource
+from unipoll_api.documents import ResourceID
 
 
 class AccountNotFound(resource.ResourceNotFound):

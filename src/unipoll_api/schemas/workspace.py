@@ -1,7 +1,7 @@
 # from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import Optional
-from src.documents import ResourceID
+from unipoll_api.documents import ResourceID
 
 
 # Schema for the response with basic workspace info (name and role)

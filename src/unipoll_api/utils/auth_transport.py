@@ -6,7 +6,7 @@ from fastapi_users.openapi import OpenAPIResponseType
 from fastapi import Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
-from src.schemas.authentication import LoginResponse
+from unipoll_api.schemas.authentication import LoginResponse
 
 
 class BearerTransport(Transport):

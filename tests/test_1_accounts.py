@@ -5,10 +5,10 @@ import pytest
 # from devtools import debug
 from httpx import AsyncClient
 from pydantic import BaseModel
-from src.app import app
+from unipoll_api.app import app
 # from app.models.user import Account
-from src.utils import colored_dbg
-from src.documents import ResourceID
+from unipoll_api.utils import colored_dbg
+from unipoll_api.documents import ResourceID
 
 
 fake = Faker()

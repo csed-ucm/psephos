@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Any, Optional
-from src.documents import ResourceID
+from unipoll_api.documents import ResourceID
 
 
 class Group(BaseModel):

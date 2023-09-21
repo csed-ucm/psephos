@@ -2,13 +2,13 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, Query, HTTPException
 
-from src import dependencies as Dependencies
-from src.documents import Poll
-from src.exceptions.resource import APIException
-from src.schemas import poll as PollSchemas
-from src.schemas import question as QuestionSchemas
-from src.schemas import policy as PolicySchema
-from src.actions import poll as PollActions
+from unipoll_api import dependencies as Dependencies
+from unipoll_api.documents import Poll
+from unipoll_api.exceptions.resource import APIException
+from unipoll_api.schemas import poll as PollSchemas
+from unipoll_api.schemas import question as QuestionSchemas
+from unipoll_api.schemas import policy as PolicySchema
+from unipoll_api.actions import poll as PollActions
 
 open_router = APIRouter()
 router = APIRouter(dependencies=[Depends(Dependencies.check_poll_permission)])

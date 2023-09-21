@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
-from src.documents import ResourceID
+from unipoll_api.documents import ResourceID
 
 
 # Schema for the response with basic member info

@@ -1,5 +1,5 @@
-from src.documents import ResourceID, Workspace, Account
-from src.exceptions import resource
+from unipoll_api.documents import ResourceID, Workspace, Account
+from unipoll_api.exceptions import resource
 
 
 # Exception for when a Workspace with the same name already exists

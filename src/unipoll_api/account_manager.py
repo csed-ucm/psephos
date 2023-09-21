@@ -5,15 +5,15 @@ from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (AuthenticationBackend,
                                           CookieTransport)
-from src.utils.auth_transport import BearerTransport
-from src.config import get_settings
+from unipoll_api.utils.auth_transport import BearerTransport
+from unipoll_api.config import get_settings
 from fastapi_users_db_beanie import BeanieUserDatabase, ObjectIDIDMixin
 # from fastapi_users_db_beanie.access_token import BeanieAccessTokenDatabase, BeanieBaseAccessToken
-from src.utils.token_db import BeanieAccessTokenDatabase
+from unipoll_api.utils.token_db import BeanieAccessTokenDatabase
 # from fastapi_users.authentication.strategy.db import AccessTokenDatabase, DatabaseStrategy
-from src.utils.auth_strategy import DatabaseStrategy
-from src.documents import Account, AccessToken
-from src.utils import colored_dbg
+from unipoll_api.utils.auth_strategy import DatabaseStrategy
+from unipoll_api.documents import Account, AccessToken
+from unipoll_api.utils import colored_dbg
 
 
 SECRET = get_settings().secrete_key

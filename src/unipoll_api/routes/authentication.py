@@ -6,12 +6,14 @@ from fastapi_users.openapi import OpenAPIResponseType
 from fastapi_users.router.common import ErrorCode, ErrorModel
 from fastapi_users.authentication import Strategy
 
-from src.account_manager import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
-from src.actions import authentication as AuthActions
-# from src.schemas import authentication as AuthSchemas
-from src.schemas import account as AccountSchemas
-from src.exceptions.resource import APIException
-from src.utils.token_db import BeanieAccessTokenDatabase
+from unipoll_api import account_manager as AccountManager
+
+# import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
+from unipoll_api.actions import authentication as AuthActions
+# from unipoll_api.schemas import authentication as AuthSchemas
+from unipoll_api.schemas import account as AccountSchemas
+from unipoll_api.exceptions.resource import APIException
+from unipoll_api.utils.token_db import BeanieAccessTokenDatabase
 router = APIRouter()
 
 
@@ -33,20 +35,20 @@ login_responses: OpenAPIResponseType = {
             }
         },
     },
-    **jwt_backend.transport.get_openapi_login_responses_success(),
+    **AccountManager.jwt_backend.transport.get_openapi_login_responses_success(),
 }
 
 
 @router.post(
     "/jwt/login",
-    name=f"auth:{jwt_backend.name}.login",
+    name=f"auth:{AccountManager.jwt_backend.name}.login",
     responses=login_responses,
     response_model_exclude_unset=True
 )
 async def login(credentials: OAuth2PasswordRequestForm = Depends(),
-                user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
-                token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
-                strategy: Strategy = Depends(get_database_strategy)):
+                user_manager: BaseUserManager[models.UP, models.ID] = Depends(AccountManager.get_user_manager),
+                token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
+                strategy: Strategy = Depends(AccountManager.get_database_strategy)):
     user = await user_manager.authenticate(credentials)
 
     if user is None or not user.is_active:
@@ -60,15 +62,15 @@ async def login(credentials: OAuth2PasswordRequestForm = Depends(),
     #         detail=ErrorCode.LOGIN_USER_NOT_VERIFIED,
     #     )
 
-    return await jwt_backend.login(strategy, user)
+    return await AccountManager.jwt_backend.login(strategy, user)
 
 
 # Refresh the access token using the refresh token
 @router.post("/jwt/refresh", responses=login_responses, response_model_exclude_unset=True)
 async def refresh_jwt(authorization: Annotated[str, Header(...)],
                       refresh_token: Annotated[str, Header(...)],
-                      token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
-                      strategy: Strategy = Depends(get_database_strategy)):
+                      token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
+                      strategy: Strategy = Depends(AccountManager.get_database_strategy)):
     """Refresh the access token using the refresh token.
 
     Headers:
@@ -85,8 +87,8 @@ async def refresh_jwt(authorization: Annotated[str, Header(...)],
 @router.post("/jwt/postman_refresh", responses=login_responses, response_model_exclude_unset=True)
 async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
                                      body: Annotated[str, Body(...)],
-                                     token_db: BeanieAccessTokenDatabase = Depends(get_access_token_db),
-                                     strategy: Strategy = Depends(get_database_strategy)):
+                                     token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
+                                     strategy: Strategy = Depends(AccountManager.get_database_strategy)):
     """Refresh the access token using the refresh token.
 
     Headers:
@@ -106,7 +108,7 @@ async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
 
 
 # Include prebuilt routes for authentication
-router.include_router(fastapi_users.get_register_router(
+router.include_router(AccountManager.fastapi_users.get_register_router(
     AccountSchemas.Account, AccountSchemas.CreateAccount))
-router.include_router(fastapi_users.get_reset_password_router())
-router.include_router(fastapi_users.get_verify_router(AccountSchemas.Account))
+router.include_router(AccountManager.fastapi_users.get_reset_password_router())
+router.include_router(AccountManager.fastapi_users.get_verify_router(AccountSchemas.Account))

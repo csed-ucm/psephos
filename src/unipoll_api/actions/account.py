@@ -1,7 +1,7 @@
 # Account actions
-from src import documents as Documents
-from src.account_manager import current_active_user
-from src.exceptions import account as AccountExceptions
+from unipoll_api import documents as Documents
+from unipoll_api.account_manager import current_active_user
+from unipoll_api.exceptions import account as AccountExceptions
 
 
 # Delete account

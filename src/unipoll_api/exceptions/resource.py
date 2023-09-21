@@ -1,6 +1,6 @@
 from fastapi import status
-from src.documents import Account, Resource
-from src.utils import colored_dbg as Debug
+from unipoll_api.documents import Account, Resource
+from unipoll_api.utils import colored_dbg as Debug
 from beanie import PydanticObjectId
 
 

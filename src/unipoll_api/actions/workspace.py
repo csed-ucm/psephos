@@ -2,24 +2,24 @@
 # from pydantic import EmailStr
 from beanie import WriteRules, DeleteRules
 from beanie.operators import In
-from src.account_manager import current_active_user
-from src.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
-from src.utils import permissions as Permissions
+from unipoll_api.account_manager import current_active_user
+from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
+from unipoll_api.utils import permissions as Permissions
 
 # Schemas
-from src.schemas import workspace as WorkspaceSchemas
-from src.schemas import group as GroupSchemas
-from src.schemas import policy as PolicySchemas
-from src.schemas import member as MemberSchemas
-from src.schemas import poll as PollSchemas
+from unipoll_api.schemas import workspace as WorkspaceSchemas
+from unipoll_api.schemas import group as GroupSchemas
+from unipoll_api.schemas import policy as PolicySchemas
+from unipoll_api.schemas import member as MemberSchemas
+from unipoll_api.schemas import poll as PollSchemas
 
 # Exceptions
-from src.exceptions import workspace as WorkspaceExceptions
-from src.exceptions import account as AccountExceptions
-from src.exceptions import group as GroupExceptions
-from src.exceptions import resource as GenericExceptions
-from src.exceptions import policy as PolicyExceptions
-from src.exceptions import poll as PollExceptions
+from unipoll_api.exceptions import workspace as WorkspaceExceptions
+from unipoll_api.exceptions import account as AccountExceptions
+from unipoll_api.exceptions import group as GroupExceptions
+from unipoll_api.exceptions import resource as GenericExceptions
+from unipoll_api.exceptions import policy as PolicyExceptions
+from unipoll_api.exceptions import poll as PollExceptions
 
 
 # Get a list of workspaces where the account is a owner/member

@@ -1,17 +1,17 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
-from src import dependencies as Dependencies
-from src.actions import group as GroupActions
-from src.actions import permissions as PermissionsActions
-from src.exceptions.resource import APIException
-from src.schemas import workspace as WorkspaceSchema
-from src.schemas import group as GroupSchemas
-from src.schemas import policy as PolicySchemas
-from src.schemas import member as MemberSchemas
-from src.documents import Group, ResourceID
-from src.account_manager import current_active_user
-from src.utils import permissions as Permissions
+from unipoll_api import dependencies as Dependencies
+from unipoll_api.actions import group as GroupActions
+from unipoll_api.actions import permissions as PermissionsActions
+from unipoll_api.exceptions.resource import APIException
+from unipoll_api.schemas import workspace as WorkspaceSchema
+from unipoll_api.schemas import group as GroupSchemas
+from unipoll_api.schemas import policy as PolicySchemas
+from unipoll_api.schemas import member as MemberSchemas
+from unipoll_api.documents import Group, ResourceID
+from unipoll_api.account_manager import current_active_user
+from unipoll_api.utils import permissions as Permissions
 
 
 # APIRouter creates path operations for user module

@@ -1,5 +1,5 @@
-from src.documents import Workspace
-from src.schemas import workspace as WorkspaceSchemas
+from unipoll_api.documents import Workspace
+from unipoll_api.schemas import workspace as WorkspaceSchemas
 
 
 # Get all workspaces

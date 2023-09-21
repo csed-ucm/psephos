@@ -1,14 +1,14 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
-from src.account_manager import current_active_user, get_current_active_user
-from src.documents import ResourceID, Workspace, Group, Account, Poll
-from src.utils import permissions as Permissions
+from unipoll_api.account_manager import current_active_user, get_current_active_user
+from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll
+from unipoll_api.utils import permissions as Permissions
 # Exceptions
-from src.exceptions import workspace as WorkspaceExceptions
-from src.exceptions import group as GroupExceptions
-from src.exceptions import account as AccountExceptions
-from src.exceptions import poll as PollExceptions
-from src.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
+from unipoll_api.exceptions import workspace as WorkspaceExceptions
+from unipoll_api.exceptions import group as GroupExceptions
+from unipoll_api.exceptions import account as AccountExceptions
+from unipoll_api.exceptions import poll as PollExceptions
+from unipoll_api.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
 # Dependency to get account by id

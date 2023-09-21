@@ -5,12 +5,12 @@ from fastapi import status
 from pydantic import BaseModel
 from httpx import AsyncClient
 from beanie.operators import In
-from src import app
-from src.utils import colored_dbg
-from src.documents import ResourceID, Account
+from unipoll_api import app
+from unipoll_api.utils import colored_dbg
+from unipoll_api.documents import ResourceID, Account
 # from app.schemas import workspace as WorkspaceSchema
-from . import test_1_accounts
-from src.utils import permissions as Permissions
+import test_1_accounts
+from unipoll_api.utils import permissions as Permissions
 
 
 fake = Faker()

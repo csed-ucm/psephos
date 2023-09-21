@@ -2,8 +2,8 @@
 # from typing import Annotated
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 # from app.models.documents import Account
-from src.websocket_manager import WebSocketManager
-from src.dependencies import websocket_auth
+from unipoll_api.websocket_manager import WebSocketManager
+from unipoll_api.dependencies import websocket_auth
 # from app.account_manager import AccessToken
 
 

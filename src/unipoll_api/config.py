@@ -1,9 +1,13 @@
 from pydantic import BaseSettings, EmailStr, Field
 from functools import lru_cache
-from setuptools_scm import get_version
+import importlib.metadata
+import unipoll_api.__version__ as version_file
 
 
-VERSION = get_version(root='..', relative_to=__file__)
+try:
+    VERSION = importlib.metadata.version('unipoll-api')
+except importlib.metadata.PackageNotFoundError:
+    VERSION = version_file.version
 
 
 class Settings(BaseSettings):  # type: ignore
@@ -18,6 +22,10 @@ class Settings(BaseSettings):  # type: ignore
     mongodb_url: str = Field(default="mongodb://localhost:27017",
                              title="MongoDB URL", description="The URL of the MongoDB database.")
     secrete_key: str = Field(default="secret", title="Secrete Key", description="The secrete key of the API.")
+    origins = "*".split(",")
+    host = "0.0.0.0"
+    port = 9000
+    reload = True
 
     class Config:
         env_file = ".env"

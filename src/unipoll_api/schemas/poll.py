@@ -1,7 +1,7 @@
 from typing import Optional, Any
 from pydantic import BaseModel
-from src.documents import ResourceID
-from src.schemas.question import Question
+from unipoll_api.documents import ResourceID
+from unipoll_api.schemas.question import Question
 
 
 class PollResponse(BaseModel):
@@ -96,6 +96,6 @@ class UpdatePollRequest(BaseModel):
 
 
 # Forward references
-from src.schemas.workspace import Workspace, WorkspaceShort   # noqa: E402
+from unipoll_api.schemas.workspace import Workspace, WorkspaceShort   # noqa: E402
 Workspace.update_forward_refs()
 WorkspaceShort.update_forward_refs()

@@ -1,5 +1,5 @@
-from src.exceptions import resource
-from src.documents import Poll, ResourceID, Account
+from unipoll_api.exceptions import resource
+from unipoll_api.documents import Poll, ResourceID, Account
 
 
 # Exception for when a Poll with the same name already exists

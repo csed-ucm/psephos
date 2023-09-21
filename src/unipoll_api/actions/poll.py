@@ -1,12 +1,12 @@
-from src.documents import Poll, Policy, Group, Account
-from src.schemas import poll as PollSchemas
-from src.schemas import question as QuestionSchemas
-from src.schemas import policy as PolicySchemas
-from src.schemas import member as MemberSchemas
-from src.schemas import workspace as WorkspaceSchema
-from src.utils import permissions as Permissions
-from src.exceptions import resource as GenericExceptions
-from src.account_manager import current_active_user
+from unipoll_api.documents import Poll, Policy, Group, Account
+from unipoll_api.schemas import poll as PollSchemas
+from unipoll_api.schemas import question as QuestionSchemas
+from unipoll_api.schemas import policy as PolicySchemas
+from unipoll_api.schemas import member as MemberSchemas
+from unipoll_api.schemas import workspace as WorkspaceSchema
+from unipoll_api.utils import permissions as Permissions
+from unipoll_api.exceptions import resource as GenericExceptions
+from unipoll_api.account_manager import current_active_user
 
 
 async def get_poll(poll: Poll, include: list[str]) -> PollSchemas.PollResponse:
