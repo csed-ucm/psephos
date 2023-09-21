@@ -2,7 +2,7 @@
 import pytest
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
-from src.app import app
+from unipoll_api.app import app
 import asyncio
 
 

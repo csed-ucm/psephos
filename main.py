@@ -1,7 +1,20 @@
-import uvicorn
-# from src import app
+import subprocess
+from src.unipoll_api.__version__ import version
+from src.unipoll_api.utils import colored_dbg
+from unipoll_api.utils import cli_args
+
+
+def run(host="127.0.0.1", port=8000, reload=None):
+    colored_dbg.info("University Polling API v{}".format(version))
+    try:
+        uvicorn_args: list[str] = ["--host", host, "--port", str(port)]
+        if reload:
+            uvicorn_args.append("--reload")
+        subprocess.run(["uvicorn", "unipoll_api.app:app"] + uvicorn_args, cwd="src")
+    except KeyboardInterrupt:
+        colored_dbg.info("University Polling API stopped")
+
 
 if __name__ == "__main__":
-    # uvicorn.run(app, host="0.0.0.0", port=8000)
-    # NOTE:  You must pass the application as an import string to enable 'reload' or 'workers'.
-    uvicorn.run("src.app:app", reload=True, host="0.0.0.0", port=8000)
+    args = cli_args.parse_args()
+    run(args.host, args.port, args.reload)
