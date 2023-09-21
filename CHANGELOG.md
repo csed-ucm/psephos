@@ -2,6 +2,17 @@
 
 
 
+## v0.8.0 (2023-09-21)
+
+### Ci
+
+* ci: Forcing minor version updated due to error ([`0cf6e85`](https://github.com/unipoll/api/commit/0cf6e85840b019f281114465dd4cf4ba1304b529))
+
+### Fix
+
+* fix: Add ref main to checkout actions ([`ae7753a`](https://github.com/unipoll/api/commit/ae7753afb0a6ece771728727f40325212cb413e6))
+
+
 ## v0.7.10 (2023-09-21)
 
 ### Breaking
