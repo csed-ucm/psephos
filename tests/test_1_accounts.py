@@ -1,18 +1,12 @@
 from faker import Faker
 from fastapi import status
-from fastapi.testclient import TestClient
 import pytest
-# from devtools import debug
 from httpx import AsyncClient
 from pydantic import BaseModel
-from unipoll_api.app import app
-# from app.models.user import Account
 from unipoll_api.utils import colored_dbg
 from unipoll_api.documents import ResourceID
 
-
 fake = Faker()
-client = TestClient(app)
 
 pytestmark = pytest.mark.asyncio
 

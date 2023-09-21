@@ -1,38 +1,17 @@
 from faker import Faker
-from fastapi.testclient import TestClient
 from fastapi import status
-# import json
 import pytest
 from pydantic import BaseModel
-# from devtools import debug
 from httpx import AsyncClient
 from beanie.operators import In
-# from pydantic import BaseSettings
-from unipoll_api import app
 from unipoll_api.utils import colored_dbg
 from unipoll_api.documents import Account, ResourceID
-# from app.exceptions.group import GroupNotFound
 import test_1_accounts
 from test_2_workspaces import create_random_user, TestWorkspace
 from unipoll_api.utils import permissions as Permissions
 
-# import pytest
-# from faker import Faker
-# from fastapi.testclient import TestClient
-# from fastapi import status
-# from pydantic import BaseModel
-# from httpx import AsyncClient
-# from beanie.operators import In
-# from app.app import app
-# from app.utils import colored_dbg
-# from app.models.documents import ResourceID, Account
-# # from app.schemas import group as WorkspaceSchema
-# from unipoll_api. import test_1_accounts
-# from app.utils import permissions as Permissions
-
 
 fake = Faker()
-client = TestClient(app)  # type: ignore
 
 # TODO: Add settings for testing, i.e. testing database
 # class Settings(BaseSettings):
