@@ -2,6 +2,31 @@
 
 
 
+## v0.8.1 (2023-09-22)
+
+### Build
+
+* build: Excluded tests folder from distribution
+
+Added Manifest.in and slightely changed project configuration to exclude tests folder from the distribution which was causing import error ([`7483101`](https://github.com/unipoll/api/commit/7483101608396a76ce691f21f36687166646d146))
+
+### Fix
+
+* fix: Fixed docker host ip
+
+Changed host ip from 127.0.0.1 to 0.0.0.0 which was preventing connections from outside ([`0f8d89b`](https://github.com/unipoll/api/commit/0f8d89b86c377bea395096a87973ea3a7b6b43fd))
+
+### Unknown
+
+* revert: Removed minor flag
+
+Removed option forcing updating minor versionh ([`0150b96`](https://github.com/unipoll/api/commit/0150b96486ef5605df011c105f652555c5268b8a))
+
+* Update README.md
+
+Changed API to api in badge links ([`5dc4129`](https://github.com/unipoll/api/commit/5dc41298148c3d7f8287c78cca0492dfbbf686a2))
+
+
 ## v0.8.0 (2023-09-21)
 
 ### Ci
