@@ -54,10 +54,10 @@ GroupPermissions = IntFlag("GroupPermissions", ['get_group',
                                                 'get_group_policy',
                                                 'set_group_policy'])
 
-PollPermissions = IntFlag("PollPermissions", ['get_poll'
-                                              'get_poll_questions'
-                                              'get_poll_policies'
-                                              'update_poll'
+PollPermissions = IntFlag("PollPermissions", ['get_poll',
+                                              'get_poll_questions',
+                                              'get_poll_policies',
+                                              'update_poll',
                                               'delete_poll'])
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
