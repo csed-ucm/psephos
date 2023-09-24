@@ -2,6 +2,29 @@
 
 
 
+## v0.8.2 (2023-09-24)
+
+### Fix
+
+* fix: Fix missing commas in PollPermissions list ([`9550a8f`](https://github.com/unipoll/api/commit/9550a8fc45b8c9917d0d790b0c7db1d8b3ddfad2))
+
+### Unknown
+
+* Merge pull request #64 from unipoll/development
+
+fix: Fix missing commas in PollPermissions list ([`b38c3e2`](https://github.com/unipoll/api/commit/b38c3e21450fb22c1a7c11ab37e0fa3e5b536419))
+
+* Update README.md
+
+Updated badges ([`d808620`](https://github.com/unipoll/api/commit/d808620fb8ee01dbfdb23f67b9fb80335899d21c))
+
+* Update README.md
+
+Updated GitHub release Badge ([`5ea3db2`](https://github.com/unipoll/api/commit/5ea3db2cf05610045a36cfd186535b719a2966bc))
+
+* Added PyPI Badge ([`a13d2e3`](https://github.com/unipoll/api/commit/a13d2e38794a4ec6b35700500c808f27c9560cff))
+
+
 ## v0.8.1 (2023-09-22)
 
 ### Build
