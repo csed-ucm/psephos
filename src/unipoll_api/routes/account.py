@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from unipoll_api.account_manager import fastapi_users
-from unipoll_api.actions import account as AccountActions
+from unipoll_api.actions import AccountActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Account
 from unipoll_api.dependencies import get_account
-from unipoll_api.schemas import account as AccountSchemas
+from unipoll_api.schemas import AccountSchemas
 
 
 # APIRouter creates path operations for user module

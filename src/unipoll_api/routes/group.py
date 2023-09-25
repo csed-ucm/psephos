@@ -2,15 +2,12 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import group as GroupActions
-from unipoll_api.actions import permissions as PermissionsActions
+from unipoll_api import AccountManager
+from unipoll_api.actions import GroupActions, PermissionsActions
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.schemas import workspace as WorkspaceSchema
-from unipoll_api.schemas import group as GroupSchemas
-from unipoll_api.schemas import policy as PolicySchemas
-from unipoll_api.schemas import member as MemberSchemas
+from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas
 from unipoll_api.documents import Group, ResourceID
-from unipoll_api.account_manager import current_active_user
+
 from unipoll_api.utils import permissions as Permissions
 
 
@@ -39,7 +36,7 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
                     ):
     try:
         # await group.fetch_all_links()
-        account = current_active_user.get()
+        account = AccountManager.active_user.get()
         members = None
         policies = None
 
@@ -59,9 +56,9 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
                 if Permissions.check_permission(permissions, req_permissions):
                     policies = (await GroupActions.get_group_policies(group)).policies
 
-        workspace = WorkspaceSchema.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
-                                                                              "policies",
-                                                                              "groups"}))
+        workspace = WorkspaceSchemas.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
+                                                                               "policies",
+                                                                               "groups"}))
 
         # Return the workspace with the fetched resources
         return GroupSchemas.Group(id=group.id,

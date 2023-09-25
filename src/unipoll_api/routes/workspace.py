@@ -1,18 +1,13 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
-from unipoll_api.actions import workspace as WorkspaceActions
-from unipoll_api.actions import permissions as PermissionsActions
+from unipoll_api import dependencies as Dependencies
+from unipoll_api.actions import WorkspaceActions, PermissionsActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Workspace, ResourceID
-from unipoll_api.schemas import workspace as WorkspaceSchemas
-from unipoll_api.schemas import policy as PolicySchemas
-from unipoll_api.schemas import group as GroupSchemas
-from unipoll_api.schemas import member as MemberSchemas
-from unipoll_api.schemas import poll as PollSchemas
-from unipoll_api import dependencies as Dependencies
+from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
 from unipoll_api.utils import permissions as Permissions
-from unipoll_api.account_manager import current_active_user
+from unipoll_api import AccountManager
 
 # APIRouter creates path operations for user module
 open_router = APIRouter()
@@ -99,7 +94,7 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
     """
     try:
         # await workspace.fetch_all_links()
-        account = current_active_user.get()
+        account = AccountManager.active_user.get()
         groups = None
         members = None
         policies = None

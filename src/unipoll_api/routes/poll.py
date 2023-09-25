@@ -5,10 +5,8 @@ from fastapi import APIRouter, Body, Depends, Query, HTTPException
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.documents import Poll
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.schemas import poll as PollSchemas
-from unipoll_api.schemas import question as QuestionSchemas
-from unipoll_api.schemas import policy as PolicySchema
-from unipoll_api.actions import poll as PollActions
+from unipoll_api.actions import PollActions
+from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas
 
 open_router = APIRouter()
 router = APIRouter(dependencies=[Depends(Dependencies.check_poll_permission)])
@@ -69,7 +67,7 @@ async def get_questions(poll: Poll = Depends(Dependencies.get_poll_model),
 
 @router.get("/{poll_id}/policies",
             response_description="Policy list of a poll",
-            response_model=PolicySchema.PolicyList,
+            response_model=PolicySchemas.PolicyList,
             response_model_exclude_none=True)
 async def get_policies(poll: Poll = Depends(Dependencies.get_poll_model),
                        include: Annotated[query_params | None, Query()] = None):

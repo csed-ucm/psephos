@@ -1,4 +1,3 @@
-# from bson import DBRef
 from pydantic import BaseModel, Field
 from typing import Optional
 from unipoll_api.documents import ResourceID

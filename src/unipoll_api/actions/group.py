@@ -1,17 +1,10 @@
 from beanie import DeleteRules
 from beanie.operators import In
-from unipoll_api.account_manager import current_active_user
+from unipoll_api import AccountManager
 from unipoll_api.documents import Policy, ResourceID, Workspace, Group, Account
-from unipoll_api.schemas import account as AccountSchemas
-from unipoll_api.schemas import group as GroupSchemas
-from unipoll_api.schemas import policy as PolicySchemas
-# from unipoll_api.schemas import workspace as WorkspaceSchema
-from unipoll_api.schemas import member as MemberSchemas
-from unipoll_api.exceptions import account as AccountExceptions
-from unipoll_api.exceptions import group as GroupExceptions
-from unipoll_api.exceptions import workspace as WorkspaceExceptions
-from unipoll_api.exceptions import resource as GenericExceptions
-from unipoll_api.exceptions import policy as PolicyExceptions
+from unipoll_api.schemas import AccountSchemas, GroupSchemas, MemberSchemas, PolicySchemas
+from unipoll_api.exceptions import (AccountExceptions, GroupExceptions, PolicyExceptions,
+                                    ResourceExceptions, WorkspaceExceptions)
 from unipoll_api.utils import permissions as Permissions
 
 
@@ -109,10 +102,10 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
         if not account:
             raise AccountExceptions.AccountNotFound(account_id)
     else:
-        account = current_active_user.get()
+        account = AccountManager.active_user.get()
     # Check if the account exists
     if not account:
-        raise GenericExceptions.InternalServerError("remove_group_member() -> Account not found")
+        raise ResourceExceptions.InternalServerError("remove_group_member() -> Account not found")
     # Check if account is a member of the group
     if account.id not in [ResourceID(member.ref.id) for member in group.members]:
         raise GroupExceptions.UserNotMember(group, account)
@@ -135,10 +128,10 @@ async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
-            raise GenericExceptions.InternalServerError("Invalid policy_holder_type")
+            raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
         if not policy_holder:
             # TODO: Replace with custom exception
-            raise GenericExceptions.InternalServerError("get_group_policies() => Policy holder not found")
+            raise ResourceExceptions.InternalServerError("get_group_policies() => Policy holder not found")
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
         policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
@@ -157,10 +150,10 @@ async def get_group_policy(group: Group, account_id: ResourceID | None):
         if not account:
             raise AccountExceptions.AccountNotFound(account_id)
     else:
-        account = current_active_user.get()
+        account = AccountManager.active_user.get()
 
     if not account:
-        raise GenericExceptions.InternalServerError("get_group_policy() => Account not found")
+        raise ResourceExceptions.InternalServerError("get_group_policy() => Account not found")
 
     # Check if account is a member of the group
     # if account.id not in [member.id for member in group.members]:
@@ -191,10 +184,10 @@ async def set_group_policy(group: Group,
             if not account:
                 raise AccountExceptions.AccountNotFound(input_data.account_id)
         else:
-            account = current_active_user.get()
+            account = AccountManager.active_user.get()
         # Make sure the account is loaded
         if not account:
-            raise GenericExceptions.InternalServerError("set_group_policy() => Account not found")
+            raise ResourceExceptions.InternalServerError("set_group_policy() => Account not found")
         try:
             # Find the policy for the account
             # NOTE: To set a policy for a user, the user must be a member of the group, therefore the policy must exist
@@ -205,14 +198,14 @@ async def set_group_policy(group: Group,
                         policy = p
                         break
         except Exception as e:
-            raise GenericExceptions.InternalServerError(str(e))
+            raise ResourceExceptions.InternalServerError(str(e))
     # Calculate the new permission value
     new_permission_value = 0
     for i in input_data.permissions:
         try:
             new_permission_value += Permissions.GroupPermissions[i].value  # type: ignore
         except KeyError:
-            raise GenericExceptions.InvalidPermission(i)
+            raise ResourceExceptions.InvalidPermission(i)
     # Update the policy
     policy.permissions = Permissions.GroupPermissions(new_permission_value)  # type: ignore
     await Policy.save(policy)
