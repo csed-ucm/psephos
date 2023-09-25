@@ -54,6 +54,21 @@ commit_version_number = true
 tag_commit = true
 changelog_file = "CHANGELOG.md"
 build_command = "python -m pip install build && python -m build"
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+    "revert"
+]
+minor_tags = ["feat", "build"]
+patch_tags = ["chore", "ci", "fix", "perf", "style", "refactor", "test", "revert"]
 
 [tool.flake8]
 max-line-length = 120
