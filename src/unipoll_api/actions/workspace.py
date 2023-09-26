@@ -94,8 +94,6 @@ async def get_workspace(workspace: Workspace,
                                       policies=policies,
                                       polls=polls)
 
-    return workspace
-
 
 # Update a workspace
 async def update_workspace(workspace: Workspace,
