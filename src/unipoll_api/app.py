@@ -4,7 +4,7 @@ from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
 from unipoll_api.routes import router
-from unipoll_api.mongo_db import mainDB, DOCUMENT_MODELS
+from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
 from unipoll_api.__version__ import version
 from unipoll_api.utils import cli_args, colored_dbg
@@ -47,7 +47,7 @@ async def on_startup() -> None:
 
     await init_beanie(
         database=mainDB,
-        document_models=DOCUMENT_MODELS,  # type: ignore
+        document_models=documentModels  # type: ignore
     )
 
 
