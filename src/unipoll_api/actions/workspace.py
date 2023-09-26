@@ -93,7 +93,7 @@ async def get_workspace(workspace: Workspace,
                                       members=members,
                                       policies=policies,
                                       polls=polls)
-    
+
     return workspace
 
 
