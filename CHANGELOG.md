@@ -2,6 +2,43 @@
 
 
 
+## v0.8.3 (2023-09-26)
+
+### Ci
+
+* ci: Updated tag list for semantic-release ([`075c1ff`](https://github.com/unipoll/api/commit/075c1ff06f37d11c3a8c928a941401488774e8ac))
+
+### Fix
+
+* fix: Removed unreachable return statement ([`e8df4da`](https://github.com/unipoll/api/commit/e8df4daff6aee57a3745b90894b7618f5347c9a0))
+
+* fix: Typing
+
+Specified type of router and open_router for mypy ([`eb97462`](https://github.com/unipoll/api/commit/eb97462118ba9dc69e5b52097f7d15beeb1e126a))
+
+* fix: linting ([`9672e44`](https://github.com/unipoll/api/commit/9672e44850dbb4940ca4ae1fce70f8e81229f7be))
+
+### Refactor
+
+* refactor: Moved query parsing to actions
+
+Query parameters are passed to actions functions as parameters, where the response model is built
+
+Closes #65 ([`38fc8f0`](https://github.com/unipoll/api/commit/38fc8f0f1afc3b17b01ba525fa0ae3e6bd25ce3b))
+
+* refactor: Updated imports ([`e47a414`](https://github.com/unipoll/api/commit/e47a4141ef8869164070d109e541bee7ab0c9f1f))
+
+### Style
+
+* style: renamed DOCUMENT_MODELS to documentModels ([`86a1269`](https://github.com/unipoll/api/commit/86a126979832eec1a5963f3d60432ee61227d831))
+
+### Unknown
+
+* Merge pull request #66 from unipoll/development
+
+Minor updates, ci, style, and refactoring ([`6361e35`](https://github.com/unipoll/api/commit/6361e3506f66f1d3e9f7645636a717979b0eb6e4))
+
+
 ## v0.8.2 (2023-09-24)
 
 ### Fix
