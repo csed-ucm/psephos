@@ -1,7 +1,6 @@
 from fastapi import status
-from unipoll_api.documents import Account, Resource
-from unipoll_api.utils import colored_dbg as Debug
-from beanie import PydanticObjectId
+from unipoll_api.documents import Account, Resource, ResourceID
+from unipoll_api.utils import Debug
 
 
 class APIException(Exception):
@@ -34,13 +33,13 @@ class ErrorWhileCreating(APIException):
 
 
 class ResourceNotFound(APIException):
-    def __init__(self, resource: str, resource_id: PydanticObjectId):
+    def __init__(self, resource: str, resource_id: ResourceID):
         super().__init__(code=status.HTTP_404_NOT_FOUND,
                          detail=f"{resource} #{resource_id} does not exist")
 
 
 class ErrorWhileDeleting(APIException):
-    def __init__(self, resource: str, resource_id: PydanticObjectId):
+    def __init__(self, resource: str, resource_id: ResourceID):
         super().__init__(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                          detail=f"Error while deleting {resource} #{resource_id}")
 

@@ -1,5 +1,5 @@
-from unipoll_api.schemas import policy as PolicySchemas
-from unipoll_api.utils import permissions as Permissions
+from unipoll_api.schemas import PolicySchemas
+from unipoll_api.utils import Permissions
 
 
 # Get All Workspace Permissions

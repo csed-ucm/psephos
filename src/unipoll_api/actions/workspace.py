@@ -2,29 +2,17 @@
 # from pydantic import EmailStr
 from beanie import WriteRules, DeleteRules
 from beanie.operators import In
-from unipoll_api.account_manager import current_active_user
+from unipoll_api import AccountManager
 from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
-from unipoll_api.utils import permissions as Permissions
-
-# Schemas
-from unipoll_api.schemas import workspace as WorkspaceSchemas
-from unipoll_api.schemas import group as GroupSchemas
-from unipoll_api.schemas import policy as PolicySchemas
-from unipoll_api.schemas import member as MemberSchemas
-from unipoll_api.schemas import poll as PollSchemas
-
-# Exceptions
-from unipoll_api.exceptions import workspace as WorkspaceExceptions
-from unipoll_api.exceptions import account as AccountExceptions
-from unipoll_api.exceptions import group as GroupExceptions
-from unipoll_api.exceptions import resource as GenericExceptions
-from unipoll_api.exceptions import policy as PolicyExceptions
-from unipoll_api.exceptions import poll as PollExceptions
+from unipoll_api.utils import Permissions
+from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas, PollSchemas
+from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, GroupExceptions, ResourceExceptions,
+                                    PolicyExceptions, PollExceptions)
 
 
 # Get a list of workspaces where the account is a owner/member
 async def get_workspaces() -> WorkspaceSchemas.WorkspaceList:
-    account = current_active_user.get()
+    account = AccountManager.active_user.get()
     workspace_list = []
 
     search_result = await Workspace.find(Workspace.members.id == account.id).to_list()  # type: ignore
@@ -39,7 +27,7 @@ async def get_workspaces() -> WorkspaceSchemas.WorkspaceList:
 
 # Create a new workspace with account as the owner
 async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) -> WorkspaceSchemas.WorkspaceCreateOutput:
-    account: Account = current_active_user.get()
+    account: Account = AccountManager.active_user.get()
     # Check if workspace name is unique
     if await Workspace.find_one({"name": input_data.name}):
         raise WorkspaceExceptions.NonUniqueName(input_data.name)
@@ -68,8 +56,43 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
-async def get_workspace(workspace: Workspace) -> Workspace:
-    return workspace
+async def get_workspace(workspace: Workspace,
+                        include_groups: bool = False,
+                        include_policies: bool = False,
+                        include_members: bool = False,
+                        include_polls: bool = False) -> WorkspaceSchemas.Workspace:
+    groups = None
+    members = None
+    policies = None
+    polls = None
+    # Get the current active user
+    account = AccountManager.active_user.get()
+    # Get the permissions(allowed actions) of the current user
+    permissions = await Permissions.get_all_permissions(workspace, account)
+    if include_groups:
+        req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            groups = (await get_groups(workspace)).groups
+    if include_members:
+        req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            members = (await get_workspace_members(workspace)).members
+    if include_policies:
+        req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            policies = (await get_workspace_policies(workspace)).policies
+    if include_polls:
+        req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            polls = (await get_polls(workspace)).polls
+    # Return the workspace with the fetched resources
+    return WorkspaceSchemas.Workspace(id=workspace.id,
+                                      name=workspace.name,
+                                      description=workspace.description,
+                                      groups=groups,
+                                      members=members,
+                                      policies=policies,
+                                      polls=polls)
 
 
 # Update a workspace
@@ -138,7 +161,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
     if account_id:
         account = await Account.get(account_id)  # type: ignore
     else:
-        account = current_active_user.get()
+        account = AccountManager.active_user.get()
     # Check if the account exists
     if not account:
         raise AccountExceptions.AccountNotFound(account_id)
@@ -156,7 +179,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
 # Get a list of groups where the account is a member
 async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
     # await workspace.fetch_link(Workspace.groups)
-    account = current_active_user.get()
+    account = AccountManager.active_user.get()
     group_list = []
 
     # Convert the list of links to a list of
@@ -174,7 +197,7 @@ async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
 async def create_group(workspace: Workspace,
                        input_data: GroupSchemas.GroupCreateInput) -> GroupSchemas.GroupCreateOutput:
     # await workspace.fetch_link(workspace.groups)
-    account = current_active_user.get()
+    account = AccountManager.active_user.get()
 
     # Check if group name is unique
     group: Group  # For type hinting, until Link type is supported
@@ -222,7 +245,7 @@ async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyLi
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
-            raise GenericExceptions.InternalServerError(str("Unknown policy_holder_type"))
+            raise ResourceExceptions.InternalServerError(str("Unknown policy_holder_type"))
         if not policy_holder:
             # TODO: Replace with a custom exception
             raise AccountExceptions.AccountNotFound(policy.policy_holder.ref.id)
@@ -240,7 +263,7 @@ async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyLi
 async def get_workspace_policy(workspace: Workspace,
                                account_id: ResourceID | None = None) -> PolicySchemas.PolicyOutput:
     # Check if account_id is specified in request, if account_id is not specified, use the current user
-    account: Account = await Account.get(account_id) if account_id else current_active_user.get()  # type: ignore
+    account: Account = await Account.get(account_id) if account_id else AccountManager.active_user.get()  # type: ignore
 
     if not account and account_id:
         raise AccountExceptions.AccountNotFound(account_id)
@@ -273,10 +296,10 @@ async def set_workspace_policy(workspace: Workspace,
             if not account:
                 raise AccountExceptions.AccountNotFound(input_data.account_id)
         else:
-            account = current_active_user.get()
+            account = AccountManager.active_user.get()
         # Make sure the account is loaded
         if not account:
-            raise GenericExceptions.APIException(code=500, detail='Unknown error')  # Should not happen
+            raise ResourceExceptions.APIException(code=500, detail='Unknown error')  # Should not happen
 
         try:
             # Find the policy for the account
@@ -292,7 +315,7 @@ async def set_workspace_policy(workspace: Workspace,
                 #                     permissions=Permissions.WorkspacePermissions(0),
                 #                     workspace=workspace)
         except Exception as e:
-            raise GenericExceptions.InternalServerError(str(e))
+            raise ResourceExceptions.InternalServerError(str(e))
 
     # Calculate the new permission value from request
     new_permission_value = 0
@@ -300,7 +323,7 @@ async def set_workspace_policy(workspace: Workspace,
         try:
             new_permission_value += Permissions.WorkspacePermissions[i].value  # type: ignore
         except KeyError:
-            raise GenericExceptions.InvalidPermission(i)
+            raise ResourceExceptions.InvalidPermission(i)
     # Update permissions
     policy.permissions = Permissions.WorkspacePermissions(new_permission_value)  # type: ignore
     await Policy.save(policy)

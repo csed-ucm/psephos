@@ -1,36 +1,29 @@
+from unipoll_api import AccountManager
 from unipoll_api.documents import Poll, Policy, Group, Account
-from unipoll_api.schemas import poll as PollSchemas
-from unipoll_api.schemas import question as QuestionSchemas
-from unipoll_api.schemas import policy as PolicySchemas
-from unipoll_api.schemas import member as MemberSchemas
-from unipoll_api.schemas import workspace as WorkspaceSchema
-from unipoll_api.utils import permissions as Permissions
-from unipoll_api.exceptions import resource as GenericExceptions
-from unipoll_api.account_manager import current_active_user
+from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas, MemberSchemas, WorkspaceSchemas
+from unipoll_api.utils import Permissions
+from unipoll_api.exceptions import ResourceExceptions
 
 
-async def get_poll(poll: Poll, include: list[str]) -> PollSchemas.PollResponse:
-    account = current_active_user.get()
+async def get_poll(poll: Poll,
+                   include_questions: bool = False,
+                   include_policies: bool = False) -> PollSchemas.PollResponse:
+    account = AccountManager.active_user.get()
     questions = []
     policies = None
 
-    if include:
-        # Get the permissions(allowed actions) of the current user
-        permissions = await Permissions.get_all_permissions(poll, account)
-        # If "all" is in the list, include all resources
-        if "all" in include:
-            include = ["policies", "questions"]
-        # Fetch the resources if the user has the required permissions
-        if "questions" in include:
-            req_permissions = Permissions.PollPermissions["get_poll_questions"]  # type: ignore
-            if Permissions.check_permission(permissions, req_permissions) or poll.public:
-                questions = (await get_poll_questions(poll)).questions
-        if "policies" in include:
-            req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore
-            if Permissions.check_permission(permissions, req_permissions):
-                policies = (await get_poll_policies(poll)).policies
+    permissions = await Permissions.get_all_permissions(poll, account)
+    # Fetch the resources if the user has the required permissions
+    if include_questions:
+        req_permissions = Permissions.PollPermissions["get_poll_questions"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions) or poll.public:
+            questions = (await get_poll_questions(poll)).questions
+    if include_policies:
+        req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            policies = (await get_poll_policies(poll)).policies
 
-    workspace = WorkspaceSchema.WorkspaceShort(**poll.workspace.dict())  # type: ignore
+    workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.dict())  # type: ignore
 
     # Return the workspace with the fetched resources
     return PollSchemas.PollResponse(id=poll.id,
@@ -65,10 +58,10 @@ async def get_poll_policies(poll: Poll) -> PolicySchemas.PolicyList:
         elif policy.policy_holder_type == 'group':
             policy_holder = await Group.get(policy.policy_holder.ref.id)
         else:
-            raise GenericExceptions.InternalServerError("Invalid policy_holder_type")
+            raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
         if not policy_holder:
             # TODO: Replace with custom exception
-            raise GenericExceptions.InternalServerError("get_poll_policies() => Policy holder not found")
+            raise ResourceExceptions.InternalServerError("get_poll_policies() => Policy holder not found")
         # Convert the policy_holder to a Member schema
         policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
         policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
@@ -94,7 +87,7 @@ async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSc
 
     # Save the updated poll
     await Poll.save(poll)
-    return await get_poll(poll, [])
+    return await get_poll(poll, include_questions=True)
 
 
 async def delete_poll(poll: Poll):
@@ -103,4 +96,4 @@ async def delete_poll(poll: Poll):
 
     # Check if the poll was deleted
     if await Poll.get(poll.id):
-        raise GenericExceptions.InternalServerError("Poll not deleted")
+        raise ResourceExceptions.InternalServerError("Poll not deleted")

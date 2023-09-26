@@ -1,13 +1,9 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
-from unipoll_api.account_manager import current_active_user, get_current_active_user
+from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll
 from unipoll_api.utils import permissions as Permissions
-# Exceptions
-from unipoll_api.exceptions import workspace as WorkspaceExceptions
-from unipoll_api.exceptions import group as GroupExceptions
-from unipoll_api.exceptions import account as AccountExceptions
-from unipoll_api.exceptions import poll as PollExceptions
+from unipoll_api.exceptions import WorkspaceExceptions, GroupExceptions, AccountExceptions, PollExceptions
 from unipoll_api.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
@@ -66,7 +62,7 @@ async def get_poll_model(poll_id: ResourceID) -> Poll:
 
 # Dependency to get a user by id and verify it exists
 async def set_active_user(user_account: Account = Depends(get_current_active_user)):
-    current_active_user.set(user_account)
+    active_user.set(user_account)
     return user_account
 
 

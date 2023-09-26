@@ -1,13 +1,10 @@
 # Handle WebSocket connections
-# from typing import Annotated
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-# from app.models.documents import Account
 from unipoll_api.websocket_manager import WebSocketManager
 from unipoll_api.dependencies import websocket_auth
-# from app.account_manager import AccessToken
 
 
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 # Create a connection manager to manage WebSocket connections
 manager = WebSocketManager()

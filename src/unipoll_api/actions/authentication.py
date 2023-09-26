@@ -5,8 +5,7 @@ from beanie import PydanticObjectId
 from fastapi import Depends
 
 from unipoll_api.documents import Account
-from unipoll_api.exceptions import authentication as AuthExceptions
-from unipoll_api.exceptions import account as AccountExceptions
+from unipoll_api.exceptions import AuthExceptions, AccountExceptions
 from unipoll_api.utils import colored_dbg as Debug
 from unipoll_api.account_manager import jwt_backend, get_database_strategy, get_access_token_db
 

@@ -1,14 +1,12 @@
 # from typing import ForwardRef, NewType, TypeAlias, Optional
 from typing import Literal
 from bson import DBRef
-# from typing import ForwardRef, Optional
 from beanie import Document, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from unipoll_api.utils import colored_dbg as Debug
 from unipoll_api.utils.permissions import Permissions  # WorkspacePermissions
 from unipoll_api.utils.token_db import BeanieBaseAccessToken
-# from unipoll_api.schemas.question import Question
 
 
 # Create a link to the Document model
