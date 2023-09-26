@@ -8,8 +8,8 @@ from unipoll_api.documents import Workspace, ResourceID
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
 
 # APIRouter creates path operations for user module
-open_router = APIRouter()
-router = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
+open_router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
 
 
 # TODO: Move to open router to a separate file

@@ -9,8 +9,8 @@ from unipoll_api.documents import Group, ResourceID
 
 
 # APIRouter creates path operations for user module
-open_router = APIRouter()
-router = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
+open_router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
 
 
 # Get all groups

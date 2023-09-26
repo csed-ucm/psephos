@@ -8,7 +8,7 @@ from unipoll_api.schemas import AccountSchemas
 
 
 # APIRouter creates path operations for user module
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 
 @router.get("",

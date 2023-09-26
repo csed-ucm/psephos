@@ -8,8 +8,8 @@ from unipoll_api.exceptions.resource import APIException
 from unipoll_api.actions import PollActions
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas
 
-open_router = APIRouter()
-router = APIRouter(dependencies=[Depends(Dependencies.check_poll_permission)])
+open_router: APIRouter = APIRouter()
+router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_poll_permission)])
 
 
 query_params = list[Literal["all", "questions", "policies"]]

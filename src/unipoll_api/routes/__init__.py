@@ -10,7 +10,7 @@ from . import websocket as WebSocketRoutes
 from . import workspace as WorkspaceRoutes
 
 # Create main router
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 # Add endpoints defined in the routes directory
 router.include_router(WorkspaceRoutes.open_router,

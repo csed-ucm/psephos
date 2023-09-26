@@ -14,7 +14,7 @@ from unipoll_api.actions import authentication as AuthActions
 from unipoll_api.schemas import account as AccountSchemas
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.utils.token_db import BeanieAccessTokenDatabase
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 
 login_responses: OpenAPIResponseType = {

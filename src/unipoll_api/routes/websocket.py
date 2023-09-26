@@ -4,7 +4,7 @@ from unipoll_api.websocket_manager import WebSocketManager
 from unipoll_api.dependencies import websocket_auth
 
 
-router = APIRouter()
+router: APIRouter = APIRouter()
 
 # Create a connection manager to manage WebSocket connections
 manager = WebSocketManager()
