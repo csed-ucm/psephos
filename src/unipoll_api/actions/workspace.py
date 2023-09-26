@@ -56,7 +56,44 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
-async def get_workspace(workspace: Workspace) -> Workspace:
+async def get_workspace(workspace: Workspace,
+                        include_groups: bool = False,
+                        include_policies: bool = False,
+                        include_members: bool = False,
+                        include_polls: bool = False) -> WorkspaceSchemas.Workspace:
+    groups = None
+    members = None
+    policies = None
+    polls = None
+    # Get the current active user
+    account = AccountManager.active_user.get()
+    # Get the permissions(allowed actions) of the current user
+    permissions = await Permissions.get_all_permissions(workspace, account)
+    if include_groups:
+        req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            groups = (await get_groups(workspace)).groups
+    if include_members:
+        req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            members = (await get_workspace_members(workspace)).members
+    if include_policies:
+        req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            policies = (await get_workspace_policies(workspace)).policies
+    if include_polls:
+        req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            polls = (await get_polls(workspace)).polls
+    # Return the workspace with the fetched resources
+    return WorkspaceSchemas.Workspace(id=workspace.id,
+                                      name=workspace.name,
+                                      description=workspace.description,
+                                      groups=groups,
+                                      members=members,
+                                      policies=policies,
+                                      polls=polls)
+    
     return workspace
 
 

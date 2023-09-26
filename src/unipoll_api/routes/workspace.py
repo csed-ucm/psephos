@@ -6,8 +6,6 @@ from unipoll_api.actions import WorkspaceActions, PermissionsActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Workspace, ResourceID
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
-from unipoll_api.utils import permissions as Permissions
-from unipoll_api import AccountManager
 
 # APIRouter creates path operations for user module
 open_router = APIRouter()
@@ -60,8 +58,7 @@ query_params = list[Literal["all", "policies", "groups", "members", "polls"]]
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                        include: Annotated[query_params | None, Query()] = None
-                        ) -> WorkspaceSchemas.Workspace:
+                        include: Annotated[query_params | None, Query()] = None):
     """
     ### Description:
     Endpoint to get a workspace with the given id.
@@ -93,44 +90,23 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
     Returns a workspace with the given id.
     """
     try:
-        # await workspace.fetch_all_links()
-        account = AccountManager.active_user.get()
-        groups = None
-        members = None
-        policies = None
-        polls = None
-
+        params = {}
         if include:
-            # Get the permissions(allowed actions) of the current user
-            permissions = await Permissions.get_all_permissions(workspace, account)
-            # If "all" is in the list, include all resources
             if "all" in include:
-                include = ["policies", "groups", "members", "polls"]
-            # Fetch the resources if the user has the required permissions
-            if "groups" in include:
-                req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    groups = (await WorkspaceActions.get_groups(workspace)).groups
-            if "members" in include:
-                req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    members = (await WorkspaceActions.get_workspace_members(workspace)).members
-            if "policies" in include:
-                req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    policies = (await WorkspaceActions.get_workspace_policies(workspace)).policies
-            if "polls" in include:
-                req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    polls = (await WorkspaceActions.get_polls(workspace)).polls
-        # Return the workspace with the fetched resources
-        return WorkspaceSchemas.Workspace(id=workspace.id,
-                                          name=workspace.name,
-                                          description=workspace.description,
-                                          groups=groups,
-                                          members=members,
-                                          policies=policies,
-                                          polls=polls)
+                params = {"include_groups": True,
+                          "include_members": True,
+                          "include_policies": True,
+                          "include_polls": True}
+            else:
+                if "groups" in include:
+                    params["include_groups"] = True
+                if "members" in include:
+                    params["include_members"] = True
+                if "policies" in include:
+                    params["include_policies"] = True
+                if "polls" in include:
+                    params["include_polls"] = True
+        return await WorkspaceActions.get_workspace(workspace, **params)
 
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

@@ -2,13 +2,10 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api import AccountManager
 from unipoll_api.actions import GroupActions, PermissionsActions
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas
+from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
 from unipoll_api.documents import Group, ResourceID
-
-from unipoll_api.utils import permissions as Permissions
 
 
 # APIRouter creates path operations for user module
@@ -32,41 +29,18 @@ query_params = list[Literal["policies", "members", "all"]]
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
 async def get_group(group: Group = Depends(Dependencies.get_group_model),
-                    include: Annotated[query_params | None, Query()] = None
-                    ):
+                    include: Annotated[query_params | None, Query()] = None):
     try:
-        # await group.fetch_all_links()
-        account = AccountManager.active_user.get()
-        members = None
-        policies = None
-
+        params = {}
         if include:
-            # Get the permissions(allowed actions) of the current user
-            permissions = await Permissions.get_all_permissions(group, account)
-            # If "all" is in the list, include all resources
             if "all" in include:
-                include = ["policies", "members"]
-            # Fetch the resources if the user has the required permissions
-            if "members" in include:
-                req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    members = (await GroupActions.get_group_members(group)).members
-            if "policies" in include:
-                req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
-                if Permissions.check_permission(permissions, req_permissions):
-                    policies = (await GroupActions.get_group_policies(group)).policies
-
-        workspace = WorkspaceSchemas.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
-                                                                               "policies",
-                                                                               "groups"}))
-
-        # Return the workspace with the fetched resources
-        return GroupSchemas.Group(id=group.id,
-                                  name=group.name,
-                                  description=group.description,
-                                  workspace=workspace,
-                                  members=members,
-                                  policies=policies)
+                params = {"include_members": True, "include_polls": True}
+            else:
+                if "members" in include:
+                    params["include_members"] = True
+                if "policies" in include:
+                    params["include_policies"] = True
+        return await GroupActions.get_group(group, **params)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

@@ -23,7 +23,16 @@ query_params = list[Literal["all", "questions", "policies"]]
 async def get_poll(poll: Poll = Depends(Dependencies.get_poll_model),
                    include: Annotated[query_params | None, Query()] = None):
     try:
-        return await PollActions.get_poll(poll, list(include or []))
+        params = {}
+        if include:
+            if "all" in include:
+                params = {"include_questions": True, "include_policies": True}
+            else:
+                if "questions" in include:
+                    params = {"include_questions": True}
+                if "policies" in include:
+                    params = {"include_policies": True}
+        return await PollActions.get_poll(poll, **params)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

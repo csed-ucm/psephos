@@ -2,7 +2,7 @@ from beanie import DeleteRules
 from beanie.operators import In
 from unipoll_api import AccountManager
 from unipoll_api.documents import Policy, ResourceID, Workspace, Group, Account
-from unipoll_api.schemas import AccountSchemas, GroupSchemas, MemberSchemas, PolicySchemas
+from unipoll_api.schemas import AccountSchemas, GroupSchemas, MemberSchemas, PolicySchemas, WorkspaceSchemas
 from unipoll_api.exceptions import (AccountExceptions, GroupExceptions, PolicyExceptions,
                                     ResourceExceptions, WorkspaceExceptions)
 from unipoll_api.utils import permissions as Permissions
@@ -21,8 +21,34 @@ from unipoll_api.utils import permissions as Permissions
 
 
 # Get group
-async def get_group(group: Group) -> GroupSchemas.Group:
-    return GroupSchemas.Group(**group.dict())
+async def get_group(group: Group, include_members: bool = False, include_policies: bool = False) -> GroupSchemas.Group:
+    members = None
+    policies = None
+
+    account = AccountManager.active_user.get()
+    # Get the permissions(allowed actions) of the current user
+    permissions = await Permissions.get_all_permissions(group, account)
+    # Fetch the resources if the user has the required permissions
+    if include_members:
+        req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            members = (await get_group_members(group)).members
+    if include_policies:
+        req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
+        if Permissions.check_permission(permissions, req_permissions):
+            policies = (await get_group_policies(group)).policies
+
+    workspace = WorkspaceSchemas.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
+                                                                           "policies",
+                                                                           "groups"}))
+
+    # Return the workspace with the fetched resources
+    return GroupSchemas.Group(id=group.id,
+                              name=group.name,
+                              description=group.description,
+                              workspace=workspace,
+                              members=members,
+                              policies=policies)
 
 
 # Update a group
