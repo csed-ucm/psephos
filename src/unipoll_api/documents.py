@@ -1,7 +1,7 @@
 # from typing import ForwardRef, NewType, TypeAlias, Optional
 from typing import Literal
 from bson import DBRef
-from beanie import Document, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
+from beanie import BackLink, Document, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from unipoll_api.utils import colored_dbg as Debug
@@ -47,14 +47,14 @@ class Resource(Document):
     def create_group(self) -> None:
         Debug.info(f'New {self.resource_type} "{self.id}" has been created')
 
-    async def add_member(self, workspace, account: "Account", permissions, save: bool = True) -> "Account":
+    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
         # Add the account to the group
         self.members.append(account)  # type: ignore
         # Create a policy for the new member
         new_policy = Policy(policy_holder_type='account',
                             policy_holder=(await create_link(account)),
                             permissions=permissions,
-                            workspace=workspace)
+                            parent_resource=self)  # type: ignore
 
         # Add the policy to the group
         self.policies.append(new_policy)  # type: ignore
@@ -117,7 +117,8 @@ class Group(Resource):
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    workspace: Link["Workspace"]
+    # workspace: Link["Workspace"]
+    parent_resource: BackLink["Workspace"] | BackLink["Group"] = Field(original_field="policies")
     # workspace: BackLink[Workspace] = Field(original_field="policies")
     policy_holder_type: Literal["account", "group"]
     policy_holder: Link["Group"] | Link["Account"]
