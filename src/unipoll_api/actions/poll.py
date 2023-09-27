@@ -1,8 +1,32 @@
 from unipoll_api import AccountManager
-from unipoll_api.documents import Poll, Policy, Group, Account
+from unipoll_api.documents import Poll, Policy, Group, Account, Workspace
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas, MemberSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
 from unipoll_api.exceptions import ResourceExceptions
+
+
+async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
+    account = AccountManager.active_user.get()
+    req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
+    all_workspaces = [workspace] if workspace else await Workspace.find(fetch_links=True).to_list()
+
+    poll_list = []
+    for workspace in all_workspaces:
+        permissions = await Permissions.get_all_permissions(workspace, account)
+        if Permissions.check_permission(permissions, req_permissions):
+            poll_list += workspace.polls  # type: ignore
+        else:
+            req_permissions = Permissions.WorkspacePermissions["get_poll"]
+            for poll in workspace.polls:  # type: ignore
+                if poll.public:  # type: ignore
+                    poll_list.append(poll)
+                else:
+                    permissions = await Permissions.get_all_permissions(poll, account)
+                    if Permissions.check_permission(permissions, req_permissions):
+                        poll_list.append(poll)
+    # Build poll list and return the result
+    poll_list = [PollSchemas.PollShort(**poll.dict(exclude={'questions', 'policies'})) for poll in poll_list]
+    return PollSchemas.PollList(polls=poll_list)
 
 
 async def get_poll(poll: Poll,
@@ -16,7 +40,7 @@ async def get_poll(poll: Poll,
     # Fetch the resources if the user has the required permissions
     if include_questions:
         req_permissions = Permissions.PollPermissions["get_poll_questions"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions) or poll.public:
+        if poll.public or Permissions.check_permission(permissions, req_permissions):
             questions = (await get_poll_questions(poll)).questions
     if include_policies:
         req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore

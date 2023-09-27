@@ -4,7 +4,7 @@ from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from unipoll_api import AccountManager
 from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
-from unipoll_api.actions import PolicyActions
+from unipoll_api.actions import PolicyActions, PollActions
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas, PollSchemas
 from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, GroupExceptions, ResourceExceptions,
@@ -346,11 +346,7 @@ async def set_workspace_policy(workspace: Workspace,
 
 # Get a list of polls in a workspace
 async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
-    poll_list = []
-    poll: Poll
-    for poll in workspace.polls:  # type: ignore
-        poll_list.append(PollSchemas.PollShort(**poll.dict(exclude={'questions', 'policies'})))
-    return PollSchemas.PollList(polls=poll_list)
+    return await PollActions.get_polls(workspace)
 
 
 # Create a new poll in a workspace
