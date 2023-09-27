@@ -22,26 +22,11 @@ from unipoll_api.utils import permissions as Permissions
 
 # Get group
 async def get_group(group: Group, include_members: bool = False, include_policies: bool = False) -> GroupSchemas.Group:
-    members = None
-    policies = None
-
-    account = AccountManager.active_user.get()
-    # Get the permissions(allowed actions) of the current user
-    permissions = await Permissions.get_all_permissions(group, account)
-    # Fetch the resources if the user has the required permissions
-    if include_members:
-        req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            members = (await get_group_members(group)).members
-    if include_policies:
-        req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            policies = (await get_group_policies(group)).policies
-
+    members = (await get_group_members(group)).members if include_members else None
+    policies = (await get_group_policies(group)).policies if include_policies else None
     workspace = WorkspaceSchemas.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
                                                                            "policies",
                                                                            "groups"}))
-
     # Return the workspace with the fetched resources
     return GroupSchemas.Group(id=group.id,
                               name=group.name,
@@ -97,10 +82,15 @@ async def delete_group(group: Group):
 async def get_group_members(group: Group) -> MemberSchemas.MemberList:
     member_list = []
     member: Account
-    for member in group.members:  # type: ignore
-        member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
-        member_scheme = MemberSchemas.Member(**member_data)
-        member_list.append(member_scheme)
+
+    account = AccountManager.active_user.get()
+    permissions = await Permissions.get_all_permissions(group, account)
+    req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
+    if Permissions.check_permission(permissions, req_permissions):
+        for member in group.members:  # type: ignore
+            member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+            member_scheme = MemberSchemas.Member(**member_data)
+            member_list.append(member_scheme)
     # Return the list of members
     return MemberSchemas.MemberList(members=member_list)
 
@@ -114,7 +104,7 @@ async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers)
     account_list = await Account.find(In(Account.id, accounts)).to_list()
     # Add the accounts to the group member list with default permissions
     for account in account_list:
-        await group.add_member(group.workspace, account, Permissions.GROUP_BASIC_PERMISSIONS)
+        await group.add_member(account, Permissions.GROUP_BASIC_PERMISSIONS)
     await Group.save(group)
     # Return the list of members added to the group
     return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
@@ -146,25 +136,29 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
 async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
     policy_list = []
     policy: Policy
-    for policy in group.policies:  # type: ignore
-        permissions = Permissions.GroupPermissions(policy.permissions).name.split('|')  # type: ignore
-        # Get the policy_holder
-        if policy.policy_holder_type == 'account':
-            policy_holder = await Account.get(policy.policy_holder.ref.id)
-        elif policy.policy_holder_type == 'group':
-            policy_holder = await Group.get(policy.policy_holder.ref.id)
-        else:
-            raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
-        if not policy_holder:
-            # TODO: Replace with custom exception
-            raise ResourceExceptions.InternalServerError("get_group_policies() => Policy holder not found")
-        # Convert the policy_holder to a Member schema
-        policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
-        policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
-                                                     policy_holder_type=policy.policy_holder_type,
-                                                     # Exclude unset fields(i.e. "description" for Account)
-                                                     policy_holder=policy_holder.dict(exclude_unset=True),
-                                                     permissions=permissions))
+    account = AccountManager.active_user.get()
+    permissions = await Permissions.get_all_permissions(group, account)
+    req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
+    if Permissions.check_permission(permissions, req_permissions):
+        for policy in group.policies:  # type: ignore
+            permissions = Permissions.GroupPermissions(policy.permissions).name.split('|')  # type: ignore
+            # Get the policy_holder
+            if policy.policy_holder_type == 'account':
+                policy_holder = await Account.get(policy.policy_holder.ref.id)
+            elif policy.policy_holder_type == 'group':
+                policy_holder = await Group.get(policy.policy_holder.ref.id)
+            else:
+                raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
+            if not policy_holder:
+                # TODO: Replace with custom exception
+                raise ResourceExceptions.InternalServerError("get_group_policies() => Policy holder not found")
+            # Convert the policy_holder to a Member schema
+            policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
+            policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
+                                                         policy_holder_type=policy.policy_holder_type,
+                                                         # Exclude unset fields(i.e. "description" for Account)
+                                                         policy_holder=policy_holder.dict(exclude_unset=True),
+                                                         permissions=permissions))
     return PolicySchemas.PolicyList(policies=policy_list)
 
 

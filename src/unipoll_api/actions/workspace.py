@@ -4,6 +4,7 @@ from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from unipoll_api import AccountManager
 from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
+from unipoll_api.actions import PolicyActions
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas, PollSchemas
 from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, GroupExceptions, ResourceExceptions,
@@ -41,14 +42,15 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
     # Create a policy for the new member
     # The member(creator) has full permissions on the workspace
-    new_policy = Policy(policy_holder_type='account',
-                        policy_holder=(await create_link(account)),
-                        permissions=Permissions.WORKSPACE_ALL_PERMISSIONS,
-                        workspace=new_workspace)  # type: ignore
+    # new_policy = Policy(policy_holder_type='account',
+    #                     policy_holder=(await create_link(account)),
+    #                     permissions=Permissions.WORKSPACE_ALL_PERMISSIONS,
+    #                     parent_resource=new_workspace)  # type: ignore
 
     # Add the current user and the policy to workspace member list
-    new_workspace.members.append(account)  # type: ignore
-    new_workspace.policies.append(new_policy)  # type: ignore
+    # new_workspace.members.append(account)  # type: ignore
+    # new_workspace.policies.append(new_policy)  # type: ignore
+    await new_workspace.add_member(account=account, permissions=Permissions.WORKSPACE_ALL_PERMISSIONS, save=False)
     await Workspace.save(new_workspace, link_rule=WriteRules.WRITE)
 
     # Specify fields for output schema
@@ -61,30 +63,10 @@ async def get_workspace(workspace: Workspace,
                         include_policies: bool = False,
                         include_members: bool = False,
                         include_polls: bool = False) -> WorkspaceSchemas.Workspace:
-    groups = None
-    members = None
-    policies = None
-    polls = None
-    # Get the current active user
-    account = AccountManager.active_user.get()
-    # Get the permissions(allowed actions) of the current user
-    permissions = await Permissions.get_all_permissions(workspace, account)
-    if include_groups:
-        req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            groups = (await get_groups(workspace)).groups
-    if include_members:
-        req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            members = (await get_workspace_members(workspace)).members
-    if include_policies:
-        req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            policies = (await get_workspace_policies(workspace)).policies
-    if include_polls:
-        req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            polls = (await get_polls(workspace)).polls
+    groups = (await get_groups(workspace)).groups if include_groups else None
+    members = (await get_workspace_members(workspace)).members if include_members else None
+    policies = (await get_workspace_policies(workspace)).policies if include_policies else None
+    polls = (await get_polls(workspace)).polls if include_polls else None
     # Return the workspace with the fetched resources
     return WorkspaceSchemas.Workspace(id=workspace.id,
                                       name=workspace.name,
@@ -123,7 +105,7 @@ async def delete_workspace(workspace: Workspace):
     # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    await Policy.find(Policy.workspace.id == workspace.id).delete()  # type: ignore
+    await Policy.find(Policy.parent_resource.id == workspace.id).delete()  # type: ignore
     await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
 
 
@@ -131,10 +113,16 @@ async def delete_workspace(workspace: Workspace):
 async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberList:
     member_list = []
     member: Account
-    for member in workspace.members:  # type: ignore
-        member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
-        member_scheme = MemberSchemas.Member(**member_data)
-        member_list.append(member_scheme)
+
+    account: Account = AccountManager.active_user.get()
+
+    permissions = await Permissions.get_all_permissions(workspace, account)
+    req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
+    if Permissions.check_permission(permissions, req_permissions):
+        for member in workspace.members:  # type: ignore
+            member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+            member_scheme = MemberSchemas.Member(**member_data)
+            member_list.append(member_scheme)
     # Return the list of members
     return MemberSchemas.MemberList(members=member_list)
 
@@ -149,7 +137,7 @@ async def add_workspace_members(workspace: Workspace,
     account_list = await Account.find(In(Account.id, accounts)).to_list()
     # Add the accounts to the group member list with basic permissions
     for account in account_list:
-        await workspace.add_member(workspace, account, Permissions.WORKSPACE_BASIC_PERMISSIONS, save=False)
+        await workspace.add_member(account, Permissions.WORKSPACE_BASIC_PERMISSIONS, save=False)
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
     # Return the list of members added to the group
     return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
@@ -178,19 +166,23 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
 
 # Get a list of groups where the account is a member
 async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
-    # await workspace.fetch_link(Workspace.groups)
     account = AccountManager.active_user.get()
-    group_list = []
-
-    # Convert the list of links to a list of
-    group: Group
-    for group in workspace.groups:  # type: ignore
-        member: Account
-        for member in group.members:  # type: ignore
-            if account.id == ResourceID(member.id):
-                group_list.append(GroupSchemas.GroupShort(**group.dict()))
+    permissions = await Permissions.get_all_permissions(workspace, account)
+    # Check if the user has permission to get all groups
+    req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
+    if Permissions.check_permission(permissions, req_permissions):
+        groups = [GroupSchemas.GroupShort(**group.dict()) for group in workspace.groups]  # type: ignore
+    # Otherwise, return only the groups where the user has permission to get the group
+    else:
+        groups = []
+        for group in workspace.groups:
+            user_permissions = await Permissions.get_all_permissions(group, account)
+            required_permission = Permissions.GroupPermissions['get_group']
+            if Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
+                                            required_permission):
+                groups.append(GroupSchemas.GroupShort(**group.dict()))  # type: ignore
     # Return the list of groups
-    return GroupSchemas.GroupList(groups=group_list)
+    return GroupSchemas.GroupList(groups=groups)
 
 
 # Create a new group with account as the owner
@@ -215,14 +207,14 @@ async def create_group(workspace: Workspace,
         raise GroupExceptions.ErrorWhileCreating(new_group)
 
     # Add the account to group member list
-    await new_group.add_member(workspace, account, Permissions.GROUP_ALL_PERMISSIONS)
+    await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
 
     # Create a policy for the new group
     permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS  # type: ignore
     new_policy = Policy(policy_holder_type='group',
                         policy_holder=(await create_link(new_group)),
                         permissions=permissions,
-                        workspace=workspace)  # type: ignore
+                        parent_resource=workspace)  # type: ignore
 
     # Add the group and the policy to the workspace
     workspace.policies.append(new_policy)  # type: ignore
@@ -235,47 +227,58 @@ async def create_group(workspace: Workspace,
 
 # Get all policies of a workspace
 async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
-    policy_list = []
+    # policy_list = []
     policy: Policy
-    for policy in workspace.policies:  # type: ignore
-        permissions = Permissions.WorkspacePermissions(policy.permissions).name.split('|')  # type: ignore
-        # Get policy_holder
-        if policy.policy_holder_type == 'account':
-            policy_holder = await Account.get(policy.policy_holder.ref.id)
-        elif policy.policy_holder_type == 'group':
-            policy_holder = await Group.get(policy.policy_holder.ref.id)
-        else:
-            raise ResourceExceptions.InternalServerError(str("Unknown policy_holder_type"))
-        if not policy_holder:
-            # TODO: Replace with a custom exception
-            raise AccountExceptions.AccountNotFound(policy.policy_holder.ref.id)
-        # Convert the policy_holder to a Member schema
-        policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
-        policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
-                                                     policy_holder_type=policy.policy_holder_type,
-                                                     # Exclude unset fields(i.e. "description" for Account)
-                                                     policy_holder=policy_holder.dict(exclude_unset=True),
-                                                     permissions=permissions))
-    return PolicySchemas.PolicyList(policies=policy_list)
+
+    # import time
+
+    # t0 = time.time()
+    policy_list2 = await PolicyActions.get_policies(resource=workspace)
+    # t1 = time.time()
+    # print(f"Time for PolicyActions.get_policies(resource=workspace): {t1-t0}")
+
+    # t0 = time.time()
+    # account = AccountManager.active_user.get()
+    # permissions = await Permissions.get_all_permissions(workspace, account)
+    # req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
+    # if Permissions.check_permission(permissions, req_permissions):
+    #     for policy in workspace.policies:  # type: ignore
+    #         policy_list.append(await PolicyActions.get_policy(policy))
+    # else:
+    #     policy = await Policy.find_one(Policy.policy_holder.ref.id == account.id)  # type: ignore
+    #     policy_list.append(await PolicyActions.get_policy(policy))
+    # t1 = time.time()
+    # print(f"Time for code block: {t1-t0}")
+
+    # print(policy_list2.policies == policy_list)
+
+    return PolicySchemas.PolicyList(policies=policy_list2.policies)
 
 
-# List all permissions for a user in a workspace
+# Get a policy of a workspace
 async def get_workspace_policy(workspace: Workspace,
                                account_id: ResourceID | None = None) -> PolicySchemas.PolicyOutput:
     # Check if account_id is specified in request, if account_id is not specified, use the current user
     account: Account = await Account.get(account_id) if account_id else AccountManager.active_user.get()  # type: ignore
+    policy_list = await PolicyActions.get_policies(resource=workspace, policy_holder=account)
 
-    if not account and account_id:
-        raise AccountExceptions.AccountNotFound(account_id)
+    # if not account and account_id:
+    #     raise AccountExceptions.AccountNotFound(account_id)
 
-    # Check if account is a member of the workspace
-    if account.id not in [member.id for member in workspace.members]:  # type: ignore
-        raise WorkspaceExceptions.UserNotMember(workspace, account)
+    # # Check if account is a member of the workspace
+    # if account.id not in [member.id for member in workspace.members]:  # type: ignore
+    #     raise WorkspaceExceptions.UserNotMember(workspace, account)
 
-    user_permissions = await Permissions.get_all_permissions(workspace, account)
+    # user_permissions = await Permissions.get_all_permissions(workspace, account)
+    # return PolicySchemas.PolicyOutput(
+    #     permissions=Permissions.WorkspacePermissions(user_permissions).name.split('|'),  # type: ignore
+    #     policy_holder=MemberSchemas.Member(**account.dict()))
+
+    user_policy = policy_list.policies[0]
+
     return PolicySchemas.PolicyOutput(
-        permissions=Permissions.WorkspacePermissions(user_permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**account.dict()))
+        permissions=user_policy.permissions,  # type: ignore
+        policy_holder=user_policy.policy_holder)
 
 
 # Set permissions for a user in a workspace
