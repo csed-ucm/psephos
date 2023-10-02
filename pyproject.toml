@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unipoll-api"
-version = "0.7.9"
+version = "0.8.3"
 description = "Unipoll API"
 authors = [{email = "help@unipoll.cc"}, {name = "University Polling"}]
 readme = "README.md"
@@ -37,11 +37,6 @@ dev = [
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-include-package-data = false
-
-[tool.setuptools.packages.find]
-include = ["unipoll-api*"]
-exclude = ["docs*", "tests*", "postman*"]
 
 [tool.semantic_release]
 version_variables = ["src/unipoll_api/__version__.py:version"]
