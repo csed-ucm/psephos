@@ -5,10 +5,11 @@ from unipoll_api.config import get_settings
 settings = get_settings()
 
 client = motor.motor_asyncio.AsyncIOMotorClient(
-    settings.mongodb_url, uuidRepresentation="standard"
+    host=settings.mongodb_url,
+    uuidRepresentation="standard",
 )
-mainDB = client.app
 
+mainDB = client["unipoll-api"]
 
 documentModels = [
     Documents.AccessToken,
