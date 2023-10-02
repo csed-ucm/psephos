@@ -2,10 +2,22 @@ FROM python:3.11-alpine
 
 WORKDIR /unipoll-api
 
-COPY ./requirements.txt /unipoll-api/requirements.txt
+COPY ./pyproject.toml /unipoll-api/pyproject.toml
 
-RUN pip install --no-cache-dir -r /unipoll-api/requirements.txt
+COPY ./src/ /unipoll-api/src/
 
-COPY ./src/ /unipoll-api/
+RUN pip install build
 
-CMD ["uvicorn", "unipoll_api.app:app"]
+RUN python -m build
+
+FROM python:3.11-alpine
+
+WORKDIR /unipoll-api
+
+COPY --from=0 /unipoll-api/dist/*.tar.gz .
+
+RUN tar -xf unipoll-api-*.tar.gz --strip-components=1
+
+RUN pip install .
+
+ENTRYPOINT [ "unipoll-api" ]
