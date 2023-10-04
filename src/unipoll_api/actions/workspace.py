@@ -227,32 +227,9 @@ async def create_group(workspace: Workspace,
 
 # Get all policies of a workspace
 async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
-    # policy_list = []
-    policy: Policy
+    policy_list = await PolicyActions.get_policies(resource=workspace)
 
-    # import time
-
-    # t0 = time.time()
-    policy_list2 = await PolicyActions.get_policies(resource=workspace)
-    # t1 = time.time()
-    # print(f"Time for PolicyActions.get_policies(resource=workspace): {t1-t0}")
-
-    # t0 = time.time()
-    # account = AccountManager.active_user.get()
-    # permissions = await Permissions.get_all_permissions(workspace, account)
-    # req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]  # type: ignore
-    # if Permissions.check_permission(permissions, req_permissions):
-    #     for policy in workspace.policies:  # type: ignore
-    #         policy_list.append(await PolicyActions.get_policy(policy))
-    # else:
-    #     policy = await Policy.find_one(Policy.policy_holder.ref.id == account.id)  # type: ignore
-    #     policy_list.append(await PolicyActions.get_policy(policy))
-    # t1 = time.time()
-    # print(f"Time for code block: {t1-t0}")
-
-    # print(policy_list2.policies == policy_list)
-
-    return PolicySchemas.PolicyList(policies=policy_list2.policies)
+    return PolicySchemas.PolicyList(policies=policy_list.policies)
 
 
 # Get a policy of a workspace
@@ -261,19 +238,6 @@ async def get_workspace_policy(workspace: Workspace,
     # Check if account_id is specified in request, if account_id is not specified, use the current user
     account: Account = await Account.get(account_id) if account_id else AccountManager.active_user.get()  # type: ignore
     policy_list = await PolicyActions.get_policies(resource=workspace, policy_holder=account)
-
-    # if not account and account_id:
-    #     raise AccountExceptions.AccountNotFound(account_id)
-
-    # # Check if account is a member of the workspace
-    # if account.id not in [member.id for member in workspace.members]:  # type: ignore
-    #     raise WorkspaceExceptions.UserNotMember(workspace, account)
-
-    # user_permissions = await Permissions.get_all_permissions(workspace, account)
-    # return PolicySchemas.PolicyOutput(
-    #     permissions=Permissions.WorkspacePermissions(user_permissions).name.split('|'),  # type: ignore
-    #     policy_holder=MemberSchemas.Member(**account.dict()))
-
     user_policy = policy_list.policies[0]
 
     return PolicySchemas.PolicyOutput(
