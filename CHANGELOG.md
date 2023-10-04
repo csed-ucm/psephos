@@ -2,6 +2,81 @@
 
 
 
+## v0.9.0 (2023-10-04)
+
+### Build
+
+* build: Changed python base image to 3.11-alpine ([`0d44ba0`](https://github.com/unipoll/api/commit/0d44ba04351dd69f8a1df61af4e9f6e0511caf82))
+
+### Feature
+
+* feat: Added action to get poll list ([`114616f`](https://github.com/unipoll/api/commit/114616fc96f8c0c4702ef4046a0d0b35fc6e3c8a))
+
+### Fix
+
+* fix: Changed permissions field type
+
+Changed permissions field type in Pollicy document from Permissions to int ([`9c44d6d`](https://github.com/unipoll/api/commit/9c44d6dec5757a26424d1bdb24dd3c1e6f94af1e))
+
+### Refactor
+
+* refactor: Changed main.py
+
+Added src to pythonpath, change main function to use app.run() ([`8b76639`](https://github.com/unipoll/api/commit/8b76639de57742b132c49ad26a0177543b4a4cd3))
+
+* refactor: Changed Dockerfile
+
+Change build process to add unipoll-api entry point ([`210452d`](https://github.com/unipoll/api/commit/210452d13f37d04a57ec32e55115452fdd8f64a5))
+
+* refactor: Changed Policy workspace link
+
+Replace link to workspace with a backlink to parent resource that holds list of policies ([`581249f`](https://github.com/unipoll/api/commit/581249f82877fadbc6fa4d059551ad6dc32950fe))
+
+* refactor: Added PolicyHolderNotFound exceptions
+
+Added PolicyHolderNotFound exceptions instead of using generic resource exception ([`804ad38`](https://github.com/unipoll/api/commit/804ad38cc09518547bee09e6ef378902cd97a573))
+
+* refactor: Moved permission checks
+
+Moved permission checks to appropriate actions ([`fd2e23c`](https://github.com/unipoll/api/commit/fd2e23cbba0751a3ed4e05c5837e170362b3ca4d))
+
+* refactor: Created Policy Actions file
+
+Moved actions to get policy/policies to a separate file, the client can specify the resource from which the policy list is requested or the user whose policy  is requested ([`6c89b10`](https://github.com/unipoll/api/commit/6c89b1020349de5ed0d7179e8f711712e170bb3f))
+
+### Style
+
+* style: Removed commented out code ([`48733e1`](https://github.com/unipoll/api/commit/48733e16a1d6cfce2a9a032c4de7337f4ec0e355))
+
+* style: Renamed mongo database
+
+Renamed mongo database from app to unipoll-api ([`bcd412d`](https://github.com/unipoll/api/commit/bcd412d49a804eb00d0585dc2272d271657414c5))
+
+### Test
+
+* test: linting ([`46dd4e8`](https://github.com/unipoll/api/commit/46dd4e86a51098706c6f58559312aafd8c9d72eb))
+
+* test: Added back the testpaths field
+
+Without testpaths, pytest would rund tests from dependency modules ([`03e71a8`](https://github.com/unipoll/api/commit/03e71a83e2ef810e9e8bbc22b13514f26426b7d0))
+
+### Unknown
+
+* Merge pull request #69 from unipoll/development
+
+Development ([`2590487`](https://github.com/unipoll/api/commit/2590487b2d5fa219c51d1563c0a40a263020ff7b))
+
+* Merge pull request #68 from unipoll/permissions
+
+Permissions ([`077d92d`](https://github.com/unipoll/api/commit/077d92d52db2e90deb7418cb4e45dad1553ead98))
+
+* Merge pull request #67 from unipoll/development
+
+Renamed database and updated Dockerfile ([`3513d97`](https://github.com/unipoll/api/commit/3513d9758ef56679bddd06c0c7788897fe92d21b))
+
+* Merge branch &#39;main&#39; into development ([`839dfdf`](https://github.com/unipoll/api/commit/839dfdf5413d2d555bf4f70854b3524a4f132ec2))
+
+
 ## v0.8.3 (2023-09-26)
 
 ### Ci
