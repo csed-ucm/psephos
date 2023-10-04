@@ -5,7 +5,6 @@ from beanie import BackLink, Document, WriteRules, after_event, Insert, Link, Py
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from unipoll_api.utils import colored_dbg as Debug
-from unipoll_api.utils.permissions import Permissions  # WorkspacePermissions
 from unipoll_api.utils.token_db import BeanieBaseAccessToken
 
 
@@ -117,14 +116,10 @@ class Group(Resource):
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    # workspace: Link["Workspace"]
     parent_resource: BackLink["Workspace"] | BackLink["Group"] = Field(original_field="policies")
-    # workspace: BackLink[Workspace] = Field(original_field="policies")
     policy_holder_type: Literal["account", "group"]
     policy_holder: Link["Group"] | Link["Account"]
-    # policy_holder: list[Link["Account"]]
-    # policy_holder: Link[Resource]
-    permissions: Permissions
+    permissions: int
 
 
 class Poll(Resource):
