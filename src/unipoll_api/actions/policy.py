@@ -16,7 +16,7 @@ async def get_policies(policy_holder: Account | Group | None = None,
 
     # Helper function to get policies from a resource
     async def get_policies_from_resource(resource: Resource) -> list[Policy]:
-        req_permissions = None
+        req_permissions: Permissions.Permissions | None = None
         if resource.resource_type == "workspace":
             req_permissions = Permissions.WorkspacePermissions["get_workspace_policies"]
         elif resource.resource_type == "group":
@@ -59,7 +59,7 @@ async def get_policy(policy: Policy) -> PolicySchemas.PolicyShort:
     if not policy_holder:
         raise PolicyExceptions.PolicyHolderNotFound(ph_ref)
 
-    policy_holder = MemberSchemas.Member(**policy_holder.dict())
+    policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
     permissions = Permissions.WorkspacePermissions(policy.permissions).name.split('|')  # type: ignore
     return PolicySchemas.PolicyShort(id=policy.id,
                                      policy_holder_type=policy.policy_holder_type,

@@ -25,7 +25,8 @@ async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
                     if Permissions.check_permission(permissions, req_permissions):
                         poll_list.append(poll)
     # Build poll list and return the result
-    poll_list = [PollSchemas.PollShort(**poll.dict(exclude={'questions', 'policies'})) for poll in poll_list]
+    for poll in poll_list:
+        poll_list.append(PollSchemas.PollShort(**poll.dict()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
 
 
