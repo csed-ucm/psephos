@@ -19,7 +19,7 @@ class BearerTransport(Transport):
         bearer_response = LoginResponse(access_token=token.access_token,  # type: ignore
                                         refresh_token=token.refresh_token,  # type: ignore
                                         client_id=str(token.user_id))  # type: ignore
-        return JSONResponse(bearer_response.dict(exclude_none=True))
+        return JSONResponse(bearer_response.model_dump(exclude_none=True))
 
     async def get_logout_response(self) -> Response:
         raise TransportLogoutNotSupportedError()

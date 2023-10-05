@@ -1,5 +1,5 @@
 from fastapi_users import schemas
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import ConfigDict, BaseModel, Field, EmailStr
 from unipoll_api.documents import ResourceID
 
 
@@ -10,22 +10,20 @@ class Account(schemas.BaseUser[ResourceID]):
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
+        pattern="^[A-Z][a-z]*$")
     last_name: str = Field(
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "email": "user@example.com",
-                "password": "pass1234",
-                "first_name": "John",
-                "last_name": "Smith",
-            }
+        pattern="^[A-Z][a-z]*$")
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "email": "user@example.com",
+            "password": "pass1234",
+            "first_name": "John",
+            "last_name": "Smith",
         }
+    })
 
 
 class AccountShort(BaseModel):
@@ -45,22 +43,20 @@ class CreateAccount(schemas.BaseUserCreate):
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
+        pattern="^[A-Z][a-z]*$")
     last_name: str = Field(
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "email": "user@example.com",
-                "password": "pass1234",
-                "first_name": "John",
-                "last_name": "Smith",
-            }
+        pattern="^[A-Z][a-z]*$")
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "email": "user@example.com",
+            "password": "pass1234",
+            "first_name": "John",
+            "last_name": "Smith",
         }
+    })
 
 
 class UpdateAccount(schemas.BaseUserUpdate):
@@ -69,19 +65,17 @@ class UpdateAccount(schemas.BaseUserUpdate):
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
+        pattern="^[A-Z][a-z]*$")
     last_name: str = Field(
         default_factory=str,
         max_length=20,
         min_length=2,
-        regex="^[A-Z][a-z]*$")
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "email": "user@example.com",
-                "password": "pass1234",
-                "first_name": "John",
-                "last_name": "Smith",
-            }
+        pattern="^[A-Z][a-z]*$")
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "email": "user@example.com",
+            "password": "pass1234",
+            "first_name": "John",
+            "last_name": "Smith",
         }
+    })

@@ -27,21 +27,14 @@ class TestAccount(BaseModel):
     is_verified: bool = False
 
 
-# first_name: str = fake.first_name()
-# last_name: str = fake.last_name()
-# email: str = (first_name[0] + last_name + "@ucmerced.edu").lower()
-# password: str = fake.password()
-# new_user = Account(email=email, first_name=first_name, last_name=last_name, hashed_password=password)
 new_user = TestAccount()
 
 
 # Test to see if the user can create an account
-# Check if the response is 201(Success)
-# Check if the user information is correct
 async def test_register(client_test: AsyncClient, new_user: TestAccount = new_user):
     print("\n")
     colored_dbg.test_info("Registering new user: ", new_user.email)
-    response = await client_test.post("/auth/register", json=new_user.dict())
+    response = await client_test.post("/auth/register", json=new_user.model_dump())
     assert response.status_code == 201
     response = response.json()
     assert response.get("id") is not None
@@ -57,7 +50,7 @@ async def test_register(client_test: AsyncClient, new_user: TestAccount = new_us
 async def test_register_existing_email(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Attempting to register a new user with an existing email: ", new_user.email)
-    response = await client_test.post("/auth/register", json=new_user.dict())
+    response = await client_test.post("/auth/register", json=new_user.model_dump())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     response = response.json()
     assert response.get("detail") == "REGISTER_USER_ALREADY_EXISTS"

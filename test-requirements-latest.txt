@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+fastapi-users[beanie]
+beanie
+colorama
+pydantic-settings
+pytest
+pytest-cov
+faker
+flake8
+tox
+mypy
+tox-gh-actions
+asgi-lifespan
+httpx
+pytest-asyncio

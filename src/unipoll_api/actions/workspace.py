@@ -21,7 +21,7 @@ async def get_workspaces() -> WorkspaceSchemas.WorkspaceList:
     # Create a workspace list for output schema using the search results
     for workspace in search_result:
         workspace_list.append(WorkspaceSchemas.WorkspaceShort(
-            **workspace.dict(exclude={'members', 'groups', 'permissions'})))
+            **workspace.model_dump(exclude={'members', 'groups', 'permissions'})))
 
     return WorkspaceSchemas.WorkspaceList(workspaces=workspace_list)
 
@@ -54,7 +54,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
     await Workspace.save(new_workspace, link_rule=WriteRules.WRITE)
 
     # Specify fields for output schema
-    return WorkspaceSchemas.WorkspaceCreateOutput(**new_workspace.dict())
+    return WorkspaceSchemas.WorkspaceCreateOutput(**new_workspace.model_dump(include={'id', 'name', 'description'}))
 
 
 # Get a workspace
@@ -96,7 +96,7 @@ async def update_workspace(workspace: Workspace,
     if save_changes:
         await Workspace.save(workspace)
     # Return the updated workspace
-    return WorkspaceSchemas.Workspace(**workspace.dict())
+    return WorkspaceSchemas.Workspace(**workspace.model_dump())
 
 
 # Delete a workspace
@@ -120,7 +120,7 @@ async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberLis
     req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
     if Permissions.check_permission(permissions, req_permissions):
         for member in workspace.members:  # type: ignore
-            member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+            member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
             member_scheme = MemberSchemas.Member(**member_data)
             member_list.append(member_scheme)
     # Return the list of members
@@ -140,7 +140,7 @@ async def add_workspace_members(workspace: Workspace,
         await workspace.add_member(account, Permissions.WORKSPACE_BASIC_PERMISSIONS, save=False)
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
     # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
+    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
 
 
 # Remove a member from a workspace
@@ -159,7 +159,7 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
     # Remove the account from the workspace
     if await workspace.remove_member(account):
         # Return the list of members added to the group
-        member_list = [MemberSchemas.Member(**account.dict()) for account in workspace.members]  # type: ignore
+        member_list = [MemberSchemas.Member(**account.model_dump()) for account in workspace.members]  # type: ignore
         return MemberSchemas.MemberList(members=member_list)
     raise WorkspaceExceptions.ErrorWhileRemovingMember(workspace, account)
 
@@ -171,7 +171,7 @@ async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
     # Check if the user has permission to get all groups
     req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
     if Permissions.check_permission(permissions, req_permissions):
-        groups = [GroupSchemas.GroupShort(**group.dict()) for group in workspace.groups]  # type: ignore
+        groups = [GroupSchemas.GroupShort(**group.model_dump()) for group in workspace.groups]  # type: ignore
     # Otherwise, return only the groups where the user has permission to get the group
     else:
         groups = []
@@ -180,7 +180,7 @@ async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
             required_permission = Permissions.GroupPermissions['get_group']
             if Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
                                             required_permission):
-                groups.append(GroupSchemas.GroupShort(**group.dict()))  # type: ignore
+                groups.append(GroupSchemas.GroupShort(**group.model_dump()))  # type: ignore
     # Return the list of groups
     return GroupSchemas.GroupList(groups=groups)
 
@@ -222,7 +222,7 @@ async def create_group(workspace: Workspace,
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
     # Return the new group
-    return GroupSchemas.GroupCreateOutput(**new_group.dict())
+    return GroupSchemas.GroupCreateOutput(**new_group.model_dump(include={'id', 'name', 'description'}))
 
 
 # Get all policies of a workspace
@@ -305,7 +305,7 @@ async def set_workspace_policy(workspace: Workspace,
     # Return the updated policy
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**policy_holder.dict()))  # type: ignore
+        policy_holder=MemberSchemas.Member(**policy_holder.model_dump()))  # type: ignore
 
 
 # Get a list of polls in a workspace
@@ -339,4 +339,4 @@ async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRe
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
     # Return the new poll
-    return PollSchemas.PollResponse(**new_poll.dict())
+    return PollSchemas.PollResponse(**new_poll.model_dump())

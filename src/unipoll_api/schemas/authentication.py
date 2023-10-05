@@ -5,8 +5,8 @@ from pydantic import BaseModel
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "Bearer"
-    scope: Optional[str]
-    client_id: Optional[str]
+    scope: Optional[str] = None
+    client_id: Optional[str] = None
     expires_in: int = 3600
     refresh_token: str
 
