@@ -18,8 +18,8 @@ class Settings(BaseSettings):  # type: ignore
     app_description: str = Field(default=("An Open Source API for creating surveys and polls "
                                           "to assist in university research."),
                                  title="App Description", description="A description of the API.")
-    admin_email: EmailStr = Field(default="",
-                                  title="Admin Email", description="The email address of the admin of the API.")
+    admin_email: EmailStr = Field(default="admin@example.com",
+                                  title="Admin Email", description="The email address of the API administrator.")
     mongodb_url: str = Field(default="mongodb://localhost:27017",
                              title="MongoDB URL", description="The URL of the MongoDB database.")
     secrete_key: str = Field(default="secret", title="Secrete Key", description="The secrete key of the API.")
