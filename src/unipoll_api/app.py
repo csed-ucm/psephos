@@ -91,7 +91,7 @@ def run(host=settings.host, port=settings.port, reload=settings.reload):
 
 def setup():
     # Print current directory
-    print("Current directory: {}".format(os.getcwd()))
+    # print("Current directory: {}".format(os.getcwd()))
 
     # Get user input
     host = input("Host IP address [{}]: ".format(settings.host))
@@ -108,10 +108,15 @@ def setup():
         f.write("ORIGINS={}\n".format(origins if origins else settings.origins))
         f.write("ADMIN_EMAIL={}\n".format(admin_email if admin_email else settings.admin_email))
 
+    # Print success message
+    print(f"Your configuration has been saved to {os.getcwd()}/.env")
+
 
 def get_openapi():
     if not app.openapi_schema:
         openapi_schema = app.openapi()
         app.openapi_schema = openapi_schema
     json.dump(app.openapi_schema, open("openapi.json", "w"), indent=2)
-    print("OpenAPI schema saved to openapi.json")
+
+    # Print success message
+    print(f"OpenAPI schema saved to {os.getcwd()}/openapi.json")
