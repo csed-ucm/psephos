@@ -62,7 +62,7 @@ class Resource(Document):
         for i, member in enumerate(self.members):
             if account.id == member.id:  # type: ignore
                 self.members.remove(member)
-                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")
                 break
 
         # Remove the policy from the group
@@ -103,14 +103,14 @@ class Workspace(Resource):
 
 class Group(Resource):
     resource_type: Literal["group"] = "group"
-    workspace: BackLink[Workspace] = Field(original_field="groups")  # type: ignore
+    workspace: BackLink[Workspace] = Field(original_field="groups")
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
 
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    parent_resource: BackLink["Workspace"] | BackLink["Group"] | BackLink["Poll"] = Field(original_field="policies")  # type: ignore
+    parent_resource: BackLink["Workspace"] | BackLink["Group"] | BackLink["Poll"] = Field(original_field="policies")
     policy_holder_type: Literal["account", "group"]
     policy_holder: Link["Group"] | Link["Account"]
     permissions: int
@@ -118,7 +118,7 @@ class Policy(Document):
 
 class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    workspace: BackLink["Workspace"] = Field(original_field="polls")  # type: ignore
+    workspace: BackLink["Workspace"] = Field(original_field="polls")
     resource_type: Literal["poll"] = "poll"
     public: bool
     published: bool

@@ -25,8 +25,8 @@ async def get_group(group: Group, include_members: bool = False, include_policie
     members = (await get_group_members(group)).members if include_members else None
     policies = (await get_group_policies(group)).policies if include_policies else None
     workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(exclude={"members",  # type: ignore
-                                                                           "policies",
-                                                                           "groups"}))
+                                                                                 "policies",
+                                                                                 "groups"}))
     # Return the workspace with the fetched resources
     return GroupSchemas.Group(id=group.id,
                               name=group.name,

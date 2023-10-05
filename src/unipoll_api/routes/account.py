@@ -15,7 +15,7 @@ router: APIRouter = APIRouter()
             response_model=AccountSchemas.AccountList)
 async def get_all_accounts():
     try:
-        accounts = [AccountSchemas.AccountShort(**account.model_dump()) for account in await Account.find_all().to_list()]
+        accounts = [AccountSchemas.AccountShort(**a.model_dump()) for a in await Account.find_all().to_list()]
         return AccountSchemas.AccountList(accounts=accounts)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
