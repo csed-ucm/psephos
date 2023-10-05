@@ -235,7 +235,7 @@ async def test_get_workspace_members(client_test: AsyncClient):
     response = response.json()
     assert len(response["members"]) == len(accounts)
     for acc in accounts:
-        assert acc.dict(include={"id", "email", "first_name", "last_name"}) in response["members"]
+        assert acc.model_dump(include={"id", "email", "first_name", "last_name"}) in response["members"]
 
     colored_dbg.test_success("The workspace returned the correct list of members")
 
@@ -276,7 +276,7 @@ async def test_get_all_policies(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert len(response["policies"]) == len(accounts)
-    temp_acc_list = [acc.dict(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
+    temp_acc_list = [acc.model_dump(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
     for policy in response["policies"]:
         assert policy["policy_holder"] in temp_acc_list
         if policy["policy_holder"]["id"] == accounts[0].id:

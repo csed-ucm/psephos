@@ -24,7 +24,7 @@ app = FastAPI(
 app.include_router(router)
 
 # Add CORS middleware to allow cross-origin requests
-origins = settings.origins
+origins = settings.origins.split(",")
 
 # Middleware
 app.add_middleware(
@@ -46,7 +46,7 @@ async def on_startup() -> None:
             route.operation_id = route.name
 
     await init_beanie(
-        database=mainDB,
+        database=mainDB,  # type: ignore
         document_models=documentModels  # type: ignore
     )
 

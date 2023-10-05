@@ -59,11 +59,11 @@ async def get_policy(policy: Policy) -> PolicySchemas.PolicyShort:
     if not policy_holder:
         raise PolicyExceptions.PolicyHolderNotFound(ph_ref)
 
-    policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
+    policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
     permissions = Permissions.WorkspacePermissions(policy.permissions).name.split('|')  # type: ignore
     return PolicySchemas.PolicyShort(id=policy.id,
                                      policy_holder_type=policy.policy_holder_type,
-                                     policy_holder=policy_holder.dict(exclude_unset=True),
+                                     policy_holder=policy_holder.model_dump(exclude_unset=True),
                                      permissions=permissions)
 
     # if not account and account_id:
@@ -76,4 +76,4 @@ async def get_policy(policy: Policy) -> PolicySchemas.PolicyShort:
     # user_permissions = await Permissions.get_all_permissions(workspace, account)
     # return PolicySchemas.PolicyOutput(
     #     permissions=Permissions.WorkspacePermissions(user_permissions).name.split('|'),  # type: ignore
-    #     policy_holder=MemberSchemas.Member(**account.dict()))
+    #     policy_holder=MemberSchemas.Member(**account.model_dump()))
