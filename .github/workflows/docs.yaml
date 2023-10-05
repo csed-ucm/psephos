@@ -1,0 +1,24 @@
+name: Update docs
+
+on:
+  workflow_dispatch:
+  gollum:
+
+jobs:
+  docs: 
+    runs-on: arc-runner-k8s
+    permissions: write-all
+    steps:
+      - name: Generate a token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PEM }}
+          owner: ${{ github.repository_owner }}
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repository: unipoll/docs
+          event-type: update_submodules
