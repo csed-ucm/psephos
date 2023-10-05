@@ -1,13 +1,8 @@
 import argparse
 import textwrap
-from dataclasses import dataclass
+from unipoll_api.config import get_settings
 
-
-@dataclass
-class Arguments:
-    host: str
-    port: int
-    reload: bool
+settings = get_settings()
 
 
 # Check if IP address is valid
@@ -22,11 +17,14 @@ def check_ip(arg_value):
 
 
 # Parse CLI arguments
-def parse_args() -> Arguments:
-    # Create arg parser
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent('''\
+def parse_args():
+    parser = argparse.ArgumentParser(description="University Polling API")
+    subparser = parser.add_subparsers(title='Available commands', dest='command', required=True)
+
+    run_parser = subparser.add_parser('run',
+                                      help="Run the API server",
+                                      formatter_class=argparse.RawDescriptionHelpFormatter,
+                                      description=textwrap.dedent('''\
         Run University Polling API
         --------------------------------
         Examples:
@@ -35,9 +33,11 @@ def parse_args() -> Arguments:
             python main.py --reload
         '''))
 
-    parser.add_argument("--reload", action="store_true",
-                        help="Enable auto-reload")
-    parser.add_argument("--host", type=check_ip, default="127.0.0.1", help="Host IP address")
-    parser.add_argument("--port", type=int, default=8000, help="Host port number")
+    run_parser.add_argument("--reload", action="store_true", help="Enable auto-reload", default=False)
+    run_parser.add_argument("--host", type=check_ip, default=settings.host, help="Host IP address")
+    run_parser.add_argument("--port", type=int, default=settings.port, help="Host port number")
 
-    return Arguments(**vars(parser.parse_args()))
+    subparser.add_parser('setup', help="Setup the API server")
+    subparser.add_parser('get-openapi', help="Get the OpenAPI schema")
+
+    return parser.parse_args()
