@@ -35,6 +35,6 @@ jobs:
           path-to-definition: ./openapi.json
           postman-api-key: ${{ secrets.POSTMAN_API_KEY }}
           api-id: ${{ vars.POSTMAN_API_ID }}
-          api-path-to-file-name: index.json
+          api-path-to-file-name: openapi.json
           version-name: ${{ github.event.inputs.versionName }}
           release-notes: ${{ github.event.inputs.releaseNotes }}
