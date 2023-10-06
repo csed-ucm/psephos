@@ -23,7 +23,7 @@ jobs:
         with:
           postmanApiKey: ${{ secrets.POSTMAN_API_KEY }}
           postmanCollectionid: ${{ secrets.POSTMAN_COLLECTION_ID }}
-          swaggerPath: openapi.json
+          openApiSpec: ./openapi.json
       # - name: Install Postman CLI
       #   run: |
       #     curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
