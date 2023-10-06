@@ -7,14 +7,30 @@ jobs:
   automated-api-tests:
     runs-on: arc-runner-k8s
     steps:
-      - uses: actions/checkout@v3
-      - name: Install Postman CLI
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
         run: |
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
-      - name: Login to Postman CLI
-        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
-      - name: Run API tests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Get OpenAPI schema
         run: |
-          postman collection run "${{ github.workspace }}/postman/collections/Automations: API-First Workflows.json" -e "19614303-61306d0f-9f72-418f-80ba-1561218563c9" --integration-id "129783-${{ github.run_id }}"
-          # Lint your API using Postman CLI
-          postman api lint --integration-id 129783
+          python main.py get-openapi
+      - uses: diegosanteri/publish-open-api-spec-to-postman@v1
+        with:
+          postmanApiKey: ${{ secrets.POSTMAN_API_KEY }}
+          postmanCollectionid: ${{ secrets.POSTMAN_COLLECTION_ID }}
+          swaggerPath: openapi.json
+      # - name: Install Postman CLI
+      #   run: |
+      #     curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+      # - name: Login to Postman CLI
+      #   run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+      # - name: Run API tests
+      #   run: |
+      #     postman collection run "${{ github.workspace }}/postman/collections/Automations: API-First Workflows.json" -e "19614303-61306d0f-9f72-418f-80ba-1561218563c9" --integration-id "129783-${{ github.run_id }}"
+      #     # Lint your API using Postman CLI
+      #     postman api lint --integration-id 129783
