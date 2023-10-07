@@ -20,4 +20,4 @@ RUN tar -xf unipoll-api-*.tar.gz --strip-components=1
 
 RUN pip install .
 
-ENTRYPOINT [ "unipoll-api" ]
+ENTRYPOINT [ "unipoll-api", "run" ]
