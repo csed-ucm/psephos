@@ -11,14 +11,12 @@
 
 ### Useful Links:
 
-- [Developer Wiki](https://github.com/mike-pisman/PollingAPI/wiki) 
+- [Developer Wiki](https://https://github.com/unipoll/api/wiki) 
 
-- [Polling API](https://polling.website/)
+- [Polling API](https://api.unipoll.cc/)
 
-- [Polling API Swagger Docs](https://polling.website/docs)
+- [Polling API Swagger Docs](https://api.unipoll.cc/docs)
 
-- [Polling API Swagger ReDoc](https://polling.website/redoc)
+- [Polling API Swagger ReDoc](https://api.unipoll.cc/redoc)
 
-- [Postman Documentation v0.0.5](https://documenter.getpostman.com/view/19614303/2s8Z6vZEBr)
-
-- [Postman Documentation v0.0.4](https://documenter.getpostman.com/view/19614303/2s8Z6sbvxz)
+- [Postman Documentation](https://documenter.getpostman.com/view/19614303/2s9YJezMkF)
