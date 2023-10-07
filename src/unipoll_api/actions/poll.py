@@ -26,7 +26,7 @@ async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
                         poll_list.append(poll)
     # Build poll list and return the result
     for poll in poll_list:
-        poll_list.append(PollSchemas.PollShort(**poll.dict()))  # type: ignore
+        poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
 
 
@@ -48,7 +48,7 @@ async def get_poll(poll: Poll,
         if Permissions.check_permission(permissions, req_permissions):
             policies = (await get_poll_policies(poll)).policies
 
-    workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.dict())  # type: ignore
+    workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
 
     # Return the workspace with the fetched resources
     return PollSchemas.PollResponse(id=poll.id,
@@ -65,7 +65,7 @@ async def get_poll_questions(poll: Poll) -> QuestionSchemas.QuestionList:
     print("Poll: ", poll.questions)
     question_list = []
     for question in poll.questions:
-        # question_data = question.dict()
+        # question_data = question.model_dump()
         question_scheme = QuestionSchemas.Question(**question)
         question_list.append(question_scheme)
     # Return the list of questions
@@ -88,11 +88,11 @@ async def get_poll_policies(poll: Poll) -> PolicySchemas.PolicyList:
             # TODO: Replace with custom exception
             raise ResourceExceptions.InternalServerError("get_poll_policies() => Policy holder not found")
         # Convert the policy_holder to a Member schema
-        policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
+        policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
         policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
                                                      policy_holder_type=policy.policy_holder_type,
                                                      # Exclude unset fields(i.e. "description" for Account)
-                                                     policy_holder=policy_holder.dict(exclude_unset=True),
+                                                     policy_holder=policy_holder.model_dump(exclude_unset=True),
                                                      permissions=permissions))
     return PolicySchemas.PolicyList(policies=policy_list)
 

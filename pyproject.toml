@@ -15,15 +15,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    'fastapi==0.98.0',
-    'uvicorn[standard]==0.22.0',
-    'fastapi-users[beanie]==11.0.0',
-    'beanie==1.19.0',
-    'colorama==0.4.6',
+    'beanie',
+    'colorama',
+    'fastapi',
+    'fastapi-users[beanie]',
+    'pydantic-settings',
+    'uvicorn[standard]',
 ]
 
 [project.scripts]
-unipoll-api = "unipoll_api.app:run"
+unipoll-api = "unipoll_api.app:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [

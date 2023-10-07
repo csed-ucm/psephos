@@ -15,7 +15,7 @@ from unipoll_api.utils import permissions as Permissions
 
 #     # Create a group list for output schema using the search results
 #     for group in search_result:
-#         group_list.append(GroupSchemas.Group(**group.dict()))
+#         group_list.append(GroupSchemas.Group(**group.model_dump()))
 
 #     return GroupSchemas.GroupList(groups=group_list)
 
@@ -24,9 +24,9 @@ from unipoll_api.utils import permissions as Permissions
 async def get_group(group: Group, include_members: bool = False, include_policies: bool = False) -> GroupSchemas.Group:
     members = (await get_group_members(group)).members if include_members else None
     policies = (await get_group_policies(group)).policies if include_policies else None
-    workspace = WorkspaceSchemas.Workspace(**group.workspace.dict(exclude={"members",  # type: ignore
-                                                                           "policies",
-                                                                           "groups"}))
+    workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(exclude={"members",  # type: ignore
+                                                                                 "policies",
+                                                                                 "groups"}))
     # Return the workspace with the fetched resources
     return GroupSchemas.Group(id=group.id,
                               name=group.name,
@@ -62,7 +62,7 @@ async def update_group(group: Group,
     if save_changes:
         await Group.save(group)
     # Return the updated group
-    return GroupSchemas.Group(**group.dict())
+    return GroupSchemas.Group(**group.model_dump())
 
 
 # Delete a group
@@ -88,7 +88,7 @@ async def get_group_members(group: Group) -> MemberSchemas.MemberList:
     req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
     if Permissions.check_permission(permissions, req_permissions):
         for member in group.members:  # type: ignore
-            member_data = member.dict(include={'id', 'first_name', 'last_name', 'email'})
+            member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
             member_scheme = MemberSchemas.Member(**member_data)
             member_list.append(member_scheme)
     # Return the list of members
@@ -107,7 +107,7 @@ async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers)
         await group.add_member(account, Permissions.GROUP_BASIC_PERMISSIONS)
     await Group.save(group)
     # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.dict()) for account in account_list])
+    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
 
 
 # Remove a member from a workspace
@@ -127,7 +127,7 @@ async def remove_group_member(group: Group, account_id: ResourceID | None):
         raise GroupExceptions.UserNotMember(group, account)
     # Remove the account from the group
     if await group.remove_member(account):
-        member_list = [MemberSchemas.Member(**account.dict()) for account in group.members]  # type: ignore
+        member_list = [MemberSchemas.Member(**account.model_dump()) for account in group.members]  # type: ignore
         return MemberSchemas.MemberList(members=member_list)
     raise GroupExceptions.ErrorWhileRemovingMember(group, account)
 
@@ -153,11 +153,11 @@ async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
                 # TODO: Replace with custom exception
                 raise ResourceExceptions.InternalServerError("get_group_policies() => Policy holder not found")
             # Convert the policy_holder to a Member schema
-            policy_holder = MemberSchemas.Member(**policy_holder.dict())  # type: ignore
+            policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
             policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
                                                          policy_holder_type=policy.policy_holder_type,
                                                          # Exclude unset fields(i.e. "description" for Account)
-                                                         policy_holder=policy_holder.dict(exclude_unset=True),
+                                                         policy_holder=policy_holder.model_dump(exclude_unset=True),
                                                          permissions=permissions))
     return PolicySchemas.PolicyList(policies=policy_list)
 
@@ -183,7 +183,7 @@ async def get_group_policy(group: Group, account_id: ResourceID | None):
     # await group.fetch_link(Group.policies)
     user_permissions = await Permissions.get_all_permissions(group, account)
     res = {'permissions': Permissions.GroupPermissions(user_permissions).name.split('|'),  # type: ignore
-           'account': AccountSchemas.AccountShort(**account.dict())}
+           'account': AccountSchemas.AccountShort(**account.model_dump())}
     return res
 
 
@@ -240,4 +240,4 @@ async def set_group_policy(group: Group,
     # Return the updated policy
     return PolicySchemas.PolicyOutput(
         permissions=Permissions.GroupPermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**policy_holder.dict()))  # type: ignore
+        policy_holder=MemberSchemas.Member(**policy_holder.model_dump()))  # type: ignore

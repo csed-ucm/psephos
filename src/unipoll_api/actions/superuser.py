@@ -9,6 +9,6 @@ async def get_all_workspaces() -> WorkspaceSchemas.WorkspaceList:
 
     # Create a workspace list for output schema using the search results
     for workspace in search_result:
-        workspace_list.append(WorkspaceSchemas.Workspace(**workspace.dict()))
+        workspace_list.append(WorkspaceSchemas.Workspace(**workspace.model_dump()))
 
     return WorkspaceSchemas.WorkspaceList(workspaces=workspace_list)

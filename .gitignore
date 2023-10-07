@@ -129,7 +129,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# vscode history
-.history/
-.vscode/settings.json
+# vscode
+.history
+.vscode
+
+# pytest
 coverage.lcov

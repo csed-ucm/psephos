@@ -1,0 +1,16 @@
+services:
+  mongodb:
+    image: 'mongo:latest'
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: changeme 
+      
+  api:
+    build: .
+    ports:
+      - '80:8000'
+    environment:
+      MONGODB_URL: mongodb://root:changeme@mongodb:27017
+      PORT: 8000
