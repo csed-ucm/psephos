@@ -2,6 +2,71 @@
 
 
 
+## v0.10.0 (2023-10-07)
+
+### Build
+
+* build: Updated Dockerfile to use new cli run command ([`ea53b88`](https://github.com/unipoll/api/commit/ea53b88fca09c9031bb1ec8fc86eb5f411094a1a))
+
+* build: Cleanup ([`95c9d05`](https://github.com/unipoll/api/commit/95c9d05ed5046b6fd22852b17527120d7ac48572))
+
+* build: Updated pydantic version to 2.4 ([`91a5a30`](https://github.com/unipoll/api/commit/91a5a305afb631987f96c55ae03b9c9751a818c2))
+
+### Chore
+
+* chore: Added .vscode to ignore ([`8cbac9f`](https://github.com/unipoll/api/commit/8cbac9f2171f7ead26b184ee902b1041b4c1bcfd))
+
+* chore: deleted postman folder ([`0803c81`](https://github.com/unipoll/api/commit/0803c81c351a0dd73c6b5334202a636a73d70004))
+
+### Ci
+
+* ci: Fixed api-path-to-file-name ([`d55ee22`](https://github.com/unipoll/api/commit/d55ee22a46d32815ec84aa9e9eeb92b1d73533a1))
+
+* ci: Changed action ([`cfc742a`](https://github.com/unipoll/api/commit/cfc742aa8d2bbbe9d0088d6b88d3872eb77f3ee0))
+
+* ci: Fixed action input
+
+Unexpected input &#39;swaggerPath&#39;, changed to &#39;openApiSpec&#39; ([`d74fa8b`](https://github.com/unipoll/api/commit/d74fa8b76c85ab2601d522b4df0aea5dd90a157a))
+
+* ci: Upadated postman workflow ([`598d729`](https://github.com/unipoll/api/commit/598d7294cf1183f169af894cd0f59ebb1b338df2))
+
+* ci: Added workflow to update docs repository
+
+On any updated to api wiki pages it will trigger Update Sobmodule workflow in the docs repository which will update the api-docs submodule refference ([`41349d1`](https://github.com/unipoll/api/commit/41349d1a0d450ad9413c595e21cea808faebfe4b))
+
+### Feature
+
+* feat: Added docker-compose file ([`ee2756e`](https://github.com/unipoll/api/commit/ee2756e118a1c6889a3174221e0be3d6d4259673))
+
+* feat: Added new cli options
+
+Added option to setup app and get openapi schema ([`c7bd5b8`](https://github.com/unipoll/api/commit/c7bd5b8da1be93a4de3c909a65dca6e4a51b7807))
+
+### Fix
+
+* fix: Fixed admin default in config ([`51f81a1`](https://github.com/unipoll/api/commit/51f81a18e1fac93812e16a0fbe43f55385bc3925))
+
+### Refactor
+
+* refactor: Improved succes messages
+
+Added full paths to the file for setup and get-openapi commands ([`2c29aac`](https://github.com/unipoll/api/commit/2c29aace41865e8d4b29331975deb64bee36bc44))
+
+### Style
+
+* style: fixed flake8 issues ([`41f5339`](https://github.com/unipoll/api/commit/41f53390c460a08e7d86fde04499a551d6388e6b))
+
+### Unknown
+
+* Merge pull request #71 from unipoll/development
+
+Pydantic 2, better cli, docker-compose ([`44d071a`](https://github.com/unipoll/api/commit/44d071ac90824b6ce35d5b44d3879c39be82b518))
+
+* Merge pull request #70 from unipoll/pydantic2-migration
+
+build: Updated pydantic version to 2.4 ([`9c541ee`](https://github.com/unipoll/api/commit/9c541ee04611dcd7338d5f07e4992d95e202840c))
+
+
 ## v0.9.0 (2023-10-04)
 
 ### Build
