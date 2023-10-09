@@ -2,7 +2,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import WorkspaceActions, PermissionsActions
+from unipoll_api.actions import WorkspaceActions, PermissionsActions, GroupActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Workspace, ResourceID
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
@@ -159,7 +159,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
             response_model=GroupSchemas.GroupList)
 async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     try:
-        return await WorkspaceActions.get_groups(workspace)
+        return await GroupActions.get_groups(workspace)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -172,7 +172,7 @@ async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace_m
 async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace_model),
                        input_data: GroupSchemas.GroupCreateInput = Body(...)):
     try:
-        return await WorkspaceActions.create_group(workspace, input_data)
+        return await GroupActions.create_group(workspace, input_data.name, input_data.description)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

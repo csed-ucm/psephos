@@ -3,16 +3,17 @@
 from beanie import WriteRules, DeleteRules
 from beanie.operators import In
 from unipoll_api import AccountManager
-from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll, create_link
+from unipoll_api.actions import GroupActions
+from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll
 from unipoll_api.actions import PolicyActions, PollActions
 from unipoll_api.utils import Permissions
-from unipoll_api.schemas import WorkspaceSchemas, GroupSchemas, PolicySchemas, MemberSchemas, PollSchemas
-from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, GroupExceptions, ResourceExceptions,
+from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, MemberSchemas, PollSchemas
+from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, ResourceExceptions,
                                     PolicyExceptions, PollExceptions)
 
 
 # Get a list of workspaces where the account is a owner/member
-async def get_workspaces() -> WorkspaceSchemas.WorkspaceList:
+async def get_workspaces(account: Account | None = None) -> WorkspaceSchemas.WorkspaceList:
     account = AccountManager.active_user.get()
     workspace_list = []
 
@@ -40,16 +41,6 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
     if not new_workspace:
         raise WorkspaceExceptions.ErrorWhileCreating(input_data.name)
 
-    # Create a policy for the new member
-    # The member(creator) has full permissions on the workspace
-    # new_policy = Policy(policy_holder_type='account',
-    #                     policy_holder=(await create_link(account)),
-    #                     permissions=Permissions.WORKSPACE_ALL_PERMISSIONS,
-    #                     parent_resource=new_workspace)  # type: ignore
-
-    # Add the current user and the policy to workspace member list
-    # new_workspace.members.append(account)  # type: ignore
-    # new_workspace.policies.append(new_policy)  # type: ignore
     await new_workspace.add_member(account=account, permissions=Permissions.WORKSPACE_ALL_PERMISSIONS, save=False)
     await Workspace.save(new_workspace, link_rule=WriteRules.WRITE)
 
@@ -63,7 +54,7 @@ async def get_workspace(workspace: Workspace,
                         include_policies: bool = False,
                         include_members: bool = False,
                         include_polls: bool = False) -> WorkspaceSchemas.Workspace:
-    groups = (await get_groups(workspace)).groups if include_groups else None
+    groups = (await GroupActions.get_groups(workspace)).groups if include_groups else None
     members = (await get_workspace_members(workspace)).members if include_members else None
     policies = (await get_workspace_policies(workspace)).policies if include_policies else None
     polls = (await get_polls(workspace)).polls if include_polls else None
@@ -162,67 +153,6 @@ async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
         member_list = [MemberSchemas.Member(**account.model_dump()) for account in workspace.members]  # type: ignore
         return MemberSchemas.MemberList(members=member_list)
     raise WorkspaceExceptions.ErrorWhileRemovingMember(workspace, account)
-
-
-# Get a list of groups where the account is a member
-async def get_groups(workspace: Workspace) -> GroupSchemas.GroupList:
-    account = AccountManager.active_user.get()
-    permissions = await Permissions.get_all_permissions(workspace, account)
-    # Check if the user has permission to get all groups
-    req_permissions = Permissions.WorkspacePermissions["get_groups"]  # type: ignore
-    if Permissions.check_permission(permissions, req_permissions):
-        groups = [GroupSchemas.GroupShort(**group.model_dump()) for group in workspace.groups]  # type: ignore
-    # Otherwise, return only the groups where the user has permission to get the group
-    else:
-        groups = []
-        for group in workspace.groups:
-            user_permissions = await Permissions.get_all_permissions(group, account)
-            required_permission = Permissions.GroupPermissions['get_group']
-            if Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
-                                            required_permission):
-                groups.append(GroupSchemas.GroupShort(**group.model_dump()))  # type: ignore
-    # Return the list of groups
-    return GroupSchemas.GroupList(groups=groups)
-
-
-# Create a new group with account as the owner
-async def create_group(workspace: Workspace,
-                       input_data: GroupSchemas.GroupCreateInput) -> GroupSchemas.GroupCreateOutput:
-    # await workspace.fetch_link(workspace.groups)
-    account = AccountManager.active_user.get()
-
-    # Check if group name is unique
-    group: Group  # For type hinting, until Link type is supported
-    for group in workspace.groups:  # type: ignore
-        if group.name == input_data.name:
-            raise GroupExceptions.NonUniqueName(group)
-
-    # Create a new group
-    new_group = Group(name=input_data.name,
-                      description=input_data.description,
-                      workspace=workspace)  # type: ignore
-
-    # Check if group was created
-    if not new_group:
-        raise GroupExceptions.ErrorWhileCreating(new_group)
-
-    # Add the account to group member list
-    await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
-
-    # Create a policy for the new group
-    permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS  # type: ignore
-    new_policy = Policy(policy_holder_type='group',
-                        policy_holder=(await create_link(new_group)),
-                        permissions=permissions,
-                        parent_resource=workspace)  # type: ignore
-
-    # Add the group and the policy to the workspace
-    workspace.policies.append(new_policy)  # type: ignore
-    workspace.groups.append(new_group)  # type: ignore
-    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
-
-    # Return the new group
-    return GroupSchemas.GroupCreateOutput(**new_group.model_dump(include={'id', 'name', 'description'}))
 
 
 # Get all policies of a workspace
