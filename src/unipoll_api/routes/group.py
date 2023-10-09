@@ -13,10 +13,31 @@ open_router: APIRouter = APIRouter()
 router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
 
 
-# Get all groups
-# @router.get("/", response_description="Get all groups")
-# async def get_all_groups() -> GroupSchemas.GroupList:
-#     return await GroupActions.get_all_groups()
+# Get groups
+@open_router.get("/", response_description="List of groups")
+async def get_all_groups(workspace: Annotated[ResourceID | None, Query()] = None,
+                         account: Annotated[ResourceID | None, Query()] = None,
+                         name: Annotated[str | None, Query()] = None
+                         ) -> GroupSchemas.GroupList:
+    args = {}
+    args['workspace'] = await Dependencies.get_workspace_model(workspace) if workspace else None
+    args['account'] = await Dependencies.get_account(account) if account else None
+    args['name'] = name
+
+    return await GroupActions.get_groups(**args)
+
+
+# Create a new group
+@open_router.post("/",
+                  status_code=201,
+                  response_description="Created Group",
+                  response_model=GroupSchemas.GroupCreateOutput)
+async def create_group(input_data: GroupSchemas.GroupCreateInput = Body(...)):
+    try:
+        workspace = await Dependencies.get_workspace_model(input_data.workspace)
+        return await GroupActions.create_group(workspace, name=input_data.name, description=input_data.description)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
 
 
 query_params = list[Literal["policies", "members", "all"]]
@@ -34,7 +55,7 @@ async def get_group(group: Group = Depends(Dependencies.get_group_model),
         params = {}
         if include:
             if "all" in include:
-                params = {"include_members": True, "include_polls": True}
+                params = {"include_members": True, "include_policies": True}
             else:
                 if "members" in include:
                     params["include_members"] = True
