@@ -1,11 +1,9 @@
 # from typing import Optional
 # from pydantic import EmailStr
 from beanie import WriteRules, DeleteRules
-from beanie.operators import In
 from unipoll_api import AccountManager
-from unipoll_api.actions import GroupActions
+from unipoll_api import actions
 from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll
-from unipoll_api.actions import PolicyActions, PollActions
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, MemberSchemas, PollSchemas
 from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, ResourceExceptions,
@@ -54,8 +52,8 @@ async def get_workspace(workspace: Workspace,
                         include_policies: bool = False,
                         include_members: bool = False,
                         include_polls: bool = False) -> WorkspaceSchemas.Workspace:
-    groups = (await GroupActions.get_groups(workspace)).groups if include_groups else None
-    members = (await get_workspace_members(workspace)).members if include_members else None
+    groups = (await actions.GroupActions.get_groups(workspace)).groups if include_groups else None
+    members = (await actions.MembersActions.get_members(workspace)).members if include_members else None
     policies = (await get_workspace_policies(workspace)).policies if include_policies else None
     polls = (await get_polls(workspace)).polls if include_polls else None
     # Return the workspace with the fetched resources
@@ -100,64 +98,12 @@ async def delete_workspace(workspace: Workspace):
     await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
 
 
-# List all members of a workspace
-async def get_workspace_members(workspace: Workspace) -> MemberSchemas.MemberList:
-    member_list = []
-    member: Account
 
-    account: Account = AccountManager.active_user.get()
-
-    permissions = await Permissions.get_all_permissions(workspace, account)
-    req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
-    if Permissions.check_permission(permissions, req_permissions):
-        for member in workspace.members:  # type: ignore
-            member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
-            member_scheme = MemberSchemas.Member(**member_data)
-            member_list.append(member_scheme)
-    # Return the list of members
-    return MemberSchemas.MemberList(members=member_list)
-
-
-# Add groups/members to group
-async def add_workspace_members(workspace: Workspace,
-                                member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
-    accounts = set(member_data.accounts)
-    # Remove existing members from the accounts set
-    accounts = accounts.difference({member.id for member in workspace.members})  # type: ignore
-    # Find the accounts from the database
-    account_list = await Account.find(In(Account.id, accounts)).to_list()
-    # Add the accounts to the group member list with basic permissions
-    for account in account_list:
-        await workspace.add_member(account, Permissions.WORKSPACE_BASIC_PERMISSIONS, save=False)
-    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
-    # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
-
-
-# Remove a member from a workspace
-async def remove_workspace_member(workspace: Workspace, account_id: ResourceID):
-    # Check if account_id is specified in request, if account_id is not specified, use the current user
-    if account_id:
-        account = await Account.get(account_id)  # type: ignore
-    else:
-        account = AccountManager.active_user.get()
-    # Check if the account exists
-    if not account:
-        raise AccountExceptions.AccountNotFound(account_id)
-    # Check if the account is a member of the workspace
-    if account.id not in [ResourceID(member.id) for member in workspace.members]:  # type: ignore
-        raise WorkspaceExceptions.UserNotMember(workspace, account)
-    # Remove the account from the workspace
-    if await workspace.remove_member(account):
-        # Return the list of members added to the group
-        member_list = [MemberSchemas.Member(**account.model_dump()) for account in workspace.members]  # type: ignore
-        return MemberSchemas.MemberList(members=member_list)
-    raise WorkspaceExceptions.ErrorWhileRemovingMember(workspace, account)
 
 
 # Get all policies of a workspace
 async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
-    policy_list = await PolicyActions.get_policies(resource=workspace)
+    policy_list = await actions.PolicyActions.get_policies(resource=workspace)
 
     return PolicySchemas.PolicyList(policies=policy_list.policies)
 
@@ -167,7 +113,7 @@ async def get_workspace_policy(workspace: Workspace,
                                account_id: ResourceID | None = None) -> PolicySchemas.PolicyOutput:
     # Check if account_id is specified in request, if account_id is not specified, use the current user
     account: Account = await Account.get(account_id) if account_id else AccountManager.active_user.get()  # type: ignore
-    policy_list = await PolicyActions.get_policies(resource=workspace, policy_holder=account)
+    policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
     user_policy = policy_list.policies[0]
 
     return PolicySchemas.PolicyOutput(
@@ -240,7 +186,7 @@ async def set_workspace_policy(workspace: Workspace,
 
 # Get a list of polls in a workspace
 async def get_polls(workspace: Workspace) -> PollSchemas.PollList:
-    return await PollActions.get_polls(workspace)
+    return await actions.PollActions.get_polls(workspace)
 
 
 # Create a new poll in a workspace

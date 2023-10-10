@@ -41,43 +41,23 @@ class Resource(Document):
     def create_group(self) -> None:
         Debug.info(f'New {self.resource_type} "{self.id}" has been created')
 
-    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
-        # Add the account to the group
-        self.members.append(account)  # type: ignore
-        # Create a policy for the new member
+    async def add_policy(self, member: "Group | Account", permissions, save: bool = True) -> None:
         new_policy = Policy(policy_holder_type='account',
-                            policy_holder=(await create_link(account)),
+                            policy_holder=(await create_link(member)),
                             permissions=permissions,
                             parent_resource=self)  # type: ignore
 
         # Add the policy to the group
         self.policies.append(new_policy)  # type: ignore
         if save:
-            await Resource.save(self, link_rule=WriteRules.WRITE)
-        return account
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
 
-    async def remove_member(self, account, save: bool = True) -> bool:
-        # Remove the account from the group
-        # await self.fetch_link("members")
-        for i, member in enumerate(self.members):
-            if account.id == member.id:  # type: ignore
-                self.members.remove(member)
-                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")
-                break
-
-        # Remove the policy from the group
-        # await self.fetch_link("policies")
+    async def remove_policy(self, member: "Group | Account", save: bool = True) -> None:
         for policy in self.policies:
-            # pc = await policy.policy_holder.fetch()  # type: ignore
-            pc = policy.policy_holder  # type: ignore
-            if pc.ref.id == account.id:
+            if policy.policy_holder.id == member.id:  # type: ignore
                 self.policies.remove(policy)
-                await Policy.delete(policy)
-                Debug.info(f"Removed policy: {pc.ref.id} from {self.resource_type} {self.id}")
-                break
-
-        await self.save(link_rule=WriteRules.WRITE)  # type: ignore
-        return True
+                if save:
+                    await self.save(link_rule=WriteRules.WRITE)  # type: ignore
 
 
 class Account(BeanieBaseUser, Document):  # type: ignore
@@ -100,12 +80,71 @@ class Workspace(Resource):
     groups: list[Link["Group"]] = []
     polls: list[Link["Poll"]] = []
 
+    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
+        # Add the account to the group
+        self.members.append(account)  # type: ignore
+        # Create a policy for the new member
+        await self.add_policy(account, permissions, save=False)  # type: ignore
+        if save:
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return account
+
+    async def remove_member(self, account, save: bool = True) -> bool:
+        # Remove the account from the group
+        for i, member in enumerate(self.members):
+            if account.id == member.id:  # type: ignore
+                self.members.remove(member)
+                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                break
+
+        # Remove the policy from the workspace
+        await self.remove_policy(account, save=False)  # type: ignore
+
+        # Remove the member from all groups in the workspace
+        group: Group
+        for group in self.groups:  # type: ignore
+            await group.remove_member(account, save=False)
+            await group.remove_policy(account, save=False)
+            await Group.save(group, link_rule=WriteRules.WRITE)
+
+        if save:
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return True
+
 
 class Group(Resource):
     resource_type: Literal["group"] = "group"
     workspace: BackLink[Workspace] = Field(original_field="groups")
     members: list[Link["Account"]] = []
     groups: list[Link["Group"]] = []
+
+    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
+        if account not in self.workspace.members:  # type: ignore
+            from unipoll_api.exceptions import WorkspaceExceptions
+            raise WorkspaceExceptions.UserNotMember(self.workspace, account)  # type: ignore
+
+        # Add the account to the group
+        self.members.append(account)  # type: ignore
+        # Create a policy for the new member
+        await self.add_policy(account, permissions, save=False)  # type: ignore
+        if save:
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return account
+
+    async def remove_member(self, account, save: bool = True) -> bool:
+        # Remove the account from the group
+        for i, member in enumerate(self.members):
+            if account.id == member.id:  # type: ignore
+                self.members.remove(member)
+                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                break
+
+        # Remove the policy from the group
+        await self.remove_policy(account, save=False)  # type: ignore
+
+        if save:
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return True
 
 
 class Policy(Document):

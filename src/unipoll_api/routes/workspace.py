@@ -2,9 +2,9 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import WorkspaceActions, PermissionsActions, GroupActions
+from unipoll_api.actions import WorkspaceActions, PermissionsActions, GroupActions, MembersActions
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.documents import Workspace, ResourceID
+from unipoll_api.documents import Account, Workspace, ResourceID
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
 
 # APIRouter creates path operations for user module
@@ -184,7 +184,7 @@ async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace
             response_model_exclude_unset=True)
 async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace_model)):
     try:
-        return await WorkspaceActions.get_workspace_members(workspace)
+        return await MembersActions.get_members(workspace)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -196,7 +196,7 @@ async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_
 async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace_model),
                                 member_data: MemberSchemas.AddMembers = Body(...)):
     try:
-        return await WorkspaceActions.add_workspace_members(workspace, member_data)
+        return await MembersActions.add_members(workspace, member_data.accounts)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -206,9 +206,10 @@ async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_
                response_description="Updated list removed members",
                response_model_exclude_unset=True)
 async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.get_workspace_model),
-                                  account_id: ResourceID = Path(..., description="Account ID of the member to remove")):
+                                  account: Account = Depends(Dependencies.get_account)):
+                                #   account_id: ResourceID = Path(..., description="Account ID of the member to remove")):
     try:
-        return await WorkspaceActions.remove_workspace_member(workspace, account_id)
+        return await MembersActions.remove_member(workspace, account)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

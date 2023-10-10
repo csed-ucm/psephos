@@ -2,10 +2,10 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import GroupActions, PermissionsActions
+from unipoll_api.actions import GroupActions, PermissionsActions, MembersActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
-from unipoll_api.documents import Group, ResourceID
+from unipoll_api.documents import Account, Group, ResourceID
 
 
 # APIRouter creates path operations for user module
@@ -97,7 +97,7 @@ async def delete_group(group: Group = Depends(Dependencies.get_group_model)):
             response_model_exclude_unset=True)
 async def get_group_members(group: Group = Depends(Dependencies.get_group_model)):
     try:
-        return await GroupActions.get_group_members(group)
+        return await MembersActions.get_members(group)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -109,7 +109,7 @@ async def get_group_members(group: Group = Depends(Dependencies.get_group_model)
 async def add_group_members(member_data: MemberSchemas.AddMembers,
                             group: Group = Depends(Dependencies.get_group_model)):
     try:
-        return await GroupActions.add_group_members(group, member_data)
+        return await MembersActions.add_members(group, member_data.accounts)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -119,9 +119,10 @@ async def add_group_members(member_data: MemberSchemas.AddMembers,
                response_description="Updated list removed members",
                response_model_exclude_unset=True)
 async def remove_group_member(group: Group = Depends(Dependencies.get_group_model),
-                              account_id: ResourceID = Path(..., description="Account ID of the member to remove")):
+                              account: Account = Depends(Dependencies.get_account)): 
+                            #   account_id: ResourceID = Path(..., description="Account ID of the member to remove")):
     try:
-        return await GroupActions.remove_group_member(group, account_id)
+        return await MembersActions.remove_member(group, account)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

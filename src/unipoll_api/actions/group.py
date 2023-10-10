@@ -2,6 +2,7 @@ from beanie import DeleteRules, WriteRules
 from beanie.operators import In
 from unipoll_api import AccountManager
 from unipoll_api.documents import Policy, ResourceID, Workspace, Group, Account, create_link
+from unipoll_api import actions
 from unipoll_api.schemas import AccountSchemas, GroupSchemas, MemberSchemas, PolicySchemas, WorkspaceSchemas
 from unipoll_api.exceptions import (AccountExceptions, GroupExceptions, PolicyExceptions,
                                     ResourceExceptions, WorkspaceExceptions)
@@ -45,7 +46,7 @@ async def get_groups(workspace: Workspace | None = None,
     groups = []
     for group in search_result:
         try:
-            groups.append(await get_group(group=group))
+            groups.append((await get_group(group=group)).model_dump(exclude_none=True))
         except Exception:
             pass
 
@@ -106,7 +107,7 @@ async def get_group(group: Group, include_members: bool = False, include_policie
         raise GroupExceptions.UserNotAuthorized(
             account, group, f"to view group {group.id}")
 
-    members = (await get_group_members(group)).members if include_members else None
+    members = (await actions.MembersActions.get_members(group)).members if include_members else None
     policies = (await get_group_policies(group)).policies if include_policies else None
     workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(exclude={"members",  # type: ignore
                                                                                  "policies",
@@ -164,63 +165,67 @@ async def delete_group(group: Group):
         return GroupExceptions.ErrorWhileDeleting(group.id)
 
 
-# Get list of members of a group
-async def get_group_members(group: Group) -> MemberSchemas.MemberList:
-    member_list = []
-    member: Account
+# # Get list of members of a group
+# async def get_group_members(group: Group) -> MemberSchemas.MemberList:
+#     member_list = []
+#     member: Account
 
-    account = AccountManager.active_user.get()
-    permissions = await Permissions.get_all_permissions(group, account)
-    # type: ignore
-    req_permissions = Permissions.GroupPermissions["get_group_members"]
-    if Permissions.check_permission(permissions, req_permissions):
-        for member in group.members:  # type: ignore
-            member_data = member.model_dump(
-                include={'id', 'first_name', 'last_name', 'email'})
-            member_scheme = MemberSchemas.Member(**member_data)
-            member_list.append(member_scheme)
-    # Return the list of members
-    return MemberSchemas.MemberList(members=member_list)
-
-
-# Add groups/members to group
-async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
-    accounts = set(member_data.accounts)
-    # Remove existing members from the accounts set
-    accounts = accounts.difference(
-        {member.id for member in group.members})  # type: ignore
-    # Find the accounts from the database
-    account_list = await Account.find(In(Account.id, accounts)).to_list()
-    # Add the accounts to the group member list with default permissions
-    for account in account_list:
-        await group.add_member(account, Permissions.GROUP_BASIC_PERMISSIONS)
-    await Group.save(group)
-    # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
+#     account = AccountManager.active_user.get()
+#     permissions = await Permissions.get_all_permissions(group, account)
+#     # type: ignore
+#     req_permissions = Permissions.GroupPermissions["get_group_members"]
+#     if Permissions.check_permission(permissions, req_permissions):
+#         for member in group.members:  # type: ignore
+#             member_data = member.model_dump(
+#                 include={'id', 'first_name', 'last_name', 'email'})
+#             member_scheme = MemberSchemas.Member(**member_data)
+#             member_list.append(member_scheme)
+#     # Return the list of members
+#     return MemberSchemas.MemberList(members=member_list)
 
 
-# Remove a member from a workspace
-async def remove_group_member(group: Group, account_id: ResourceID | None):
-    # Check if account_id is specified in request, if account_id is not specified, use the current user
-    if account_id:
-        account = await Account.get(account_id)  # type: ignore
-        if not account:
-            raise AccountExceptions.AccountNotFound(account_id)
-    else:
-        account = AccountManager.active_user.get()
-    # Check if the account exists
-    if not account:
-        raise ResourceExceptions.InternalServerError(
-            "remove_group_member() -> Account not found")
-    # Check if account is a member of the group
-    if account.id not in [ResourceID(member.ref.id) for member in group.members]:
-        raise GroupExceptions.UserNotMember(group, account)
-    # Remove the account from the group
-    if await group.remove_member(account):
-        member_list = [MemberSchemas.Member(
-            **account.model_dump()) for account in group.members]  # type: ignore
-        return MemberSchemas.MemberList(members=member_list)
-    raise GroupExceptions.ErrorWhileRemovingMember(group, account)
+# async def add_member(group: Group, account: "Account", permissions, save: bool = True) -> "Account":
+#     if account.id not in [member.id for member in self.workspace.members]:  # type: ignore
+#         raise Exceptions.WorkspaceExceptions.UserNotMember(self.workspace, account)  # type: ignore
+#     # Add the account to the group
+#     self.members.append(account)  # type: ignore
+#     # Create a policy for the new member
+#     new_policy = Policy(policy_holder_type='account',
+#                         policy_holder=(await create_link(account)),
+#                         permissions=permissions,
+#                         parent_resource=self)  # type: ignore
+
+#     # Add the policy to the group
+#     self.policies.append(new_policy)  # type: ignore
+#     if save:
+#         await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+#     return account
+
+
+# async def remove_member(self, account, save: bool = True) -> bool:
+#     # Remove the account from the group
+#     for i, member in enumerate(self.members):
+#         if account.id == member.id:  # type: ignore
+#             self.members.remove(member)
+#             Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+#             break
+
+#     # Remove the policy from the group
+#     for policy in self.policies:
+#         pc = policy.policy_holder  # type: ignore
+#         if pc.ref.id == account.id:
+#             self.policies.remove(policy)
+#             await Policy.delete(policy)
+#             Debug.info(f"Removed policy: {pc.ref.id} from {self.resource_type} {self.id}")
+#             break
+
+#     if save:
+#         await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+#     return True
+
+
+
+
 
 
 # Get all policies of a group
