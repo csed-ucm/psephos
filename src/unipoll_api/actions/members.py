@@ -37,7 +37,7 @@ async def add_members(resource: Workspace | Group,
     # Check if the user has permission to add members
     account = AccountManager.active_user.get()
     permissions = await Permissions.get_all_permissions(resource, account)
-    if resource.resource_type == "workspace": 
+    if resource.resource_type == "workspace":
         req_permissions = Permissions.WorkspacePermissions["add_workspace_members"]
         default_permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS
     elif resource.resource_type == "group":
