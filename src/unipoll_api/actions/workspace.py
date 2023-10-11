@@ -1,13 +1,12 @@
 # from typing import Optional
 # from pydantic import EmailStr
-from beanie import WriteRules, DeleteRules
+from beanie import WriteRules
 from unipoll_api import AccountManager
 from unipoll_api import actions
-from unipoll_api.documents import Group, ResourceID, Workspace, Account, Policy, Poll
+from unipoll_api.documents import Workspace, Account, Policy, Poll
 from unipoll_api.utils import Permissions
-from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, MemberSchemas, PollSchemas
-from unipoll_api.exceptions import (WorkspaceExceptions, AccountExceptions, ResourceExceptions,
-                                    PolicyExceptions, PollExceptions)
+from unipoll_api.schemas import WorkspaceSchemas, PollSchemas
+from unipoll_api.exceptions import (WorkspaceExceptions, PollExceptions)
 
 
 # Get a list of workspaces where the account is a owner/member
@@ -90,12 +89,14 @@ async def update_workspace(workspace: Workspace,
 
 # Delete a workspace
 async def delete_workspace(workspace: Workspace):
-    await Workspace.delete(workspace, link_rule=DeleteRules.DO_NOTHING)
-    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
+    # BUG: Cannot delete groups
+    for group in workspace.groups:
+        await actions.GroupActions.delete_group(group)  # type: ignore
+
+    await Workspace.delete(workspace)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    await Policy.find(Policy.parent_resource.id == workspace.id).delete()  # type: ignore
-    await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
+    await Policy.find({"parent_resource._id": workspace.id}, fetch_links=True).delete()
 
 
 # Get a list of polls in a workspace
