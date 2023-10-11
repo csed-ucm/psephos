@@ -1,8 +1,9 @@
+from beanie import WriteRules
 from unipoll_api import AccountManager
 from unipoll_api.documents import Poll, Workspace
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
-from unipoll_api.exceptions import ResourceExceptions
+from unipoll_api.exceptions import ResourceExceptions, PollExceptions
 from unipoll_api import actions
 
 
@@ -29,6 +30,35 @@ async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
     for poll in poll_list:
         poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
+
+
+# Create a new poll in a workspace
+async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRequest) -> PollSchemas.PollResponse:
+    # Check if poll name is unique
+    poll: Poll  # For type hinting, until Link type is supported
+    for poll in workspace.polls:  # type: ignore
+        if poll.name == input_data.name:
+            raise PollExceptions.NonUniqueName(poll)
+
+    # Create a new poll
+    new_poll = Poll(name=input_data.name,
+                    description=input_data.description,
+                    workspace=workspace,  # type: ignore
+                    public=input_data.public,
+                    published=input_data.published,
+                    questions=input_data.questions,
+                    policies=[])
+
+    # Check if poll was created
+    if not new_poll:
+        raise PollExceptions.ErrorWhileCreating(new_poll)
+
+    # Add the poll to the workspace
+    workspace.polls.append(new_poll)  # type: ignore
+    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
+
+    # Return the new poll
+    return PollSchemas.PollResponse(**new_poll.model_dump())
 
 
 async def get_poll(poll: Poll,
