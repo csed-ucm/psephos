@@ -54,7 +54,7 @@ async def get_workspace(workspace: Workspace,
                         include_polls: bool = False) -> WorkspaceSchemas.Workspace:
     groups = (await actions.GroupActions.get_groups(workspace)).groups if include_groups else None
     members = (await actions.MembersActions.get_members(workspace)).members if include_members else None
-    policies = (await get_workspace_policies(workspace)).policies if include_policies else None
+    policies = (await actions.PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
     polls = (await get_polls(workspace)).polls if include_polls else None
     # Return the workspace with the fetched resources
     return WorkspaceSchemas.Workspace(id=workspace.id,
@@ -96,92 +96,6 @@ async def delete_workspace(workspace: Workspace):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
     await Policy.find(Policy.parent_resource.id == workspace.id).delete()  # type: ignore
     await Group.find(Group.workspace.id == workspace).delete()  # type: ignore
-
-
-
-
-
-# Get all policies of a workspace
-async def get_workspace_policies(workspace: Workspace) -> PolicySchemas.PolicyList:
-    policy_list = await actions.PolicyActions.get_policies(resource=workspace)
-
-    return PolicySchemas.PolicyList(policies=policy_list.policies)
-
-
-# Get a policy of a workspace
-async def get_workspace_policy(workspace: Workspace,
-                               account_id: ResourceID | None = None) -> PolicySchemas.PolicyOutput:
-    # Check if account_id is specified in request, if account_id is not specified, use the current user
-    account: Account = await Account.get(account_id) if account_id else AccountManager.active_user.get()  # type: ignore
-    policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
-    user_policy = policy_list.policies[0]
-
-    return PolicySchemas.PolicyOutput(
-        permissions=user_policy.permissions,  # type: ignore
-        policy_holder=user_policy.policy_holder)
-
-
-# Set permissions for a user in a workspace
-async def set_workspace_policy(workspace: Workspace,
-                               input_data: PolicySchemas.PolicyInput) -> PolicySchemas.PolicyOutput:
-    policy: Policy | None = None
-    account: Account | None = None
-    if input_data.policy_id:
-        policy = await Policy.get(input_data.policy_id)
-        if not policy:
-            raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
-        # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
-        else:
-            account = await Account.get(policy.policy_holder.ref.id)
-    else:
-        if input_data.account_id:
-            account = await Account.get(input_data.account_id)
-            if not account:
-                raise AccountExceptions.AccountNotFound(input_data.account_id)
-        else:
-            account = AccountManager.active_user.get()
-        # Make sure the account is loaded
-        if not account:
-            raise ResourceExceptions.APIException(code=500, detail='Unknown error')  # Should not happen
-
-        try:
-            # Find the policy for the account
-            p: Policy
-            for p in workspace.policies:  # type: ignore
-                if p.policy_holder_type == "account":
-                    if p.policy_holder.ref.id == account.id:
-                        policy = p
-                        break
-                # if not policy:
-                #     policy = Policy(policy_holder_type='account',
-                #                     policy_holder=(await create_link(account)),
-                #                     permissions=Permissions.WorkspacePermissions(0),
-                #                     workspace=workspace)
-        except Exception as e:
-            raise ResourceExceptions.InternalServerError(str(e))
-
-    # Calculate the new permission value from request
-    new_permission_value = 0
-    for i in input_data.permissions:
-        try:
-            new_permission_value += Permissions.WorkspacePermissions[i].value  # type: ignore
-        except KeyError:
-            raise ResourceExceptions.InvalidPermission(i)
-    # Update permissions
-    policy.permissions = Permissions.WorkspacePermissions(new_permission_value)  # type: ignore
-    await Policy.save(policy)
-
-    # Get Account or Group from policy_holder link
-    # HACK: Have to do it manualy, as Beanie cannot fetch policy_holder link of mixed types (Account | Group)
-    if policy.policy_holder_type == "account":  # type: ignore
-        policy_holder = await Account.get(policy.policy_holder.ref.id)  # type: ignore
-    elif policy.policy_holder_type == "group":  # type: ignore
-        policy_holder = await Group.get(policy.policy_holder.ref.id)  # type: ignore
-
-    # Return the updated policy
-    return PolicySchemas.PolicyOutput(
-        permissions=Permissions.WorkspacePermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**policy_holder.model_dump()))  # type: ignore
 
 
 # Get a list of polls in a workspace
