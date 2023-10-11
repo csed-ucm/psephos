@@ -13,10 +13,6 @@ async def get_groups(workspace: Workspace | None = None,
                      name: str | None = None) -> GroupSchemas.GroupList:
     account = account or AccountManager.active_user.get()
 
-    # import time
-
-    # Using Mongo operators
-    # t1 = time.time()
     search_filter = {}
     if name:
         search_filter['name'] = name
@@ -25,21 +21,6 @@ async def get_groups(workspace: Workspace | None = None,
     if account:
         search_filter['members._id'] = account.id
     search_result = await Group.find(search_filter, fetch_links=True).to_list()
-    # t2 = time.time()
-    # print("Mongo operator search time: ", t2 - t1)
-
-    # Using Python operators
-    # t1 = time.time()
-    # search = Group.find_all(fetch_links=True)
-    # if name:
-    #     search.find(Group.name == name)
-    # if workspace:
-    #     search.find(Group.workspace.id == workspace.id, fetch_links=True)
-    # if account:
-    #     search.find(Group.members.id == account.id, fetch_links=True)
-    # search_result = await search.to_list()
-    # t2 = time.time()
-    # print("Python operator search time: ", t2 - t1)
 
     groups = []
     for group in search_result:

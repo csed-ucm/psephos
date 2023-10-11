@@ -4,7 +4,7 @@ from unipoll_api.documents import Account, Group, ResourceID, Workspace
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import MemberSchemas
 from unipoll_api import AccountManager
-from unipoll_api.exceptions import ResourceExceptions, AccountExceptions
+from unipoll_api.exceptions import ResourceExceptions
 
 
 async def get_members(resource: Workspace | Group) -> MemberSchemas.MemberList:
