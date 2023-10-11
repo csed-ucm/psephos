@@ -1,9 +1,9 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
-from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll
+from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy
 from unipoll_api.utils import permissions as Permissions
-from unipoll_api.exceptions import WorkspaceExceptions, GroupExceptions, AccountExceptions, PollExceptions
+from unipoll_api.exceptions import WorkspaceExceptions, GroupExceptions, AccountExceptions, PollExceptions, PolicyExceptions
 from unipoll_api.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
@@ -25,7 +25,7 @@ async def websocket_auth(websocket: WebSocket,
 
 
 # Dependency for getting a workspace with the given id
-async def get_workspace_model(workspace_id: ResourceID) -> Workspace:
+async def get_workspace(workspace_id: ResourceID) -> Workspace:
     """
     Returns a workspace with the given id.
     """
@@ -38,7 +38,7 @@ async def get_workspace_model(workspace_id: ResourceID) -> Workspace:
 
 
 # Dependency to get a group by id and verify it exists
-async def get_group_model(group_id: ResourceID) -> Group:
+async def get_group(group_id: ResourceID) -> Group:
     """
     Returns a group with the given id.
     """
@@ -50,7 +50,7 @@ async def get_group_model(group_id: ResourceID) -> Group:
 
 
 # Dependency to get a poll by id and verify it exists
-async def get_poll_model(poll_id: ResourceID) -> Poll:
+async def get_poll(poll_id: ResourceID) -> Poll:
     """
     Returns a poll with the given id.
     """
@@ -58,6 +58,15 @@ async def get_poll_model(poll_id: ResourceID) -> Poll:
     if poll:
         return poll
     raise GroupExceptions.GroupNotFound(poll_id)
+
+
+# Dependency to get a policy by id and verify it exists
+async def get_policy(policy_id: ResourceID) -> Policy:
+    policy = await Policy.get(policy_id, fetch_links=True)
+    if policy:
+        # await policy.parent_resource.fetch_all_links()  # type: ignore
+        return policy
+    raise PolicyExceptions.PolicyNotFound(policy_id)
 
 
 # Dependency to get a user by id and verify it exists
