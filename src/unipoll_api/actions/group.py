@@ -161,3 +161,5 @@ async def delete_group(group: Group):
 
     if await Group.get(group.id):
         return GroupExceptions.ErrorWhileDeleting(group.id)
+
+    await Policy.find({"parent_resource._id": group.id}, fetch_links=True).delete()
