@@ -2,6 +2,63 @@
 
 
 
+## v0.11.0 (2023-10-12)
+
+### Feature
+
+* feat: Added dependency to get policy by ID ([`0bfeb6d`](https://github.com/unipoll/api/commit/0bfeb6d07d7ff9fe5646b45db4df4ffa6fa91dc4))
+
+* feat: Moved policy related actions to a separate file ([`5129fbe`](https://github.com/unipoll/api/commit/5129fbe7d6b9b68f8aeb515e2ca35a4726faeeb1))
+
+* feat: Added new routes to get and create groups
+
+Added new route to get list of groups, by default returns all groups which a user has permission to view, the endpoint also accepts query parameters to filter list of groups by name, workspace, or account ([`ff9aa02`](https://github.com/unipoll/api/commit/ff9aa0256aff8f453035e31a13759e97dd3b0fa8))
+
+### Fix
+
+* fix: Typing errors ([`9d9cc23`](https://github.com/unipoll/api/commit/9d9cc2330bf9e3baae61e610aa229ff9c749f1ce))
+
+* fix: Resolved typing errors ([`9a852b3`](https://github.com/unipoll/api/commit/9a852b3fe3e835ee1e40654fba63f81b3652e8c3))
+
+* fix: Delete policies when group is deleted ([`a157480`](https://github.com/unipoll/api/commit/a1574808ecc3e8f18e39ce0e7f94ea077a2ac22e))
+
+* fix: Fixed groups not deleting ([`504b92f`](https://github.com/unipoll/api/commit/504b92f88221599e31c71a82104b7de6f463b6fe))
+
+### Refactor
+
+* refactor: Added request schema for new group route
+
+Added GroupCreateRequest for new POST /groups endpoint that will replace workspace/{id}/groups ([`f74f844`](https://github.com/unipoll/api/commit/f74f84483e094d346f2fef9cd00b642e1fd1f023))
+
+* refactor: Add permission check to get_policy ([`924e462`](https://github.com/unipoll/api/commit/924e462373a4d6bd096b8fa04bc4575e35750c37))
+
+* refactor: Changed imports ([`dd7ba5a`](https://github.com/unipoll/api/commit/dd7ba5ad23879774949b38e641b09dee6faa5251))
+
+* refactor: Moved create poll action ([`2664b7a`](https://github.com/unipoll/api/commit/2664b7afc3c4ee1f38e6709831f14afa2b4225ee))
+
+* refactor: Changed Member Actions
+
+Moved Members related actions to a separate module. The old routes use new actions to view, add, remove members from Group/Workspace ([`3bd5363`](https://github.com/unipoll/api/commit/3bd5363cd5b05db28e15dcdfc649692aa117a98c))
+
+* refactor: Moved group actions
+
+Moved actions to get list of groups and create new group to GroupActions ([`6fdd25e`](https://github.com/unipoll/api/commit/6fdd25e5056427eb599b8b81516164ee05cf8b8a))
+
+### Style
+
+* style: flake8 linting ([`1be8a1a`](https://github.com/unipoll/api/commit/1be8a1a1c02e030eafb61778464eddd344be8c3c))
+
+* style: Cleanup ([`713dde8`](https://github.com/unipoll/api/commit/713dde8426a08b8f0dee34e4da6d3eb21064fcf9))
+
+### Unknown
+
+* Merge pull request #72 from unipoll/actions_rework
+
+Actions overhaull ([`b843563`](https://github.com/unipoll/api/commit/b84356330d658e4185d3732771de8ce8f01c236e))
+
+* Update README.md ([`cb23f3d`](https://github.com/unipoll/api/commit/cb23f3d7021c23a8da207ee81f7ff568c8ff0273))
+
+
 ## v0.10.0 (2023-10-07)
 
 ### Build
