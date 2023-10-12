@@ -26,6 +26,20 @@ class GroupList(BaseModel):
 
 
 # Schema for the request to create a new group
+class GroupCreateRequest(BaseModel):
+    name: str = Field(default="", min_length=3, max_length=50)
+    workspace: ResourceID = Field(title="Workspace ID")
+    description: str = Field(default="", title="Description", max_length=300)
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "name": "Group 01",
+            "workspace": "60b9d1c8e1f1d5f5f5b4f8e1",
+            "description": "My first Group",
+        }
+    })
+
+
+# Schema for the request to create a new group
 class GroupCreateInput(BaseModel):
     name: str = Field(default="", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=300)

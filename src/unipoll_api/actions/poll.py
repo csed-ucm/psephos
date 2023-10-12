@@ -1,8 +1,10 @@
+from beanie import WriteRules
 from unipoll_api import AccountManager
-from unipoll_api.documents import Poll, Policy, Group, Account, Workspace
-from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas, MemberSchemas, WorkspaceSchemas
+from unipoll_api.documents import Poll, Workspace
+from unipoll_api.schemas import PollSchemas, QuestionSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
-from unipoll_api.exceptions import ResourceExceptions
+from unipoll_api.exceptions import ResourceExceptions, PollExceptions
+from unipoll_api import actions
 
 
 async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
@@ -30,6 +32,35 @@ async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
     return PollSchemas.PollList(polls=poll_list)
 
 
+# Create a new poll in a workspace
+async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRequest) -> PollSchemas.PollResponse:
+    # Check if poll name is unique
+    poll: Poll  # For type hinting, until Link type is supported
+    for poll in workspace.polls:  # type: ignore
+        if poll.name == input_data.name:
+            raise PollExceptions.NonUniqueName(poll)
+
+    # Create a new poll
+    new_poll = Poll(name=input_data.name,
+                    description=input_data.description,
+                    workspace=workspace,  # type: ignore
+                    public=input_data.public,
+                    published=input_data.published,
+                    questions=input_data.questions,
+                    policies=[])
+
+    # Check if poll was created
+    if not new_poll:
+        raise PollExceptions.ErrorWhileCreating(new_poll)
+
+    # Add the poll to the workspace
+    workspace.polls.append(new_poll)  # type: ignore
+    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
+
+    # Return the new poll
+    return PollSchemas.PollResponse(**new_poll.model_dump())
+
+
 async def get_poll(poll: Poll,
                    include_questions: bool = False,
                    include_policies: bool = False) -> PollSchemas.PollResponse:
@@ -46,7 +77,7 @@ async def get_poll(poll: Poll,
     if include_policies:
         req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore
         if Permissions.check_permission(permissions, req_permissions):
-            policies = (await get_poll_policies(poll)).policies
+            policies = (await actions.PolicyActions.get_policies(resource=poll)).policies
 
     workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
 
@@ -70,31 +101,6 @@ async def get_poll_questions(poll: Poll) -> QuestionSchemas.QuestionList:
         question_list.append(question_scheme)
     # Return the list of questions
     return QuestionSchemas.QuestionList(questions=question_list)
-
-
-async def get_poll_policies(poll: Poll) -> PolicySchemas.PolicyList:
-    policy_list = []
-    policy: Policy
-    for policy in poll.policies:  # type: ignore
-        permissions = Permissions.pollPermissions(policy.permissions).name.split('|')  # type: ignore
-        # Get the policy_holder
-        if policy.policy_holder_type == 'account':
-            policy_holder = await Account.get(policy.policy_holder.ref.id)
-        elif policy.policy_holder_type == 'group':
-            policy_holder = await Group.get(policy.policy_holder.ref.id)
-        else:
-            raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
-        if not policy_holder:
-            # TODO: Replace with custom exception
-            raise ResourceExceptions.InternalServerError("get_poll_policies() => Policy holder not found")
-        # Convert the policy_holder to a Member schema
-        policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
-        policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
-                                                     policy_holder_type=policy.policy_holder_type,
-                                                     # Exclude unset fields(i.e. "description" for Account)
-                                                     policy_holder=policy_holder.model_dump(exclude_unset=True),
-                                                     permissions=permissions))
-    return PolicySchemas.PolicyList(policies=policy_list)
 
 
 async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSchemas.PollResponse:

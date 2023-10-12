@@ -1,29 +1,93 @@
-from beanie import DeleteRules
-from beanie.operators import In
+from beanie import DeleteRules, WriteRules
 from unipoll_api import AccountManager
-from unipoll_api.documents import Policy, ResourceID, Workspace, Group, Account
-from unipoll_api.schemas import AccountSchemas, GroupSchemas, MemberSchemas, PolicySchemas, WorkspaceSchemas
-from unipoll_api.exceptions import (AccountExceptions, GroupExceptions, PolicyExceptions,
-                                    ResourceExceptions, WorkspaceExceptions)
-from unipoll_api.utils import permissions as Permissions
+from unipoll_api.documents import Policy, Workspace, Group, Account, create_link
+from unipoll_api import actions
+from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
+from unipoll_api.exceptions import (GroupExceptions, WorkspaceExceptions)
+from unipoll_api.utils import Permissions
 
 
-# Get all groups (for superuser)
-# async def get_all_groups() -> GroupSchemas.GroupList:
-#     group_list = []
-#     search_result = await Group.find_all().to_list()
+# Get list of groups
+async def get_groups(workspace: Workspace | None = None,
+                     account: Account | None = None,
+                     name: str | None = None) -> GroupSchemas.GroupList:
+    account = account or AccountManager.active_user.get()
 
-#     # Create a group list for output schema using the search results
-#     for group in search_result:
-#         group_list.append(GroupSchemas.Group(**group.model_dump()))
+    search_filter = {}
+    if name:
+        search_filter['name'] = name  # type: ignore
+    if workspace:
+        search_filter['workspace._id'] = workspace.id  # type: ignore
+    if account:
+        search_filter['members._id'] = account.id  # type: ignore
+    search_result = await Group.find(search_filter, fetch_links=True).to_list()
 
-#     return GroupSchemas.GroupList(groups=group_list)
+    groups = []
+    for group in search_result:
+        try:
+            groups.append((await get_group(group=group)).model_dump(exclude_none=True))
+        except Exception:
+            pass
+
+    return GroupSchemas.GroupList(groups=groups)
+
+
+# Create a new group with account as the owner
+async def create_group(workspace: Workspace,
+                       name: str,
+                       description: str) -> GroupSchemas.GroupCreateOutput:
+    # await workspace.fetch_link(workspace.groups)
+    account = AccountManager.active_user.get()
+
+    # Check if group name is unique
+    group: Group  # For type hinting, until Link type is supported
+    for group in workspace.groups:  # type: ignore
+        if group.name == name:
+            raise GroupExceptions.NonUniqueName(group)
+
+    # Create a new group
+    new_group = Group(name=name,
+                      description=description,
+                      workspace=workspace)  # type: ignore
+
+    # Check if group was created
+    if not new_group:
+        raise GroupExceptions.ErrorWhileCreating(new_group)
+
+    # Add the account to group member list
+    await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
+
+    # Create a policy for the new group
+    permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS  # type: ignore
+    new_policy = Policy(policy_holder_type='group',
+                        policy_holder=(await create_link(new_group)),
+                        permissions=permissions,
+                        parent_resource=workspace)  # type: ignore
+
+    # Add the group and the policy to the workspace
+    workspace.policies.append(new_policy)  # type: ignore
+    workspace.groups.append(new_group)  # type: ignore
+    await Workspace.save(workspace, link_rule=WriteRules.WRITE)
+
+    # Return the new group
+    return GroupSchemas.GroupCreateOutput(**new_group.model_dump(include={'id', 'name', 'description'}))
 
 
 # Get group
 async def get_group(group: Group, include_members: bool = False, include_policies: bool = False) -> GroupSchemas.Group:
-    members = (await get_group_members(group)).members if include_members else None
-    policies = (await get_group_policies(group)).policies if include_policies else None
+    account = AccountManager.active_user.get()
+
+    # Check if the user has a permission to get all the groups in the workspace
+    workspace_permissions = await Permissions.get_all_permissions(group.workspace, account)
+    group_permissions = await Permissions.get_all_permissions(group, account)
+
+    if not (Permissions.check_permission(workspace_permissions, Permissions.WorkspacePermissions["get_groups"]) or
+            Permissions.check_permission(group_permissions, Permissions.GroupPermissions["get_group"])):
+        raise GroupExceptions.UserNotAuthorized(
+            account, group, f"to view group {group.id}")
+
+    members = (await actions.MembersActions.get_members(group)).members if include_members else None
+    policies = (await actions.PolicyActions.get_policies(resource=group)).policies if include_policies else None
     workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(exclude={"members",  # type: ignore
                                                                                  "policies",
                                                                                  "groups"}))
@@ -69,175 +133,14 @@ async def update_group(group: Group,
 async def delete_group(group: Group):
     # await group.fetch_link(Group.workspace)
     workspace: Workspace = group.workspace  # type: ignore
-    workspace.groups = [g for g in workspace.groups if g.id != group.id]  # type: ignore
-    workspace.policies = [p for p in workspace.policies if p.policy_holder.ref.id != group.id]  # type: ignore
+    workspace.groups = [
+        g for g in workspace.groups if g.id != group.id]  # type: ignore
+    workspace.policies = [
+        p for p in workspace.policies if p.policy_holder.ref.id != group.id]  # type: ignore
     await Workspace.save(workspace, link_rule=DeleteRules.DELETE_LINKS)
     await Group.delete(group)
 
     if await Group.get(group.id):
         return GroupExceptions.ErrorWhileDeleting(group.id)
 
-
-# Get list of members of a group
-async def get_group_members(group: Group) -> MemberSchemas.MemberList:
-    member_list = []
-    member: Account
-
-    account = AccountManager.active_user.get()
-    permissions = await Permissions.get_all_permissions(group, account)
-    req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
-    if Permissions.check_permission(permissions, req_permissions):
-        for member in group.members:  # type: ignore
-            member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
-            member_scheme = MemberSchemas.Member(**member_data)
-            member_list.append(member_scheme)
-    # Return the list of members
-    return MemberSchemas.MemberList(members=member_list)
-
-
-# Add groups/members to group
-async def add_group_members(group: Group, member_data: MemberSchemas.AddMembers) -> MemberSchemas.MemberList:
-    accounts = set(member_data.accounts)
-    # Remove existing members from the accounts set
-    accounts = accounts.difference({member.id for member in group.members})  # type: ignore
-    # Find the accounts from the database
-    account_list = await Account.find(In(Account.id, accounts)).to_list()
-    # Add the accounts to the group member list with default permissions
-    for account in account_list:
-        await group.add_member(account, Permissions.GROUP_BASIC_PERMISSIONS)
-    await Group.save(group)
-    # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
-
-
-# Remove a member from a workspace
-async def remove_group_member(group: Group, account_id: ResourceID | None):
-    # Check if account_id is specified in request, if account_id is not specified, use the current user
-    if account_id:
-        account = await Account.get(account_id)  # type: ignore
-        if not account:
-            raise AccountExceptions.AccountNotFound(account_id)
-    else:
-        account = AccountManager.active_user.get()
-    # Check if the account exists
-    if not account:
-        raise ResourceExceptions.InternalServerError("remove_group_member() -> Account not found")
-    # Check if account is a member of the group
-    if account.id not in [ResourceID(member.ref.id) for member in group.members]:
-        raise GroupExceptions.UserNotMember(group, account)
-    # Remove the account from the group
-    if await group.remove_member(account):
-        member_list = [MemberSchemas.Member(**account.model_dump()) for account in group.members]  # type: ignore
-        return MemberSchemas.MemberList(members=member_list)
-    raise GroupExceptions.ErrorWhileRemovingMember(group, account)
-
-
-# Get all policies of a group
-async def get_group_policies(group: Group) -> PolicySchemas.PolicyList:
-    policy_list = []
-    policy: Policy
-    account = AccountManager.active_user.get()
-    permissions = await Permissions.get_all_permissions(group, account)
-    req_permissions = Permissions.GroupPermissions["get_group_policies"]  # type: ignore
-    if Permissions.check_permission(permissions, req_permissions):
-        for policy in group.policies:  # type: ignore
-            permissions = Permissions.GroupPermissions(policy.permissions).name.split('|')  # type: ignore
-            # Get the policy_holder
-            if policy.policy_holder_type == 'account':
-                policy_holder = await Account.get(policy.policy_holder.ref.id)
-            elif policy.policy_holder_type == 'group':
-                policy_holder = await Group.get(policy.policy_holder.ref.id)
-            else:
-                raise ResourceExceptions.InternalServerError("Invalid policy_holder_type")
-            if not policy_holder:
-                # TODO: Replace with custom exception
-                raise ResourceExceptions.InternalServerError("get_group_policies() => Policy holder not found")
-            # Convert the policy_holder to a Member schema
-            policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
-            policy_list.append(PolicySchemas.PolicyShort(id=policy.id,
-                                                         policy_holder_type=policy.policy_holder_type,
-                                                         # Exclude unset fields(i.e. "description" for Account)
-                                                         policy_holder=policy_holder.model_dump(exclude_unset=True),
-                                                         permissions=permissions))
-    return PolicySchemas.PolicyList(policies=policy_list)
-
-
-# List all permissions for a user in a workspace
-async def get_group_policy(group: Group, account_id: ResourceID | None):
-    # Check if account_id is specified in request, if account_id is not specified, use the current user
-    if account_id:
-        account = await Account.get(account_id)  # type: ignore
-        if not account:
-            raise AccountExceptions.AccountNotFound(account_id)
-    else:
-        account = AccountManager.active_user.get()
-
-    if not account:
-        raise ResourceExceptions.InternalServerError("get_group_policy() => Account not found")
-
-    # Check if account is a member of the group
-    # if account.id not in [member.id for member in group.members]:
-    if account not in group.members:
-        raise GroupExceptions.UserNotMember(group, account)
-
-    # await group.fetch_link(Group.policies)
-    user_permissions = await Permissions.get_all_permissions(group, account)
-    res = {'permissions': Permissions.GroupPermissions(user_permissions).name.split('|'),  # type: ignore
-           'account': AccountSchemas.AccountShort(**account.model_dump())}
-    return res
-
-
-async def set_group_policy(group: Group,
-                           input_data: PolicySchemas.PolicyInput) -> PolicySchemas.PolicyOutput:
-    policy: Policy | None = None
-    account: Account | None = None
-    if input_data.policy_id:
-        policy = await Policy.get(input_data.policy_id)
-        if not policy:
-            raise PolicyExceptions.PolicyNotFound(input_data.policy_id)
-        # BUG: Beanie cannot fetch policy_holder link, as it can be a Group or an Account
-        else:
-            account = await Account.get(policy.policy_holder.ref.id)
-    else:
-        if input_data.account_id:
-            account = await Account.get(input_data.account_id)
-            if not account:
-                raise AccountExceptions.AccountNotFound(input_data.account_id)
-        else:
-            account = AccountManager.active_user.get()
-        # Make sure the account is loaded
-        if not account:
-            raise ResourceExceptions.InternalServerError("set_group_policy() => Account not found")
-        try:
-            # Find the policy for the account
-            # NOTE: To set a policy for a user, the user must be a member of the group, therefore the policy must exist
-            p: Policy
-            for p in group.policies:  # type: ignore
-                if p.policy_holder_type == "account":
-                    if p.policy_holder.ref.id == account.id:
-                        policy = p
-                        break
-        except Exception as e:
-            raise ResourceExceptions.InternalServerError(str(e))
-    # Calculate the new permission value
-    new_permission_value = 0
-    for i in input_data.permissions:
-        try:
-            new_permission_value += Permissions.GroupPermissions[i].value  # type: ignore
-        except KeyError:
-            raise ResourceExceptions.InvalidPermission(i)
-    # Update the policy
-    policy.permissions = Permissions.GroupPermissions(new_permission_value)  # type: ignore
-    await Policy.save(policy)
-
-    # Get Account or Group from policy_holder link
-    # HACK: Have to do it manualy, as Beanie cannot fetch policy_holder link of mixed types (Account | Group)
-    if policy.policy_holder_type == "account":  # type: ignore
-        policy_holder = await Account.get(policy.policy_holder.ref.id)  # type: ignore
-    elif policy.policy_holder_type == "group":  # type: ignore
-        policy_holder = await Group.get(policy.policy_holder.ref.id)  # type: ignore
-
-    # Return the updated policy
-    return PolicySchemas.PolicyOutput(
-        permissions=Permissions.GroupPermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=MemberSchemas.Member(**policy_holder.model_dump()))  # type: ignore
+    await Policy.find({"parent_resource._id": group.id}, fetch_links=True).delete()

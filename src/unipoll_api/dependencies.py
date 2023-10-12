@@ -1,9 +1,9 @@
 from typing import Annotated
 from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
-from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll
+from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy
 from unipoll_api.utils import permissions as Permissions
-from unipoll_api.exceptions import WorkspaceExceptions, GroupExceptions, AccountExceptions, PollExceptions
+from unipoll_api import exceptions as Exceptions
 from unipoll_api.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
@@ -14,7 +14,7 @@ async def get_account(account_id: ResourceID) -> Account:
     """
     account = await Account.get(account_id)
     if not account:
-        raise AccountExceptions.AccountNotFound(account_id)
+        raise Exceptions.AccountExceptions.AccountNotFound(account_id)
     return account
 
 
@@ -25,7 +25,7 @@ async def websocket_auth(websocket: WebSocket,
 
 
 # Dependency for getting a workspace with the given id
-async def get_workspace_model(workspace_id: ResourceID) -> Workspace:
+async def get_workspace(workspace_id: ResourceID) -> Workspace:
     """
     Returns a workspace with the given id.
     """
@@ -34,11 +34,11 @@ async def get_workspace_model(workspace_id: ResourceID) -> Workspace:
     if workspace:
         # await workspace.fetch_all_links()
         return workspace
-    raise WorkspaceExceptions.WorkspaceNotFound(workspace_id)
+    raise Exceptions.WorkspaceExceptions.WorkspaceNotFound(workspace_id)
 
 
 # Dependency to get a group by id and verify it exists
-async def get_group_model(group_id: ResourceID) -> Group:
+async def get_group(group_id: ResourceID) -> Group:
     """
     Returns a group with the given id.
     """
@@ -46,18 +46,27 @@ async def get_group_model(group_id: ResourceID) -> Group:
     if group:
         # await group.fetch_all_links()
         return group
-    raise GroupExceptions.GroupNotFound(group_id)
+    raise Exceptions.GroupExceptions.GroupNotFound(group_id)
 
 
 # Dependency to get a poll by id and verify it exists
-async def get_poll_model(poll_id: ResourceID) -> Poll:
+async def get_poll(poll_id: ResourceID) -> Poll:
     """
     Returns a poll with the given id.
     """
     poll = await Poll.get(poll_id, fetch_links=True)
     if poll:
         return poll
-    raise GroupExceptions.GroupNotFound(poll_id)
+    raise Exceptions.GroupExceptions.GroupNotFound(poll_id)
+
+
+# Dependency to get a policy by id and verify it exists
+async def get_policy(policy_id: ResourceID) -> Policy:
+    policy = await Policy.get(policy_id, fetch_links=True)
+    if policy:
+        # await policy.parent_resource.fetch_all_links()  # type: ignore
+        return policy
+    raise Exceptions.PolicyExceptions.PolicyNotFound(policy_id)
 
 
 # Dependency to get a user by id and verify it exists
@@ -79,7 +88,7 @@ async def check_workspace_permission(request: Request, account: Account = Depend
 
     # Check if workspace exists
     if not workspace:
-        e = WorkspaceExceptions.WorkspaceNotFound(workspaceID)
+        e = Exceptions.WorkspaceExceptions.WorkspaceNotFound(workspaceID)
         raise HTTPException(e.code, str(e))
 
     if account.is_superuser:
@@ -93,10 +102,10 @@ async def check_workspace_permission(request: Request, account: Account = Depend
         required_permission = Permissions.WorkspacePermissions[operationID]  # type: ignore
         if not Permissions.check_permission(Permissions.WorkspacePermissions(user_permissions),   # type: ignore
                                             required_permission):
-            e = WorkspaceExceptions.UserNotAuthorized(account, workspace, operationID)
+            e = Exceptions.WorkspaceExceptions.UserNotAuthorized(account, workspace, operationID)
             raise HTTPException(e.code, str(e))
     except KeyError:
-        e = WorkspaceExceptions.ActionNotFound(operationID)
+        e = Exceptions.WorkspaceExceptions.ActionNotFound(operationID)
         raise HTTPException(e.code, str(e))
 
 
@@ -110,7 +119,7 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
     # Check if group exists
     e: Exception
     if not group:
-        e = GroupExceptions.GroupNotFound(groupID)
+        e = Exceptions.GroupExceptions.GroupNotFound(groupID)
         raise HTTPException(e.code, str(e))
     # Get the user policy for the group
     # print(group.members)
@@ -121,10 +130,10 @@ async def check_group_permission(request: Request, account: Account = Depends(ge
         required_permission = Permissions.GroupPermissions[operationID]  # type: ignore
         if not Permissions.check_permission(Permissions.GroupPermissions(user_permissions),  # type: ignore
                                             required_permission):
-            e = GroupExceptions.UserNotAuthorized(account, group, operationID)
+            e = Exceptions.GroupExceptions.UserNotAuthorized(account, group, operationID)
             raise HTTPException(e.code, str(e))
     except KeyError:
-        e = GroupExceptions.ActionNotFound(operationID)
+        e = Exceptions.GroupExceptions.ActionNotFound(operationID)
         raise HTTPException(e.code, str(e))
 
 
@@ -138,7 +147,7 @@ async def check_poll_permission(request: Request, account: Account = Depends(get
     # Check if poll exists
     e: Exception
     if not poll:
-        e = PollExceptions.PollNotFound(pollID)
+        e = Exceptions.PollExceptions.PollNotFound(pollID)
         raise HTTPException(e.code, str(e))
 
     # Check if the poll is public
@@ -153,8 +162,8 @@ async def check_poll_permission(request: Request, account: Account = Depends(get
         required_permission = Permissions.PollPermissions[operationID]  # type: ignore
         if not Permissions.check_permission(Permissions.PollPermissions(user_permissions),  # type: ignore
                                             required_permission):
-            e = PollExceptions.UserNotAuthorized(account, poll, operationID)
+            e = Exceptions.PollExceptions.UserNotAuthorized(account, poll, operationID)
             raise HTTPException(e.code, str(e))
     except KeyError:
-        e = PollExceptions.ActionNotFound(operationID)
+        e = Exceptions.PollExceptions.ActionNotFound(operationID)
         raise HTTPException(e.code, str(e))
