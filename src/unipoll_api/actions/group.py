@@ -15,11 +15,11 @@ async def get_groups(workspace: Workspace | None = None,
 
     search_filter = {}
     if name:
-        search_filter['name'] = name
+        search_filter['name'] = name  # type: ignore
     if workspace:
-        search_filter['workspace._id'] = workspace.id
+        search_filter['workspace._id'] = workspace.id  # type: ignore
     if account:
-        search_filter['members._id'] = account.id
+        search_filter['members._id'] = account.id  # type: ignore
     search_result = await Group.find(search_filter, fetch_links=True).to_list()
 
     groups = []

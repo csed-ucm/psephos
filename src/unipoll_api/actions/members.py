@@ -12,9 +12,9 @@ async def get_members(resource: Workspace | Group) -> MemberSchemas.MemberList:
     permissions = await Permissions.get_all_permissions(resource, account)
 
     if resource.resource_type == "workspace":
-        req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]
+        req_permissions = Permissions.WorkspacePermissions["get_workspace_members"]  # type: ignore
     elif resource.resource_type == "group":
-        req_permissions = Permissions.GroupPermissions["get_group_members"]
+        req_permissions = Permissions.GroupPermissions["get_group_members"]  # type: ignore
     else:
         raise ResourceExceptions.InternalServerError("Invalid resource type")
 
@@ -41,8 +41,8 @@ async def add_members(resource: Workspace | Group,
         req_permissions = Permissions.WorkspacePermissions["add_workspace_members"]
         default_permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS
     elif resource.resource_type == "group":
-        req_permissions = Permissions.GroupPermissions["add_group_members"]
-        default_permissions = Permissions.GROUP_BASIC_PERMISSIONS
+        req_permissions = Permissions.GroupPermissions["add_group_members"]  # type: ignore
+        default_permissions = Permissions.GROUP_BASIC_PERMISSIONS  # type: ignore
     else:
         raise ResourceExceptions.InternalServerError("Invalid resource type")
 
@@ -71,9 +71,9 @@ async def remove_member(resource: Workspace | Group, account: Account):
     account = AccountManager.active_user.get()
     permissions = await Permissions.get_all_permissions(resource, account)
     if resource.resource_type == "workspace":
-        req_permissions = Permissions.WorkspacePermissions["remove_workspace_members"]
+        req_permissions = Permissions.WorkspacePermissions["remove_workspace_members"]  # type: ignore
     elif resource.resource_type == "group":
-        req_permissions = Permissions.GroupPermissions["remove_group_members"]
+        req_permissions = Permissions.GroupPermissions["remove_group_members"]  # type: ignore
     else:
         raise ResourceExceptions.InternalServerError("Invalid resource type")
     if not Permissions.check_permission(permissions, req_permissions):
