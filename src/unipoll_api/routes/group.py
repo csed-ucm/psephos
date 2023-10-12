@@ -20,12 +20,9 @@ async def get_all_groups(workspace: Annotated[ResourceID | None, Query()] = None
                          account: Annotated[ResourceID | None, Query()] = None,
                          name: Annotated[str | None, Query()] = None
                          ) -> GroupSchemas.GroupList:
-    args = {}
-    args['workspace'] = await Dependencies.get_workspace(workspace) if workspace else None
-    args['account'] = await Dependencies.get_account(account) if account else None
-    args['name'] = name
-
-    return await GroupActions.get_groups(**args)
+    return await GroupActions.get_groups(workspace=await Dependencies.get_workspace(workspace) if workspace else None,
+                                         account=await Dependencies.get_account(account) if account else None,
+                                         name=name)
 
 
 # Create a new group
@@ -33,7 +30,7 @@ async def get_all_groups(workspace: Annotated[ResourceID | None, Query()] = None
                   status_code=201,
                   response_description="Created Group",
                   response_model=GroupSchemas.GroupCreateOutput)
-async def create_group(input_data: GroupSchemas.GroupCreateInput = Body(...)):
+async def create_group(input_data: GroupSchemas.GroupCreateRequest = Body(...)):
     try:
         workspace = await Dependencies.get_workspace(input_data.workspace)
         return await GroupActions.create_group(workspace, name=input_data.name, description=input_data.description)
@@ -177,15 +174,15 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group),
             account = await Dependencies.get_account(permissions.account_id)
             # policy = await Policy.find_one(Policy.policy_holder.id == account.id, fetch_links=True)
             # Temporarily workaround
-            policy_list = await PolicyActions.get_policies(resource=group, policy_holder=account)
-            policy = policy_list.policies[0]
-            policy = await Policy.get(policy.id, fetch_links=True)
+            policy_list = await PolicyActions.get_policies(resource=group, policy_holder=account)  # type: ignore
+            policy = policy_list.policies[0]  # type: ignore
+            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
         elif permissions.group_id:
             # Temporarily workaround
             group = await Dependencies.get_group(permissions.group_id)
-            policy_list = await PolicyActions.get_policies(resource=group, policy_holder=group)
-            policy = policy_list.policies[0]
-            policy = await Policy.get(policy.id, fetch_links=True)
+            policy_list = await PolicyActions.get_policies(resource=group, policy_holder=group)  # type: ignore
+            policy = policy_list.policies[0]  # type: ignore
+            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
 
         if not policy:
             raise APIException(404, "Policy not found 404")

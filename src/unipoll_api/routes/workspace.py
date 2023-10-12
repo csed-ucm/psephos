@@ -266,14 +266,14 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
             # policy = await Policy.find_one(Policy.policy_holder.id == account.id, fetch_links=True)
             # Temporarily workaround
             policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
-            policy = policy_list.policies[0]
-            policy = await Policy.get(policy.id, fetch_links=True)
+            policy = policy_list.policies[0]  # type: ignore
+            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
         elif permissions.group_id:
             # Temporarily workaround
             group = await Dependencies.get_group(permissions.group_id)
             policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=group)
-            policy = policy_list.policies[0]
-            policy = await Policy.get(policy.id, fetch_links=True)
+            policy = policy_list.policies[0]  # type: ignore
+            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
 
         if not policy:
             raise APIException(404, "Policy not found 404")
