@@ -1,6 +1,6 @@
 from beanie import DeleteRules, WriteRules
 from unipoll_api import AccountManager
-from unipoll_api.documents import Policy, Workspace, Group, Account, create_link
+from unipoll_api.documents import Policy, Workspace, Group, Account
 from unipoll_api import actions
 from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
 from unipoll_api.exceptions import (GroupExceptions, WorkspaceExceptions)
@@ -22,6 +22,9 @@ async def get_groups(workspace: Workspace | None = None,
         search_filter['members._id'] = account.id  # type: ignore
     search_result = await Group.find(search_filter, fetch_links=True).to_list()
 
+    # TODO: Rewrite to iterate over list of workspaces
+    # TODO: to avoid permission check for every group if the user has permission to get all groups
+
     groups = []
     for group in search_result:
         try:
@@ -35,8 +38,10 @@ async def get_groups(workspace: Workspace | None = None,
 # Create a new group with account as the owner
 async def create_group(workspace: Workspace,
                        name: str,
-                       description: str) -> GroupSchemas.GroupCreateOutput:
-    # await workspace.fetch_link(workspace.groups)
+                       description: str,
+                       check_permissions: bool = True) -> GroupSchemas.GroupCreateOutput:
+
+    await Permissions.check_permissions(workspace, "add_groups", check_permissions)
     account = AccountManager.active_user.get()
 
     # Check if group name is unique
@@ -57,15 +62,8 @@ async def create_group(workspace: Workspace,
     # Add the account to group member list
     await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
 
-    # Create a policy for the new group
-    permissions = Permissions.WORKSPACE_BASIC_PERMISSIONS  # type: ignore
-    new_policy = Policy(policy_holder_type='group',
-                        policy_holder=(await create_link(new_group)),
-                        permissions=permissions,
-                        parent_resource=workspace)  # type: ignore
-
-    # Add the group and the policy to the workspace
-    workspace.policies.append(new_policy)  # type: ignore
+    # Create a policy for the new group    
+    await workspace.add_policy(new_group, Permissions.GROUP_BASIC_PERMISSIONS, False)
     workspace.groups.append(new_group)  # type: ignore
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
@@ -74,17 +72,14 @@ async def create_group(workspace: Workspace,
 
 
 # Get group
-async def get_group(group: Group, include_members: bool = False, include_policies: bool = False) -> GroupSchemas.Group:
-    account = AccountManager.active_user.get()
-
-    # Check if the user has a permission to get all the groups in the workspace
-    workspace_permissions = await Permissions.get_all_permissions(group.workspace, account)
-    group_permissions = await Permissions.get_all_permissions(group, account)
-
-    if not (Permissions.check_permission(workspace_permissions, Permissions.WorkspacePermissions["get_groups"]) or
-            Permissions.check_permission(group_permissions, Permissions.GroupPermissions["get_group"])):
-        raise GroupExceptions.UserNotAuthorized(
-            account, group, f"to view group {group.id}")
+async def get_group(group: Group, 
+                    include_members: bool = False,
+                    include_policies: bool = False,
+                    check_permissions: bool = True) -> GroupSchemas.Group:
+    try:
+        await Permissions.check_permissions(group.workspace, "get_groups", check_permissions)
+    except WorkspaceExceptions.UserNotAuthorized:
+        await Permissions.check_permissions(group, "get_group", check_permissions)
 
     members = (await actions.MembersActions.get_members(group)).members if include_members else None
     policies = (await actions.PolicyActions.get_policies(resource=group)).policies if include_policies else None
@@ -102,7 +97,13 @@ async def get_group(group: Group, include_members: bool = False, include_policie
 
 # Update a group
 async def update_group(group: Group,
-                       group_data: GroupSchemas.GroupUpdateRequest) -> GroupSchemas.Group:
+                       group_data: GroupSchemas.GroupUpdateRequest,
+                       check_permissions: bool = True) -> GroupSchemas.Group:
+    try:
+        await Permissions.check_permissions(group.workspace, "update_groups", check_permissions)
+    except WorkspaceExceptions.UserNotAuthorized:
+        await Permissions.check_permissions(group, "update_group", check_permissions)
+
     save_changes = False
     workspace: Workspace = group.workspace  # type: ignore
     # The group must belong to a workspace
@@ -130,7 +131,13 @@ async def update_group(group: Group,
 
 
 # Delete a group
-async def delete_group(group: Group):
+async def delete_group(group: Group,
+                       check_permissions: bool = True):
+    try:
+        await Permissions.check_permissions(group.workspace, "delete_groups", check_permissions)
+    except WorkspaceExceptions.UserNotAuthorized:
+        await Permissions.check_permissions(group, "delete_group", check_permissions)
+
     # await group.fetch_link(Group.workspace)
     workspace: Workspace = group.workspace  # type: ignore
     workspace.groups = [

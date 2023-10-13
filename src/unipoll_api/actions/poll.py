@@ -1,5 +1,4 @@
 from beanie import WriteRules
-from unipoll_api import AccountManager
 from unipoll_api.documents import Poll, Workspace
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
@@ -7,25 +6,22 @@ from unipoll_api.exceptions import ResourceExceptions, PollExceptions
 from unipoll_api import actions
 
 
-async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
-    account = AccountManager.active_user.get()
-    req_permissions = Permissions.WorkspacePermissions["get_polls"]  # type: ignore
+async def get_polls(workspace: Workspace | None = None,
+                    check_permissions: bool = True) -> PollSchemas.PollList:
     all_workspaces = [workspace] if workspace else await Workspace.find(fetch_links=True).to_list()
 
     poll_list = []
     for workspace in all_workspaces:
-        permissions = await Permissions.get_all_permissions(workspace, account)
-        if Permissions.check_permission(permissions, req_permissions):
+        try:
+            await Permissions.check_permissions(workspace, "get_polls", check_permissions)
             poll_list += workspace.polls  # type: ignore
-        else:
-            req_permissions = Permissions.WorkspacePermissions["get_poll"]
+        except ResourceExceptions.UserNotAuthorized:
+            poll: Poll
             for poll in workspace.polls:  # type: ignore
-                if poll.public:  # type: ignore
+                if poll.public:
                     poll_list.append(poll)
                 else:
-                    permissions = await Permissions.get_all_permissions(poll, account)
-                    if Permissions.check_permission(permissions, req_permissions):
-                        poll_list.append(poll)
+                    poll_list.append(await get_poll(poll, check_permissions))
     # Build poll list and return the result
     for poll in poll_list:
         poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
@@ -33,7 +29,12 @@ async def get_polls(workspace: Workspace | None = None) -> PollSchemas.PollList:
 
 
 # Create a new poll in a workspace
-async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRequest) -> PollSchemas.PollResponse:
+async def create_poll(workspace: Workspace,
+                      input_data: PollSchemas.CreatePollRequest,
+                      check_permissions: bool = True) -> PollSchemas.PollResponse:
+    # Check if the user has permission to create polls
+    await Permissions.check_permissions(actions, "create_polls", check_permissions)
+
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
     for poll in workspace.polls:  # type: ignore
@@ -63,21 +64,14 @@ async def create_poll(workspace: Workspace, input_data: PollSchemas.CreatePollRe
 
 async def get_poll(poll: Poll,
                    include_questions: bool = False,
-                   include_policies: bool = False) -> PollSchemas.PollResponse:
-    account = AccountManager.active_user.get()
-    questions = []
-    policies = None
+                   include_policies: bool = False,
+                   check_permissions: bool = True) -> PollSchemas.PollResponse:
+    if not poll.public:
+        await Permissions.check_permissions(poll, "get_poll", check_permissions)
 
-    permissions = await Permissions.get_all_permissions(poll, account)
     # Fetch the resources if the user has the required permissions
-    if include_questions:
-        req_permissions = Permissions.PollPermissions["get_poll_questions"]  # type: ignore
-        if poll.public or Permissions.check_permission(permissions, req_permissions):
-            questions = (await get_poll_questions(poll)).questions
-    if include_policies:
-        req_permissions = Permissions.PollPermissions["get_poll_policies"]  # type: ignore
-        if Permissions.check_permission(permissions, req_permissions):
-            policies = (await actions.PolicyActions.get_policies(resource=poll)).policies
+    questions = (await get_poll_questions(poll)).questions if include_questions else None
+    policies = (await actions.PolicyActions.get_policies(resource=poll)).policies if include_policies else None
 
     workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
 
@@ -92,8 +86,12 @@ async def get_poll(poll: Poll,
                                     policies=policies)
 
 
-async def get_poll_questions(poll: Poll) -> QuestionSchemas.QuestionList:
-    print("Poll: ", poll.questions)
+async def get_poll_questions(poll: Poll,
+                             check_permissions: bool = True) -> QuestionSchemas.QuestionList:
+    # Check if the user has permission to get questions
+    if not poll.public:
+        await Permissions.check_permissions(poll, "get_questions", check_permissions)
+
     question_list = []
     for question in poll.questions:
         # question_data = question.model_dump()

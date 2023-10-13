@@ -46,7 +46,9 @@ async def get_workspace(workspace: Workspace,
                         include_groups: bool = False,
                         include_policies: bool = False,
                         include_members: bool = False,
-                        include_polls: bool = False) -> WorkspaceSchemas.Workspace:
+                        include_polls: bool = False,
+                        check_permissions: bool = True) -> WorkspaceSchemas.Workspace:
+    await Permissions.check_permissions(workspace, "get_workspace", check_permissions)
     groups = (await actions.GroupActions.get_groups(workspace)).groups if include_groups else None
     members = (await actions.MembersActions.get_members(workspace)).members if include_members else None
     policies = (await actions.PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
@@ -63,7 +65,10 @@ async def get_workspace(workspace: Workspace,
 
 # Update a workspace
 async def update_workspace(workspace: Workspace,
-                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest) -> WorkspaceSchemas.Workspace:
+                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest,
+                           check_permissions: bool = True) -> WorkspaceSchemas.Workspace:
+    await Permissions.check_permissions(workspace, "update_workspace", check_permissions)
+    
     save_changes = False
     # Check if user suplied a name
     if input_data.name and input_data.name != workspace.name:
@@ -84,8 +89,9 @@ async def update_workspace(workspace: Workspace,
 
 
 # Delete a workspace
-async def delete_workspace(workspace: Workspace):
-    # BUG: Cannot delete groups
+async def delete_workspace(workspace: Workspace, check_permissions: bool = True):
+    await Permissions.check_permissions(workspace, "delete_workspace", check_permissions)
+    
     for group in workspace.groups:
         await actions.GroupActions.delete_group(group)  # type: ignore
 
