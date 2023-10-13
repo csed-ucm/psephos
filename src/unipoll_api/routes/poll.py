@@ -10,7 +10,7 @@ from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas
 from unipoll_api import actions
 
 open_router: APIRouter = APIRouter()
-router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_poll_permission)])
+router: APIRouter = APIRouter()
 
 
 query_params = list[Literal["all", "questions", "policies"]]

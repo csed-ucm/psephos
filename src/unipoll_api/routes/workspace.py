@@ -10,7 +10,8 @@ from unipoll_api import AccountManager
 
 # APIRouter creates path operations for user module
 open_router: APIRouter = APIRouter()
-router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
+# router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
+router: APIRouter = APIRouter()
 
 
 # TODO: Move to open router to a separate file
