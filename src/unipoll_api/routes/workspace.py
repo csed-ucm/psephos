@@ -10,7 +10,8 @@ from unipoll_api import AccountManager
 
 # APIRouter creates path operations for user module
 open_router: APIRouter = APIRouter()
-router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
+# router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_workspace_permission)])
+router: APIRouter = APIRouter()
 
 
 # TODO: Move to open router to a separate file
@@ -272,6 +273,11 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
             # Temporarily workaround
             group = await Dependencies.get_group(permissions.group_id)
             policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=group)
+            policy = policy_list.policies[0]  # type: ignore
+            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
+        else:
+            account = AccountManager.active_user.get()
+            policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
             policy = policy_list.policies[0]  # type: ignore
             policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
 

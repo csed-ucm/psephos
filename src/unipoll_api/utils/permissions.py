@@ -1,4 +1,8 @@
 from enum import IntFlag
+import unipoll_api
+from unipoll_api import exceptions
+
+# import functools
 # import ast
 # from pathlib import Path
 
@@ -12,72 +16,59 @@ from enum import IntFlag
 # permission4 = 8, 2^3, 1000
 Permissions = IntFlag
 
-
-# Parse action module (e.g. src/actions/workspace.py) to get the actions of the resource
-# Create a permission class(IntFlag Enum) for that type of resource
-# **param** resource_type: Name of the resource type (e.g. workspace, group)
-# def parse_action_file(resource_type: str) -> Permissions:
-#     parsed_ast = ast.parse(Path("/actions/" + resource_type + ".py").read_text())
-#     actions = [node.name for node in ast.walk(parsed_ast) if isinstance(
-#         node, (ast.FunctionDef, ast.AsyncFunctionDef))]
-#     return IntFlag(resource_type.capitalize() + "Permission", actions)
-
-
-# # Create permissions for each resource type
-# WorkspacePermissions = parse_action_file("workspace")
-# GroupPermissions = parse_action_file("group")
-# PollPermissions = parse_action_file("poll")
-
-WorkspacePermissions = IntFlag("WorkspacePermissions", ['get_workspaces',
-                                                        'create_workspace',
-                                                        'get_workspace',
+WorkspacePermissions = IntFlag("WorkspacePermissions", ['get_workspace',
                                                         'update_workspace',
                                                         'delete_workspace',
-                                                        'get_workspace_members',
-                                                        'add_workspace_members',
-                                                        'remove_workspace_member',
+                                                        'get_members',
+                                                        'add_members',
+                                                        'remove_members',
                                                         'get_groups',
-                                                        'create_group',
-                                                        'get_workspace_policies',
-                                                        'get_workspace_policy',
-                                                        'set_workspace_policy',
+                                                        'add_groups',
+                                                        'update_groups',
+                                                        'delete_groups',
+                                                        'get_policies',
+                                                        'add_policies',
+                                                        'update_policies',
+                                                        'delete_policies',
                                                         'get_polls',
-                                                        'create_poll'])
+                                                        'create_polls',
+                                                        'delete_polls'])
 
 GroupPermissions = IntFlag("GroupPermissions", ['get_group',
                                                 'update_group',
                                                 'delete_group',
-                                                'get_group_members',
-                                                'add_group_members',
-                                                'remove_group_member',
-                                                'get_group_policies',
-                                                'get_group_policy',
-                                                'set_group_policy'])
+                                                'get_members',
+                                                'add_members',
+                                                'remove_members',
+                                                'get_policies',
+                                                'add_policies',
+                                                'update_policies',
+                                                'delete_policies'])
 
 PollPermissions = IntFlag("PollPermissions", ['get_poll',
-                                              'get_poll_questions',
-                                              'get_poll_policies',
+                                              'get_questions',
                                               'update_poll',
-                                              'delete_poll'])
+                                              'delete_poll',
+                                              'get_policies',
+                                              'add_policies',
+                                              'update_policies',
+                                              'delete_policies'
+                                              ])
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
-# WORKSPACE_BASIC_PERMISSIONS = (WorkspacePermissions["get_workspace"])  # type: ignore
-WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(WorkspacePermissions["get_workspace"] +  # type: ignore
-                                                   WorkspacePermissions["get_workspace_members"] +  # type: ignore
-                                                   WorkspacePermissions["get_workspace_policy"] +  # type: ignore
-                                                   WorkspacePermissions["get_workspace_policies"] +  # type: ignore
-                                                   WorkspacePermissions["get_groups"])  # type: ignore
-# Example: (WorkspacePermissions["get_workspace"] + WorkspacePermissions["get_workspace_members"])
+WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(sum([WorkspacePermissions["get_workspace"],
+                                                       WorkspacePermissions["get_members"],
+                                                       WorkspacePermissions["get_polls"]]))  # type: ignore
 
 GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
 GROUP_BASIC_PERMISSIONS = (GroupPermissions["get_group"])  # type: ignore
 
 POLL_ALL_PERMISSIONS = PollPermissions(-1)  # type: ignore
-# POLL_BASIC_PERMISSIONS = (PollPermissions["get_poll"])  # type: ignore
+POLL_BASIC_PERMISSIONS = (PollPermissions["get_poll"])  # type: ignore
 
 
 # Check if a user has a permission
-def check_permission(user_permission: Permissions, required_permission: Permissions) -> bool:
+def compare_permissions(user_permission: Permissions, required_permission: Permissions) -> bool:
     """Check if a user has a right provided in the permission argument.
     If the user is not found or has no permission, the default permission NONE is used.
     In which case the function returns False, unless the required permission is also NONE.
@@ -129,3 +120,36 @@ async def get_all_permissions(resource, account) -> Permissions:
                     # print("Group permissions: ", policy.permissions)
 
     return permission_sum  # type: ignore
+
+
+def convert_string_to_permission(resource_type: str, string: str):
+    try:
+        # return eval(resource_type.capitalize() + "Permissions")[string]
+        if resource_type == "workspace":  # type: ignore
+            req_permissions = WorkspacePermissions[string]  # type: ignore
+        elif resource_type == "group":  # type: ignore
+            req_permissions = GroupPermissions[string]  # type: ignore
+        elif resource_type == "poll":  # type: ignore
+            req_permissions = PollPermissions[string]  # type: ignore
+        else:
+            raise ValueError("Unknown resource type")
+        return req_permissions
+    except NameError:
+        raise ValueError("Invalid permission string")
+
+
+async def check_permissions(resource, required_permissions: str | list[str] | None = None, permission_check=True):
+    if permission_check and required_permissions:
+        account = unipoll_api.AccountManager.active_user.get()           # Get the active user
+        user_permissions = await get_all_permissions(resource, account)  # Get the user permissions
+        if isinstance(required_permissions, str):  # If only one permission is required
+            required_permissions = [required_permissions]
+
+        permissions_list = [convert_string_to_permission(resource.resource_type, p) for p in required_permissions]
+        required_permission = eval(resource.resource_type.capitalize() + "Permissions")(sum(permissions_list))
+
+        if not compare_permissions(user_permissions, required_permission):
+            actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
+            raise exceptions.ResourceExceptions.UserNotAuthorized(account,
+                                                                  f"{resource.resource_type} {resource.id}",
+                                                                  actions)
