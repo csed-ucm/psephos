@@ -7,17 +7,18 @@ from unipoll_api.utils.permissions import check_permissions
 
 
 # Helper function to get policies from a resource
-# NOTE: This can be moved to utils.py
+# NOTE: This can be moved to utils
 async def get_policies_from_resource(resource: Resource) -> list[Policy]:
     policies: list[Policy] = []
-    account = AccountManager.active_user.get()
-    if await check_permissions(resource, "get_policies"):
-        policies = resource.policies  # type: ignore
-    else:
+    try:
+        await check_permissions(resource, "get_policies")
+        return resource.policies  # type: ignore
+    except ResourceExceptions.UserNotAuthorized:
+        account = AccountManager.active_user.get()
         for policy in resource.policies:
             if policy.policy_holder.ref.id == account.id:  # type: ignore
                 policies.append(policy)  # type: ignore
-    return policies
+        return policies
 
 
 # Get all policies of a workspace
