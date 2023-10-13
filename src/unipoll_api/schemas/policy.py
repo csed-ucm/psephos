@@ -1,14 +1,13 @@
 from typing import Literal, Any, Optional
 from pydantic import ConfigDict, BaseModel, Field
 from unipoll_api.documents import ResourceID, Account, Group
-from unipoll_api.utils.permissions import Permissions
 
 
 class Policy(BaseModel):
     id: ResourceID
     policy_holder_type: Literal["account", "group"]
     policy_holder: Account | Group
-    permissions: Permissions
+    permissions: int
 
 
 class PolicyShort(BaseModel):
@@ -97,7 +96,7 @@ class PolicyList(BaseModel):
 
 # Schema for adding permissions to a group
 class AddPermission(BaseModel):
-    permissions: list[Permissions] = Field(title="Permissions")
+    permissions: list[str] = Field(title="Permissions")
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "permissions": [
