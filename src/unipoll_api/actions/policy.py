@@ -80,7 +80,7 @@ async def update_policy(policy: Policy,
     await policy.parent_resource.fetch_all_links()  # type: ignore
 
     # Check if the user has the required permissions to update the policy
-    await Permissions.check_permissions(policy.parent_resource, "set_policy", check_permissions)
+    await Permissions.check_permissions(policy.parent_resource, "update_policies", check_permissions)
     ResourcePermissions = eval(
         "Permissions." + policy.parent_resource.resource_type.capitalize() + "Permissions")  # type: ignore
 
