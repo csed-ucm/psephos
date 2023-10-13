@@ -21,9 +21,9 @@ async def get_polls(workspace: Workspace | None = None,
                 if poll.public:
                     poll_list.append(poll)
                 else:
-                    poll_list.append(await get_poll(poll, check_permissions))
+                    poll_list.append(await get_poll(poll, check_permissions))  # type: ignore
     # Build poll list and return the result
-    for poll in poll_list:
+    for poll in poll_list:  # type: ignore
         poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
 
