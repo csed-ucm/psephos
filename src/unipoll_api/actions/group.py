@@ -62,7 +62,7 @@ async def create_group(workspace: Workspace,
     # Add the account to group member list
     await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
 
-    # Create a policy for the new group    
+    # Create a policy for the new group
     await workspace.add_policy(new_group, Permissions.GROUP_BASIC_PERMISSIONS, False)
     workspace.groups.append(new_group)  # type: ignore
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
@@ -72,7 +72,7 @@ async def create_group(workspace: Workspace,
 
 
 # Get group
-async def get_group(group: Group, 
+async def get_group(group: Group,
                     include_members: bool = False,
                     include_policies: bool = False,
                     check_permissions: bool = True) -> GroupSchemas.Group:

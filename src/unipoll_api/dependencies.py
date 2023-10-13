@@ -1,11 +1,9 @@
 from typing import Annotated
 from functools import wraps
-from fastapi import Cookie, Depends, Query, Request, HTTPException, WebSocket
+from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy
-from unipoll_api.utils import permissions as Permissions
 from unipoll_api import exceptions as Exceptions
-from unipoll_api.utils.path_operations import extract_action_from_path, extract_resourceID_from_path
 
 
 # Wrapper to handle exceptions and raise HTTPException
