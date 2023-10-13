@@ -3,7 +3,7 @@ from unipoll_api import AccountManager
 from unipoll_api.documents import Policy, Workspace, Group, Account
 from unipoll_api import actions
 from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
-from unipoll_api.exceptions import (GroupExceptions, WorkspaceExceptions)
+from unipoll_api.exceptions import GroupExceptions, WorkspaceExceptions, ResourceExceptions
 from unipoll_api.utils import Permissions
 
 
@@ -78,7 +78,7 @@ async def get_group(group: Group,
                     check_permissions: bool = True) -> GroupSchemas.Group:
     try:
         await Permissions.check_permissions(group.workspace, "get_groups", check_permissions)
-    except WorkspaceExceptions.UserNotAuthorized:
+    except ResourceExceptions.UserNotAuthorized:
         await Permissions.check_permissions(group, "get_group", check_permissions)
 
     members = (await actions.MembersActions.get_members(group)).members if include_members else None
