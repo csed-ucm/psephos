@@ -27,7 +27,7 @@ WorkspacePermissions = IntFlag("WorkspacePermissions", ['get_workspace',
                                                         'update_groups',
                                                         'delete_groups',
                                                         'get_policies',
-                                                        'add_policies'
+                                                        'add_policies',
                                                         'update_policies',
                                                         'delete_policies',
                                                         'get_polls',
@@ -56,9 +56,9 @@ PollPermissions = IntFlag("PollPermissions", ['get_poll',
                                               ])
 
 WORKSPACE_ALL_PERMISSIONS = WorkspacePermissions(-1)  # type: ignore
-WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(WorkspacePermissions["get_workspace"] +  # type: ignore
-                                                   WorkspacePermissions["get_members"] +  # type: ignore
-                                                   WorkspacePermissions["get_polls"])  # type: ignore
+WORKSPACE_BASIC_PERMISSIONS = WorkspacePermissions(sum([WorkspacePermissions["get_workspace"],
+                                                       WorkspacePermissions["get_members"],
+                                                       WorkspacePermissions["get_polls"]]))  # type: ignore
 
 GROUP_ALL_PERMISSIONS = GroupPermissions(-1)  # type: ignore
 GROUP_BASIC_PERMISSIONS = (GroupPermissions["get_group"])  # type: ignore
