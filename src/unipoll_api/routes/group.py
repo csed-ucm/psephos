@@ -184,6 +184,11 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group),
             policy_list = await PolicyActions.get_policies(resource=group, policy_holder=group)  # type: ignore
             policy = policy_list.policies[0]  # type: ignore
             policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
+        else:
+            account = AccountManager.active_user.get()
+            policy_list = await PolicyActions.get_policies(resource=group, policy_holder=account)
+            policy = policy_list.policies[0]
+            policy = await Policy.get(policy.id, fetch_links=True)
 
         if not policy:
             raise APIException(404, "Policy not found 404")
