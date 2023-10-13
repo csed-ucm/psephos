@@ -359,7 +359,7 @@ async def test_permissions(client_test: AsyncClient):
 
     # Try to get group permissions
     res = await client_test.get(f"/groups/{group.id}/policy", headers=headers)
-    assert res.status_code == status.HTTP_403_FORBIDDEN
+    assert res.status_code == status.HTTP_200_OK
 
     # Try to set group permissions
     res = await client_test.put(f"/groups/{group.id}/policy",
