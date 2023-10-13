@@ -9,7 +9,7 @@ from unipoll_api.exceptions import ResourceExceptions
 
 async def get_members(resource: Workspace | Group, check_permissions: bool = True) -> MemberSchemas.MemberList:
     # Check if the user has permission to add members
-    await Permissions.check_permissions(resource, "add_members", check_permissions)
+    await Permissions.check_permissions(resource, "get_members", check_permissions)
 
     def build_member_scheme(member: Account) -> MemberSchemas.Member:
         member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
