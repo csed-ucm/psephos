@@ -2,6 +2,75 @@
 
 
 
+## v0.11.1 (2023-10-13)
+
+### Ci
+
+* ci: Update postman.yaml
+
+Changed vars.POSTMAN_API_ID to secrets.POSTMAN_API_ID ([`9c34ea9`](https://github.com/unipoll/api/commit/9c34ea9c713a19ba925878eda6e586b74f12a02e))
+
+### Fix
+
+* fix: Added comma to workspace permission list ([`166184d`](https://github.com/unipoll/api/commit/166184d788be3ae743b9d199296d44b5c62c690a))
+
+* fix: Updated set policy routes
+
+Added case when user does not provide account_id in update_policy request, with the else statement, the route will find current user&#39;s policy ([`f072769`](https://github.com/unipoll/api/commit/f07276900de423642c92f11cfffb3b7b6823cc4d))
+
+* fix: Replace required permission for update_policy
+
+Changed old permission set_policy to the new update_policies ([`edccfa9`](https://github.com/unipoll/api/commit/edccfa92d18143397dd74532d4c79c169557c21b))
+
+* fix: updated get_policies_from_resource
+
+check_permissions does not return anything but raises an exception in case user does not have the required permission, so the check must be made using try-catch block ([`c116990`](https://github.com/unipoll/api/commit/c1169909962064a00a5b45a78ad18786cbb97a7c))
+
+* fix: Changed required permission
+
+Changed required permissions from add_members to get_members ([`785b889`](https://github.com/unipoll/api/commit/785b889531a0ed97d086c5315cc37d0e4826bcf0))
+
+* fix: Resolved issue with not getting group
+
+check_permissions raises UserNotAuthorized from ResourceExceptions, so even though the permission is checked inside workspace, it will not raise WorkspaceExceptions ([`97808c3`](https://github.com/unipoll/api/commit/97808c3132025c43864a8d82ddb2a6b5b7df177a))
+
+* fix: Resolved circular import ([`e5eb703`](https://github.com/unipoll/api/commit/e5eb703a12bcc55f83371224aa808b56c25b5b23))
+
+### Refactor
+
+* refactor: resolved mypy issues ([`762fa14`](https://github.com/unipoll/api/commit/762fa149e2ee0adcb20eff5eeb501f8b309b8470))
+
+* refactor: Added permission check to actions
+
+Added permission check to actions using new check_permission function ([`3b83508`](https://github.com/unipoll/api/commit/3b83508134d8a5d1a2f10ffc423e34a060059d1c))
+
+* refactor: Updated dependencies functions
+
+Removed permission check dependencies, added http wrapper for resource accessors ([`05db0f0`](https://github.com/unipoll/api/commit/05db0f03e8df3db95719d2738617f625595f6c7c))
+
+* refactor: Updated Permissions
+
+Updated permission names, added utility function check_permissions which checks if user has required permissions based on provided resource and permission requirements, renamed check_permission to compare_permissions ([`4451376`](https://github.com/unipoll/api/commit/445137656e549833b76f02045216c4b2f84d6434))
+
+* refactor: Removed permission check based on operation_id ([`5bd9b3b`](https://github.com/unipoll/api/commit/5bd9b3b5dfdc3ebe770c3cdbbbd26b0af8e21fbe))
+
+### Style
+
+* style: flake8 styling ([`44a7dce`](https://github.com/unipoll/api/commit/44a7dceafbde475ac360470e747e5f8245cfc473))
+
+### Test
+
+* test: Change group test
+
+The new policy action will return the users policy even if the user does not have permission to get_policies ([`d4d7980`](https://github.com/unipoll/api/commit/d4d79802815dbe16515620d89bd958ca7e6e1518))
+
+### Unknown
+
+* Merge pull request #73 from unipoll/permissions
+
+Overhaul of Permission System ([`5e0ed7d`](https://github.com/unipoll/api/commit/5e0ed7dc21d07fd7619e2fc6da8dae5302bac275))
+
+
 ## v0.11.0 (2023-10-12)
 
 ### Feature
