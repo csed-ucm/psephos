@@ -19,4 +19,4 @@
 
 - [Polling API Swagger ReDoc](https://api.unipoll.cc/redoc)
 
-- [Postman Documentation](https://documenter.getpostman.com/view/19614303/2s9YJezMkF)
+- [Postman Documentation](https://documenter.getpostman.com/view/19614303/2s9YR6ZDRA)
