@@ -261,26 +261,29 @@ async def test_get_group_members(client_test: AsyncClient):
 
 async def test_get_policy(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Getting list of member permissions in group [GET /groups/{group.id}/policy]")
+    colored_dbg.test_info("Getting list of member permissions in group [GET /groups/{group.id}/policies]")
     group = groups[0]
     active_user = accounts[0]
 
     # Check permission of the user who created the group
-    response = await client_test.get(f"/groups/{group.id}/policy",
+    response = await client_test.get(f"/groups/{group.id}/policies",
+                                     params={"account_id": str(active_user.id)},
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
+    policy = response["policies"][0]
     # Creator of the group should have all permissions
-    assert response["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")  # type: ignore
+    assert policy["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")  # type: ignore
 
     # Check permission of the rest of the members
     students = accounts[1:10]
     for account in students:
-        response = await client_test.get(f"/groups/{group.id}/policy",
+        response = await client_test.get(f"/groups/{group.id}/policies",
                                          params={"account_id": account.id},  # type: ignore
                                          headers={"Authorization": f"Bearer {active_user.token}"})
         response = response.json()
-        assert response["permissions"] == Permissions.GROUP_BASIC_PERMISSIONS.name.split("|")  # type: ignore
+        policy = response["policies"][0]
+        assert policy["permissions"] == Permissions.GROUP_BASIC_PERMISSIONS.name.split("|")  # type: ignore
     colored_dbg.test_success("All members have the correct permissions")
 
 
@@ -342,27 +345,18 @@ async def test_permissions(client_test: AsyncClient):
                                  headers=headers)
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    # # Try to get group list
-    # res = await client_test.get(f"/groups/{group.id}/groups", headers=headers)
-    # assert res.status_code == status.HTTP_403_FORBIDDEN
-
-    # # Try to create group
-    # res = await client_test.post(f"/groups/{group.id}/groups",
-    #                              json={"name": "New group", "description": "New description"},
-    #                              headers=headers)
-    # assert res.status_code == status.HTTP_403_FORBIDDEN
-
     # Try to delete members from group
     res = await client_test.delete(f"/groups/{group.id}/members/{accounts[2].id}",
                                    headers=headers)
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
     # Try to get group permissions
-    res = await client_test.get(f"/groups/{group.id}/policy", headers=headers)
+    res = await client_test.get(f"/groups/{group.id}/policies", headers=headers)
     assert res.status_code == status.HTTP_200_OK
+    policy = res.json()["policies"][0]
 
     # Try to set group permissions
-    res = await client_test.put(f"/groups/{group.id}/policy",
+    res = await client_test.put(f"/groups/{group.id}/policies/{policy['id']}",
                                 json={"permissions": Permissions.GROUP_BASIC_PERMISSIONS.name.split("|")},
                                 headers=headers)
     assert res.status_code == status.HTTP_403_FORBIDDEN
@@ -374,35 +368,45 @@ async def test_permissions(client_test: AsyncClient):
 
 async def test_set_permissions(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Setting permissions of group members [PUT /groups/{group.id}/policy]")
+    colored_dbg.test_info("Setting permissions of group members [PUT /groups/{group.id}/policies/{policy.id}]")
     active_user = accounts[0]
     group = groups[0]
 
+    # Get policy of another member
+    response = await client_test.get(f"/groups/{group.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
+                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    policy = response["policies"][0]
+
     # Update policy of another member
-    response = await client_test.put(f"/groups/{group.id}/policy?",
-                                     json={"account_id": accounts[1].id,
-                                           "permissions": Permissions.GROUP_ALL_PERMISSIONS.name.split("|")},
+    response = await client_test.put(f"/groups/{group.id}/policies/{policy['id']}",
+                                     json={"permissions": Permissions.GROUP_ALL_PERMISSIONS.name.split("|")},
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert response["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
 
     # Check permissions
-    response = await client_test.get(f"/groups/{group.id}/policy?account_id={accounts[1].id}",
+    response = await client_test.get(f"/groups/{group.id}/policies?account_id={accounts[1].id}",
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
+    policy = response["policies"][0]
+    assert policy["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
 
     # Now the member should be able to get their policy information
     await test_1_accounts.test_login(client_test, accounts[1])  # Login the active_user
     colored_dbg.test_success("Signed in under {} {} ({})".format(
         accounts[1].first_name, accounts[1].last_name, accounts[1].email))
-    response = await client_test.get(f"/groups/{group.id}/policy",
+    response = await client_test.get(f"/groups/{group.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
                                      headers={"Authorization": f"Bearer {accounts[1].token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
+    policy = response["policies"][0]
+    assert policy["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
 
     colored_dbg.test_success("All members have the correct permissions")
 

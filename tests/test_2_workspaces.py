@@ -242,25 +242,30 @@ async def test_get_workspace_members(client_test: AsyncClient):
 
 async def test_get_permissions(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Getting list of member permissions in workspace [GET /workspaces/{workspace.id}/policy]")
+    colored_dbg.test_info("Getting list of member permissions in workspace" +
+                          "[GET /workspaces/{workspace.id}/policies?account_id={account_id}]")
     workspace = workspaces[0]
     active_user = accounts[0]
 
     # Check permission of the user who created the workspace
-    response = await client_test.get(f"/workspaces/{workspace.id}/policy",
-                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    response = await client_test.get(f"/workspaces/{workspace.id}/policies",
+                                     headers={"Authorization": f"Bearer {active_user.token}"},
+                                     params={"account_id": str(active_user.id)})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     # Creator of the workspace should have all permissions
-    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")  # type: ignore
+
+    policy = response['policies'][0]
+    assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")  # type: ignore
 
     # Check permission of the rest of the members
     for i in range(1, len(accounts)):
-        response = await client_test.get(f"/workspaces/{workspace.id}/policy",
+        response = await client_test.get(f"/workspaces/{workspace.id}/policies",
                                          params={"account_id": accounts[i].id},  # type: ignore
                                          headers={"Authorization": f"Bearer {active_user.token}"})
         response = response.json()
-        assert response["permissions"] == Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")  # type: ignore
+        policy = response['policies'][0]
+        assert policy["permissions"] == Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")  # type: ignore
     colored_dbg.test_success("All members have the correct permissions")
 
 
@@ -340,12 +345,13 @@ async def test_permissions(client_test: AsyncClient):
     assert res.status_code == status.HTTP_403_FORBIDDEN
 
     # Try to get workspace permissions
-    res = await client_test.get(f"/workspaces/{workspace.id}/policy", headers=headers)
+    res = await client_test.get(f"/workspaces/{workspace.id}/policies", headers=headers)
     # assert res.status_code == status.HTTP_403_FORBIDDEN
     assert res.status_code == status.HTTP_200_OK
+    policy = res.json()["policies"][0]
 
-    # Try to set workspace permissions
-    res = await client_test.put(f"/workspaces/{workspace.id}/policy",
+    # # Try to set workspace permissions
+    res = await client_test.put(f"/workspaces/{workspace.id}/policies/{policy['id']}",
                                 json={"permissions": Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")},
                                 headers=headers)
     assert res.status_code == status.HTTP_403_FORBIDDEN
@@ -357,32 +363,42 @@ async def test_permissions(client_test: AsyncClient):
 
 async def test_set_permissions(client_test: AsyncClient):
     print("\n")
-    colored_dbg.test_info("Setting permissions of workspace members [PUT /workspaces/{workspace.id}/policy]")
+    colored_dbg.test_info("Setting permissions of members [PUT /workspaces/{workspace.id}/policy/{policy_id}]")
     active_user = accounts[0]
     workspace = workspaces[0]
 
+    # Get policy of another member
+    response = await client_test.get(f"/workspaces/{workspace.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
+                                     headers={"Authorization": f"Bearer {active_user.token}"})
+    assert response.status_code == status.HTTP_200_OK
+    response = response.json()
+    policy = response["policies"][0]
+
     # Update policy of another member
-    response = await client_test.put(f"/workspaces/{workspace.id}/policy?",
-                                     json={"account_id": accounts[1].id,
-                                           "permissions": Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")},
+    response = await client_test.put(f"/workspaces/{workspace.id}/policies/{policy['id']}",
+                                     json={"permissions": Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")},
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
 
     # Check permissions
-    response = await client_test.get(f"/workspaces/{workspace.id}/policy?account_id={accounts[1].id}",
+    response = await client_test.get(f"/workspaces/{workspace.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
+    policy = response["policies"][0]
+    assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
 
     # Now the member should be able to get their policy information
-    response = await client_test.get(f"/workspaces/{workspace.id}/policy",
+    response = await client_test.get(f"/workspaces/{workspace.id}/policies",
                                      headers={"Authorization": f"Bearer {accounts[1].token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    assert response["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
+    policy = response["policies"][0]
+    assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
 
     colored_dbg.test_success("All members have the correct permissions")
 
