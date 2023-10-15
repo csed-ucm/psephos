@@ -2,6 +2,27 @@
 
 
 
+## v0.11.2 (2023-10-15)
+
+### Fix
+
+* fix: Fixed routes to get/update policies
+
+Updated Policy endpoints in Workspace and Group routes: Added account_id query parameter to GET resource/{resource_id}/policies, deleted GET resource/{resource_id}/policy, changed PUT resource/{resource_id}/policy to resource/{resource_id}/policies/{policy_id} and removed all the conditions inside ([`3404c17`](https://github.com/unipoll/api/commit/3404c17c670c693db5898512364bce1954d074cd))
+
+### Test
+
+* test: Updated policies in workspace/group tests
+
+Updated tests to accomodate workspace/group route changes to get/update policies ([`b65dc01`](https://github.com/unipoll/api/commit/b65dc018971d3f4a1a87811069cd2ba5ea10e10d))
+
+### Unknown
+
+* Merge pull request #74 from unipoll/development
+
+Updated get/update policies routes ([`6a950e6`](https://github.com/unipoll/api/commit/6a950e649a72cb07502114002449a22e4a0649fe))
+
+
 ## v0.11.1 (2023-10-13)
 
 ### Ci
