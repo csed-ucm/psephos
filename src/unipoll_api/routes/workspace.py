@@ -6,7 +6,6 @@ from unipoll_api import actions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Account, Workspace, ResourceID, Policy
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
-from unipoll_api import AccountManager
 
 # APIRouter creates path operations for user module
 open_router: APIRouter = APIRouter()
@@ -219,33 +218,21 @@ async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.ge
 @router.get("/{workspace_id}/policies",
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
-async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get_workspace)):
+async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get_workspace),
+                                 account_id: ResourceID = Query(None)):
     try:
-        return await actions.PolicyActions.get_policies(resource=workspace)
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=str(e))
-
-
-# List member's permissions in the workspace
-@router.get("/{workspace_id}/policy",
-            response_description="List member policy(permissions)",
-            response_model=PolicySchemas.PolicyOutput)
-async def get_workspace_policy(workspace: Workspace = Depends(Dependencies.get_workspace),
-                               account_id: ResourceID | None = None):
-    try:
-        account = await Dependencies.get_account(account_id) if account_id else AccountManager.active_user.get()
-        policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
-        policy = policy_list.policies[0]
-        return PolicySchemas.PolicyOutput(**policy.model_dump())
+        account = await Dependencies.get_account(account_id) if account_id else None
+        return await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
 # Set permissions for a member in a workspace
-@router.put("/{workspace_id}/policy",
+@router.put("/{workspace_id}/policies/{policy_id}",
             response_description="Updated permissions",
             response_model=PolicySchemas.PolicyOutput)
 async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_workspace),
+                               policy: Policy = Depends(Dependencies.get_policy),
                                permissions: PolicySchemas.PolicyInput = Body(...)):
     """
     Sets the permissions for a user in a workspace.
@@ -258,32 +245,6 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
     Returns the updated workspace.
     """
     try:
-        # return await WorkspaceActions.set_workspace_policy(workspace, permissions)
-        policy = None
-        if permissions.policy_id:
-            policy = await Dependencies.get_policy(permissions.policy_id)  # type: ignore
-        elif permissions.account_id:
-            account = await Dependencies.get_account(permissions.account_id)
-            # policy = await Policy.find_one(Policy.policy_holder.id == account.id, fetch_links=True)
-            # Temporarily workaround
-            policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
-            policy = policy_list.policies[0]  # type: ignore
-            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
-        elif permissions.group_id:
-            # Temporarily workaround
-            group = await Dependencies.get_group(permissions.group_id)
-            policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=group)
-            policy = policy_list.policies[0]  # type: ignore
-            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
-        else:
-            account = AccountManager.active_user.get()
-            policy_list = await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
-            policy = policy_list.policies[0]  # type: ignore
-            policy = await Policy.get(policy.id, fetch_links=True)  # type: ignore
-
-        if not policy:
-            raise APIException(404, "Policy not found 404")
-
         return await actions.PolicyActions.update_policy(policy, new_permissions=permissions.permissions)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
