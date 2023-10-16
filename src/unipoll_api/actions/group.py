@@ -63,7 +63,7 @@ async def create_group(workspace: Workspace,
     await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
 
     # Create a policy for the new group
-    await workspace.add_policy(new_group, Permissions.GROUP_BASIC_PERMISSIONS, False)
+    await workspace.add_policy(new_group, Permissions.WORKSPACE_BASIC_PERMISSIONS, False)
     workspace.groups.append(new_group)  # type: ignore
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
