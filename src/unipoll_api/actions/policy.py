@@ -53,7 +53,7 @@ async def get_policies(policy_holder: Account | Group | None = None,
 
 async def get_policy(policy: Policy, permission_check: bool = True) -> PolicySchemas.PolicyShort:
     # Get the parent resource of the policy
-    parent_resource = await policy.get_parent_recource(fetch_links=True)
+    parent_resource = await policy.get_parent_resource(fetch_links=True)
     await check_permissions(parent_resource, "get_policies", permission_check)
 
     # Get the policy holder
@@ -75,7 +75,7 @@ async def update_policy(policy: Policy,
                         new_permissions: list[str],
                         check_permissions: bool = True) -> PolicySchemas.PolicyOutput:
 
-    parent_resource = await policy.get_parent_recource(fetch_links=True)
+    parent_resource = await policy.get_parent_resource(fetch_links=True)
 
     # Check if the user has the required permissions to update the policy
     await Permissions.check_permissions(parent_resource, "update_policies", check_permissions)

@@ -33,7 +33,8 @@ class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
 class Resource(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     resource_type: Literal["workspace", "group", "poll"]
-    name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
+    name: str = Field(
+        title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
     policies: list[Link["Policy"]] = []
 
@@ -101,7 +102,9 @@ class Workspace(Resource):
         for i, member in enumerate(self.members):
             if account.id == member.id:  # type: ignore
                 self.members.remove(member)
-                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                # type: ignore
+                Debug.info(
+                    f"Removed member {member.id} from {self.resource_type} {self.id}")
                 break
 
         # Remove the policy from the workspace
@@ -128,7 +131,8 @@ class Group(Resource):
     async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
         if account not in self.workspace.members:  # type: ignore
             from unipoll_api.exceptions import WorkspaceExceptions
-            raise WorkspaceExceptions.UserNotMember(self.workspace, account)  # type: ignore
+            raise WorkspaceExceptions.UserNotMember(
+                self.workspace, account)  # type: ignore
 
         # Add the account to the group
         self.members.append(account)  # type: ignore
@@ -143,7 +147,9 @@ class Group(Resource):
         for i, member in enumerate(self.members):
             if account.id == member.id:  # type: ignore
                 self.members.remove(member)
-                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                # type: ignore
+                Debug.info(
+                    f"Removed member {member.id} from {self.resource_type} {self.id}")
                 break
 
         # Remove the policy from the group
@@ -171,12 +177,13 @@ class Policy(Document):
     policy_holder: Link["Group"] | Link["Account"]
     permissions: int
 
-    async def get_parent_recource(self, fetch_links: bool = False) -> Workspace | Group | Poll:
+    async def get_parent_resource(self, fetch_links: bool = False) -> Workspace | Group | Poll:
         from unipoll_api.exceptions.resource import ResourceNotFound
         parent = await eval(self.parent_resource.ref.collection).get(self.parent_resource.ref.id,
                                                                      fetch_links=fetch_links)
         if not parent:
-            ResourceNotFound(self.parent_resource.ref.collection, self.parent_resource.ref.id)
+            ResourceNotFound(self.parent_resource.ref.collection,
+                             self.parent_resource.ref.id)
         return parent
 
     async def get_policy_holder(self, fetch_links: bool = False) -> Group | Account:
