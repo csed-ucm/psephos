@@ -52,9 +52,16 @@ class Resource(Document):
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
 
-    async def remove_policy(self, member: "Group | Account", save: bool = True) -> None:
+    async def remove_policy(self, policy: "Policy", save: bool = True) -> None:
+        for i, p in enumerate(self.policies):
+            if policy.id == p.ref.id:
+                self.policies.remove(p)
+                if save:
+                    await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+
+    async def remove_member_policy(self, member: "Group | Account", save: bool = True) -> None:
         for policy in self.policies:
-            if policy.policy_holder.id == member.id:  # type: ignore
+            if policy.policy_holder.ref.id == member.id:  # type: ignore
                 self.policies.remove(policy)
                 if save:
                     await self.save(link_rule=WriteRules.WRITE)  # type: ignore
@@ -98,13 +105,13 @@ class Workspace(Resource):
                 break
 
         # Remove the policy from the workspace
-        await self.remove_policy(account, save=False)  # type: ignore
+        await self.remove_member_policy(account, save=False)  # type: ignore
 
         # Remove the member from all groups in the workspace
         group: Group
         for group in self.groups:  # type: ignore
             await group.remove_member(account, save=False)
-            await group.remove_policy(account, save=False)
+            await group.remove_member_policy(account, save=False)
             await Group.save(group, link_rule=WriteRules.WRITE)
 
         if save:
@@ -140,7 +147,7 @@ class Group(Resource):
                 break
 
         # Remove the policy from the group
-        await self.remove_policy(account, save=False)  # type: ignore
+        await self.remove_member_policy(account, save=False)  # type: ignore
 
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
