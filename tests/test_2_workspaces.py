@@ -394,6 +394,7 @@ async def test_set_permissions(client_test: AsyncClient):
 
     # Now the member should be able to get their policy information
     response = await client_test.get(f"/workspaces/{workspace.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
                                      headers={"Authorization": f"Bearer {accounts[1].token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
