@@ -1,7 +1,7 @@
 from unipoll_api import AccountManager
 from unipoll_api.documents import Account, Workspace, Group, Policy, Resource
 from unipoll_api.schemas import MemberSchemas, PolicySchemas
-from unipoll_api.exceptions import PolicyExceptions, ResourceExceptions
+from unipoll_api.exceptions import ResourceExceptions
 from unipoll_api.utils import Permissions
 from unipoll_api.utils.permissions import check_permissions
 
@@ -51,24 +51,23 @@ async def get_policies(policy_holder: Account | Group | None = None,
     return PolicySchemas.PolicyList(policies=policy_list)
 
 
-# @check_permissions(resource=policy.parent_resource, required_permissions="get_policy", permission_check=True)
 async def get_policy(policy: Policy, permission_check: bool = True) -> PolicySchemas.PolicyShort:
-    await policy.parent_resource.fetch_all_links()  # type: ignore
-    await check_permissions(policy.parent_resource, "get_policies", permission_check)
+    # Get the parent resource of the policy
+    parent_resource = await policy.get_parent_resource(fetch_links=True)
+    await check_permissions(parent_resource, "get_policies", permission_check)
 
-    # Convert policy_holder link to Member object
-    ph_type = policy.policy_holder_type
-    ph_ref = policy.policy_holder.ref.id
-    policy_holder = await Account.get(ph_ref) if ph_type == "account" else await Group.get(ph_ref)
-    if not policy_holder:
-        raise PolicyExceptions.PolicyHolderNotFound(ph_ref)
-    policy_holder = MemberSchemas.Member(**policy_holder.model_dump())  # type: ignore
-    resource_type: str = policy.parent_resource.resource_type  # type: ignore
-    PermissionType = eval("Permissions." + resource_type.capitalize() + "Permissions")
-    permissions = PermissionType(policy.permissions).name.split('|')  # type: ignore
+    # Get the policy holder
+    policy_holder = await policy.get_policy_holder()
+    member = MemberSchemas.Member(**policy_holder.model_dump())
+
+    # Get the permissions based on the resource type and convert it to a list of strings
+    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
+    permissions = permission_type(policy.permissions).name.split('|')  # type: ignore
+
+    # Return the policy
     return PolicySchemas.PolicyShort(id=policy.id,
                                      policy_holder_type=policy.policy_holder_type,
-                                     policy_holder=policy_holder.model_dump(exclude_unset=True),
+                                     policy_holder=member.model_dump(exclude_unset=True),
                                      permissions=permissions)
 
 
@@ -76,30 +75,25 @@ async def update_policy(policy: Policy,
                         new_permissions: list[str],
                         check_permissions: bool = True) -> PolicySchemas.PolicyOutput:
 
-    # BUG: since the parent_resource is of multiple types, it is not fetched properly, so we fetch it manually
-    await policy.parent_resource.fetch_all_links()  # type: ignore
+    parent_resource = await policy.get_parent_resource(fetch_links=True)
 
     # Check if the user has the required permissions to update the policy
-    await Permissions.check_permissions(policy.parent_resource, "update_policies", check_permissions)
-    ResourcePermissions = eval(
-        "Permissions." + policy.parent_resource.resource_type.capitalize() + "Permissions")  # type: ignore
+    await Permissions.check_permissions(parent_resource, "update_policies", check_permissions)
+    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
 
     # Calculate the new permission value from request
     new_permission_value = 0
     for i in new_permissions:
         try:
-            new_permission_value += ResourcePermissions[i].value  # type: ignore
+            new_permission_value += permission_type[i].value
         except KeyError:
             raise ResourceExceptions.InvalidPermission(i)
     # Update permissions
-    policy.permissions = ResourcePermissions(new_permission_value)  # type: ignore
+    policy.permissions = permission_type(new_permission_value)
     await Policy.save(policy)
 
-    if policy.policy_holder_type == "account":
-        policy_holder = await Account.get(policy.policy_holder.ref.id)
-    elif policy.policy_holder_type == "group":
-        policy_holder = await Group.get(policy.policy_holder.ref.id)
+    policy_holder = await policy.get_policy_holder()
 
     return PolicySchemas.PolicyOutput(
-        permissions=ResourcePermissions(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=policy_holder.model_dump())  # type: ignore
+        permissions=permission_type(policy.permissions).name.split('|'),  # type: ignore
+        policy_holder=policy_holder.model_dump())

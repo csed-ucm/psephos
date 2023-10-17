@@ -1,3 +1,4 @@
+from bson import DBRef
 from unipoll_api import AccountManager
 from unipoll_api import actions
 from unipoll_api.documents import Workspace, Account, Policy
@@ -92,11 +93,16 @@ async def update_workspace(workspace: Workspace,
 async def delete_workspace(workspace: Workspace, check_permissions: bool = True):
     await Permissions.check_permissions(workspace, "delete_workspace", check_permissions)
 
+    workspace_ref = DBRef(collection="Workspace", id=workspace.id)
+
     # Delete all groups in the workspace
     for group in workspace.groups:
         await actions.GroupActions.delete_group(group)  # type: ignore
 
+    # TODO: Delete all polls in the workspace
+
+    # Delete Workspace
     await Workspace.delete(workspace)
     if await workspace.get(workspace.id):
         raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    await Policy.find({"parent_resource._id": workspace.id}, fetch_links=True).delete()
+    await Policy.find({"parent_resource": workspace_ref}).delete()

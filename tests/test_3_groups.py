@@ -389,7 +389,8 @@ async def test_set_permissions(client_test: AsyncClient):
     assert response["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
 
     # Check permissions
-    response = await client_test.get(f"/groups/{group.id}/policies?account_id={accounts[1].id}",
+    response = await client_test.get(f"/groups/{group.id}/policies",
+                                     params={"account_id": str(accounts[1].id)},
                                      headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
