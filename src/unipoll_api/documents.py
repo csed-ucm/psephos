@@ -103,8 +103,7 @@ class Workspace(Resource):
             if account.id == member.id:  # type: ignore
                 self.members.remove(member)
                 # type: ignore
-                Debug.info(
-                    f"Removed member {member.id} from {self.resource_type} {self.id}")
+                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the workspace
@@ -149,7 +148,7 @@ class Group(Resource):
                 self.members.remove(member)
                 # type: ignore
                 Debug.info(
-                    f"Removed member {member.id} from {self.resource_type} {self.id}")
+                    f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the group
@@ -179,8 +178,9 @@ class Policy(Document):
 
     async def get_parent_resource(self, fetch_links: bool = False) -> Workspace | Group | Poll:
         from unipoll_api.exceptions.resource import ResourceNotFound
-        parent = await eval(self.parent_resource.ref.collection).get(self.parent_resource.ref.id,
-                                                                     fetch_links=fetch_links)
+        collection = eval(self.parent_resource.ref.collection)
+        parent: Workspace | Group | Poll = await collection.get(self.parent_resource.ref.id,
+                                                                fetch_links=fetch_links)
         if not parent:
             ResourceNotFound(self.parent_resource.ref.collection,
                              self.parent_resource.ref.id)
@@ -188,8 +188,9 @@ class Policy(Document):
 
     async def get_policy_holder(self, fetch_links: bool = False) -> Group | Account:
         from unipoll_api.exceptions.policy import PolicyHolderNotFound
-        policy_holder = await eval(self.policy_holder.ref.collection).get(self.policy_holder.ref.id,
-                                                                          fetch_links=fetch_links)
+        collection = eval(self.policy_holder.ref.collection)
+        policy_holder: Group | Account = await collection.get(self.policy_holder.ref.id,
+                                                              fetch_links=fetch_links)
         if not policy_holder:
             PolicyHolderNotFound(self.policy_holder.ref.id)
         return policy_holder

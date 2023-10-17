@@ -58,16 +58,16 @@ async def get_policy(policy: Policy, permission_check: bool = True) -> PolicySch
 
     # Get the policy holder
     policy_holder = await policy.get_policy_holder()
-    policy_holder = MemberSchemas.Member(**policy_holder.model_dump())
+    member = MemberSchemas.Member(**policy_holder.model_dump())
 
     # Get the permissions based on the resource type and convert it to a list of strings
     permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
-    permissions = permission_type(policy.permissions).name.split('|')
+    permissions = permission_type(policy.permissions).name.split('|')  # type: ignore
 
     # Return the policy
     return PolicySchemas.PolicyShort(id=policy.id,
                                      policy_holder_type=policy.policy_holder_type,
-                                     policy_holder=policy_holder.model_dump(exclude_unset=True),
+                                     policy_holder=member.model_dump(exclude_unset=True),
                                      permissions=permissions)
 
 
@@ -95,5 +95,5 @@ async def update_policy(policy: Policy,
     policy_holder = await policy.get_policy_holder()
 
     return PolicySchemas.PolicyOutput(
-        permissions=permission_type(policy.permissions).name.split('|'),
+        permissions=permission_type(policy.permissions).name.split('|'),  # type: ignore
         policy_holder=policy_holder.model_dump())
