@@ -2,6 +2,65 @@
 
 
 
+## v0.11.3 (2023-10-17)
+
+### Ci
+
+* ci: Added job to trigger docs workflow
+
+On release, the api release workflow will trigger workflow in the docs repository with event update_api_changelog ([`c68bd48`](https://github.com/unipoll/api/commit/c68bd48bc94afd34c8cdafd285e9d000356c09b6))
+
+### Fix
+
+* fix: Fixed delete actions of Workspace/Group
+
+Due to changed to policies, upon deletion of Workspace/Group the related Policies could not be fetched and therefore deleted. Using DBref, the updated actions find and delete policies without even fetching them first ([`764cd57`](https://github.com/unipoll/api/commit/764cd5757f89668c92d653388bd58e4b458718c9))
+
+* fix: Updated policy as a workaround for #75
+
+A workaround for issue #75, the `parent_resource` was converted to the **Link** type, which is manually populated using create_link() method. Since Beanie cannot/struggles to fetch links of multiple types, two new class methods were added: get_parent_resource() uses link reference to find and return parent document(Workspace/Group/Poll), and get_policy_holder() finds and returns document of policy holder(Account/Group). ([`7ac8180`](https://github.com/unipoll/api/commit/7ac8180b6e634ff2dfe5003f196506d0f02f7184))
+
+* fix: Changed the default permission for new group
+
+Replaced GROUP_BASIC_PERMISSIONS with WORKSPACE_BASIC_PERMISSIONS ([`ff0a65f`](https://github.com/unipoll/api/commit/ff0a65fd820072e7f215ee1001cd096e6151fde0))
+
+### Refactor
+
+* refactor: Fixed mypy issues ([`8cb2916`](https://github.com/unipoll/api/commit/8cb291613123b10f87e5a232fdca16094e434bdf))
+
+* refactor: Changed remove_policy method
+
+Renamed remove_policy to remove_member_policy, and added new remove_policy method which takes policy as an argument ([`ddfe048`](https://github.com/unipoll/api/commit/ddfe048f5840b176c2982c0e3d4269c7de8bcf87))
+
+### Style
+
+* style: Fixed resource spelling ([`6ffa917`](https://github.com/unipoll/api/commit/6ffa917c8d5b2c0d046ee25ce549356424cfbb20))
+
+### Test
+
+* test: Styling
+
+Provided query parameter using params argument instead of passing as a part of url string ([`d4f986c`](https://github.com/unipoll/api/commit/d4f986c484f9eb8fa23924c5d98cb48e9d55b754))
+
+* test: Fixed set_permission_test
+
+Added account_id parameter when checking account permissions ([`b68a4b1`](https://github.com/unipoll/api/commit/b68a4b15c8c32fa1f86fe85e0ca46d2d5c81073e))
+
+### Unknown
+
+* Merge pull request #76 from unipoll/development
+
+Policies Patch ([`697406d`](https://github.com/unipoll/api/commit/697406dd17ed22a8fd4f1e2c7ac2220ad8accf1f))
+
+* Untrack .vscode ([`3885ec1`](https://github.com/unipoll/api/commit/3885ec19f7f8ccc352cb83d9ce2ea4853874ef0a))
+
+* Update README.md
+
+Updated Postman Documentation link ([`9d17121`](https://github.com/unipoll/api/commit/9d17121eee9038c23b5452f60ecbe2b0d8582944))
+
+* Merge branch &#39;main&#39; of github.com:unipoll/API ([`f60d80b`](https://github.com/unipoll/api/commit/f60d80b3e95c2ebb44aa3922e3f277b1694cf60a))
+
+
 ## v0.11.2 (2023-10-15)
 
 ### Fix
