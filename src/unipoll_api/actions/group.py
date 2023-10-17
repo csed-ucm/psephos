@@ -1,4 +1,7 @@
-from beanie import DeleteRules, WriteRules
+from beanie import WriteRules
+from beanie.operators import Or
+from bson import DBRef
+
 from unipoll_api import AccountManager
 from unipoll_api.documents import Policy, Workspace, Group, Account
 from unipoll_api import actions
@@ -138,16 +141,20 @@ async def delete_group(group: Group,
     except WorkspaceExceptions.UserNotAuthorized:
         await Permissions.check_permissions(group, "delete_group", check_permissions)
 
-    # await group.fetch_link(Group.workspace)
     workspace: Workspace = group.workspace  # type: ignore
-    workspace.groups = [
-        g for g in workspace.groups if g.id != group.id]  # type: ignore
-    workspace.policies = [
-        p for p in workspace.policies if p.policy_holder.ref.id != group.id]  # type: ignore
-    await Workspace.save(workspace, link_rule=DeleteRules.DELETE_LINKS)
+    group_ref = DBRef(collection="Group", id=group.id)
+
+    # Remove the group from group list in the workspace
+    workspace.groups = [g for g in workspace.groups if g.id != group.id]  # type: ignore
+    await Workspace.replace(workspace)
+
+    # Delete the group
     await Group.delete(group)
-
     if await Group.get(group.id):
-        return GroupExceptions.ErrorWhileDeleting(group.id)
+        raise GroupExceptions.ErrorWhileDeleting(group.id)
 
-    await Policy.find({"parent_resource._id": group.id}, fetch_links=True).delete()
+    # Delete group policy in the workspace and all policies stored in the group
+    # MongoDB style: {"$or": [{"parent_resource": ref}, {"policy_holder": ref}]}
+    # Beanie style: Or(Policy.parent_resource == ref, Policy.policy_holder == ref)
+    await Policy.find(Or(Policy.parent_resource == group_ref,          # type: ignore
+                         Policy.policy_holder == group_ref)).delete()  # type: ignore
