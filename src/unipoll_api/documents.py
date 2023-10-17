@@ -45,7 +45,7 @@ class Resource(Document):
         new_policy = Policy(policy_holder_type='account',
                             policy_holder=(await create_link(member)),
                             permissions=permissions,
-                            parent_resource=self)  # type: ignore
+                            parent_resource=(await create_link(self)))  # type: ignore
 
         # Add the policy to the group
         self.policies.append(new_policy)  # type: ignore
@@ -147,17 +147,9 @@ class Group(Resource):
         return True
 
 
-class Policy(Document):
-    id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    parent_resource: BackLink["Workspace"] | BackLink["Group"] | BackLink["Poll"] = Field(original_field="policies")
-    policy_holder_type: Literal["account", "group"]
-    policy_holder: Link["Group"] | Link["Account"]
-    permissions: int
-
-
 class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    workspace: BackLink["Workspace"] = Field(original_field="polls")
+    workspace: Link[Workspace]
     resource_type: Literal["poll"] = "poll"
     public: bool
     published: bool
@@ -165,9 +157,25 @@ class Poll(Resource):
     policies: list[Link["Policy"]]
 
 
-# NOTE: model_rebuild is used to avoid circular imports
-Resource.model_rebuild()
-Workspace.model_rebuild()
-Group.model_rebuild()
-Policy.model_rebuild()
-Poll.model_rebuild()
+class Policy(Document):
+    id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    parent_resource: Link[Workspace] | Link[Group] | Link[Poll]
+    policy_holder_type: Literal["account", "group"]
+    policy_holder: Link["Group"] | Link["Account"]
+    permissions: int
+
+    async def get_parent_recource(self, fetch_links: bool = False) -> Workspace | Group | Poll:
+        from unipoll_api.exceptions.resource import ResourceNotFound
+        parent = await eval(self.parent_resource.ref.collection).get(self.parent_resource.ref.id,
+                                                                     fetch_links=fetch_links)
+        if not parent:
+            ResourceNotFound(self.parent_resource.ref.collection, self.parent_resource.ref.id)
+        return parent
+
+    async def get_policy_holder(self, fetch_links: bool = False) -> Group | Account:
+        from unipoll_api.exceptions.policy import PolicyHolderNotFound
+        policy_holder = await eval(self.policy_holder.ref.collection).get(self.policy_holder.ref.id,
+                                                                          fetch_links=fetch_links)
+        if not policy_holder:
+            PolicyHolderNotFound(self.policy_holder.ref.id)
+        return policy_holder
