@@ -11,7 +11,7 @@
 
 ### Useful Links:
 
-- [Developer Wiki](https://https://github.com/unipoll/api/wiki) 
+- [Developer Wiki](https://github.com/unipoll/api/wiki) 
 
 - [Polling API](https://api.unipoll.cc/)
 
