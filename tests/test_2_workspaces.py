@@ -247,7 +247,7 @@ async def test_get_workspace_members(client_test: AsyncClient):
     colored_dbg.test_success("The workspace returned the correct list of members")
 
 
-async def test_get_permissions(client_test: AsyncClient):
+async def test_get_user_policy(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Getting list of member permissions in workspace" +
                           "[GET /workspaces/{workspace.id}/policies?account_id={account_id}]")
@@ -260,15 +260,15 @@ async def test_get_permissions(client_test: AsyncClient):
                                      params={"account_id": str(active_user.id)})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
-    # Creator of the workspace should have all permissions
-
     policy = response['policies'][0]
+
+    # Creator of the workspace should have all permissions
     assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")  # type: ignore
 
     # Check permission of the rest of the members
-    for i in range(1, len(accounts)):
+    for account in accounts[1:]:
         response = await client_test.get(f"/workspaces/{workspace.id}/policies",
-                                         params={"account_id": accounts[i].id},  # type: ignore
+                                         params={"account_id": str(account.id)},
                                          headers={"Authorization": f"Bearer {active_user.token}"})
         response = response.json()
         policy = response['policies'][0]
@@ -289,8 +289,9 @@ async def test_get_all_policies(client_test: AsyncClient):
     response = response.json()
     assert len(response["policies"]) == len(accounts)
     # temp_acc_list = [acc.model_dump(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
+    temp_acc_list = [acc.id for acc in accounts]
     for policy in response["policies"]:
-        # assert policy["policy_holder"] in temp_acc_list
+        assert policy["policy_holder"]["account_id"] in temp_acc_list
         if policy["policy_holder"]["account_id"] == accounts[0].id:
             assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
         else:
