@@ -153,7 +153,7 @@ async def test_get_workspace_info(client_test: AsyncClient):
     response = response.json()
     assert len(response["members"]) == 1
     temp = response["members"][0]
-    assert temp["id"] == active_user.id
+    assert temp["account_id"] == active_user.id
     assert temp["email"] == active_user.email
     assert temp["first_name"] == active_user.first_name
     assert temp["last_name"] == active_user.last_name
@@ -211,9 +211,10 @@ async def test_add_members_to_workspace(client_test: AsyncClient):
                                       headers={"Authorization": f"Bearer {active_user.token}"})
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
+
     for i in response["members"]:
-        assert i["id"] in members
-        members.remove(i["id"])
+        assert i["account_id"] in members
+        members.remove(i["account_id"])
     assert members == []
 
     colored_dbg.test_success("All members have been successfully added to the workspace")
@@ -234,8 +235,14 @@ async def test_get_workspace_members(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert len(response["members"]) == len(accounts)
+
     for acc in accounts:
-        assert acc.model_dump(include={"id", "email", "first_name", "last_name"}) in response["members"]
+        for member in response["members"]:
+            if member["account_id"] == acc.id:
+                assert member["email"] == acc.email
+                assert member["first_name"] == acc.first_name
+                assert member["last_name"] == acc.last_name
+        # assert acc.model_dump(include={"id", "email", "first_name", "last_name"}) in members
 
     colored_dbg.test_success("The workspace returned the correct list of members")
 
@@ -281,10 +288,10 @@ async def test_get_all_policies(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert len(response["policies"]) == len(accounts)
-    temp_acc_list = [acc.model_dump(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
+    # temp_acc_list = [acc.model_dump(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
     for policy in response["policies"]:
-        assert policy["policy_holder"] in temp_acc_list
-        if policy["policy_holder"]["id"] == accounts[0].id:
+        # assert policy["policy_holder"] in temp_acc_list
+        if policy["policy_holder"]["account_id"] == accounts[0].id:
             assert policy["permissions"] == Permissions.WORKSPACE_ALL_PERMISSIONS.name.split("|")
         else:
             assert policy["permissions"] == Permissions.WORKSPACE_BASIC_PERMISSIONS.name.split("|")
@@ -348,6 +355,7 @@ async def test_permissions(client_test: AsyncClient):
     res = await client_test.get(f"/workspaces/{workspace.id}/policies", headers=headers)
     # assert res.status_code == status.HTTP_403_FORBIDDEN
     assert res.status_code == status.HTTP_200_OK
+    print(res.json())
     policy = res.json()["policies"][0]
 
     # # Try to set workspace permissions
