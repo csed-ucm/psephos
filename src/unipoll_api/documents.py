@@ -33,6 +33,7 @@ class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
 class Resource(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     resource_type: Literal["workspace", "group", "poll"]
+    document_type: Literal["resource"] = "resource"
     name: str = Field(
         title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
@@ -71,6 +72,7 @@ class Resource(Document):
 
 class Account(BeanieBaseUser, Document):  # type: ignore
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    document_type: Literal["account"] = "account"
     first_name: str = Field(
         default_factory=str,
         max_length=20,
@@ -85,18 +87,21 @@ class Account(BeanieBaseUser, Document):  # type: ignore
 
 class Workspace(Resource):
     resource_type: Literal["workspace"] = "workspace"
+    document_type: Literal["workspace"] = "workspace"
     members: list[Link["Member"]] = []
     groups: list[Link["Group"]] = []
     polls: list[Link["Poll"]] = []
 
-    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
+    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Member":
         new_member = await Member(account=account, resource=(await create_link(self))).create()  # type: ignore
         new_policy = await self.add_policy(new_member, permissions, save=False)  # type: ignore
+        new_member.policies.append(new_policy)  # type: ignore
+
         self.members.append(new_member)  # type: ignore
 
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
-        return account
+        return new_member
 
     async def remove_member(self, member: "Member", save: bool = True) -> bool:
         # Remove the account from the workspace
@@ -125,24 +130,24 @@ class Workspace(Resource):
 
 class Group(Resource):
     resource_type: Literal["group"] = "group"
+    document_type: Literal["group"] = "group"
     workspace: BackLink[Workspace] = Field(original_field="groups")
     members: list[Link["Member"]] = []
     groups: list[Link["Group"]] = []
 
-    async def add_member(self, account: "Account", permissions, save: bool = True) -> "Account":
-        if account.id not in [i.id for i in self.workspace.members]:  # type: ignore
+    async def add_member(self, member: "Member", permissions, save: bool = True) -> "Member":
+        if member.workspace.id != self.workspace.id:
             from unipoll_api.exceptions import WorkspaceExceptions
             raise WorkspaceExceptions.UserNotMember(
-                self.workspace, account)  # type: ignore
+                self.workspace, member)  # type: ignore
 
-        new_member = await Member(account=account, resource=(await create_link(self))).create()  # type: ignore
         # Add the account to the group
-        self.members.append(new_member)  # type: ignore
+        self.members.append(member)  # type: ignore
         # Create a policy for the new member
-        await self.add_policy(new_member, permissions, save=False)  # type: ignore
+        await self.add_policy(member, permissions, save=False)  # type: ignore
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
-        return account
+        return member
 
     async def remove_member(self, account, save: bool = True) -> bool:
         # Remove the account from the group
@@ -164,6 +169,7 @@ class Group(Resource):
 
 class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    document_type: Literal["poll"] = "poll"
     workspace: Link[Workspace]
     resource_type: Literal["poll"] = "poll"
     public: bool
@@ -174,6 +180,7 @@ class Poll(Resource):
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    document_type: Literal["policy"] = "policy"
     parent_resource: Link[Workspace] | Link[Group] | Link[Poll]
     policy_holder_type: Literal["member", "group"]
     policy_holder: Link["Group"] | Link["Member"]
@@ -201,6 +208,8 @@ class Policy(Document):
 
 class Member(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
+    document_type: Literal["member"] = "member"
     account: Link[Account]
-    resource: Link[Workspace] | Link[Group] | Link[Poll]
-    # policy: Link[Policy]
+    workspace: BackLink[Workspace] = Field(original_field="members")
+    groups: list[BackLink[Group]] = Field(original_field="members")
+    policies: list[Link[Policy]] = []

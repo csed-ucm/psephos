@@ -8,6 +8,7 @@ from unipoll_api import actions
 from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
 from unipoll_api.exceptions import GroupExceptions, WorkspaceExceptions, ResourceExceptions
 from unipoll_api.utils import Permissions
+from unipoll_api.dependencies import get_member
 
 
 # Get list of groups
@@ -22,7 +23,7 @@ async def get_groups(workspace: Workspace | None = None,
     if workspace:
         search_filter['workspace._id'] = workspace.id  # type: ignore
     if account:
-        search_filter['members._id'] = account.id  # type: ignore
+        search_filter['members.account._id'] = account.id  # type: ignore
     search_result = await Group.find(search_filter, fetch_links=True).to_list()
 
     # TODO: Rewrite to iterate over list of workspaces
@@ -47,6 +48,10 @@ async def create_group(workspace: Workspace,
     await Permissions.check_permissions(workspace, "add_groups", check_permissions)
     account = AccountManager.active_user.get()
 
+
+
+    member = await get_member(account, workspace)
+
     # Check if group name is unique
     group: Group  # For type hinting, until Link type is supported
     for group in workspace.groups:  # type: ignore
@@ -63,7 +68,7 @@ async def create_group(workspace: Workspace,
         raise GroupExceptions.ErrorWhileCreating(new_group)
 
     # Add the account to group member list
-    await new_group.add_member(account, Permissions.GROUP_ALL_PERMISSIONS)
+    await new_group.add_member(member, Permissions.GROUP_ALL_PERMISSIONS)
 
     # Create a policy for the new group
     await workspace.add_policy(new_group, Permissions.WORKSPACE_BASIC_PERMISSIONS, False)

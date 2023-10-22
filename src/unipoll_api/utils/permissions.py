@@ -92,7 +92,7 @@ def compare_permissions(user_permission: Permissions, required_permission: Permi
 
 
 # TODO: Rename
-async def get_all_permissions(resource, account) -> Permissions:
+async def get_all_permissions(resource, member) -> Permissions:
     permission_sum = 0
     # print("resource: ", resource.name)
     # await resource.fetch_link("policies")
@@ -100,13 +100,13 @@ async def get_all_permissions(resource, account) -> Permissions:
     # Get policies for the resource
     for policy in resource.policies:
         # Get policy for the user
-        if policy.policy_holder_type == "account":
+        if policy.policy_holder_type == "member":
             policy_holder_id = None
             if hasattr(policy.policy_holder, "id"):     # In case the policy_holder is an Account Document
                 policy_holder_id = policy.policy_holder.id
             elif hasattr(policy.policy_holder, "ref"):  # In case the policy_holder is a Link
                 policy_holder_id = policy.policy_holder.ref.id
-            if policy_holder_id == account.id:
+            if policy_holder_id == member.id:
                 # print("Found policy for user")
                 permission_sum |= policy.permissions
                 # print("User permissions: ", policy.permissions)
@@ -123,7 +123,7 @@ async def get_all_permissions(resource, account) -> Permissions:
             if group:
                 await group.fetch_link("policies")
                 # print("Checking group: ", group.name)
-                if await get_all_permissions(group, account):
+                if await get_all_permissions(group, member):
                     permission_sum |= policy.permissions
                     # print("Group permissions: ", policy.permissions)
 
@@ -149,7 +149,12 @@ def convert_string_to_permission(resource_type: str, string: str):
 async def check_permissions(resource, required_permissions: str | list[str] | None = None, permission_check=True):
     if permission_check and required_permissions:
         account = unipoll_api.AccountManager.active_user.get()           # Get the active user
-        user_permissions = await get_all_permissions(resource, account)  # Get the user permissions
+
+        from unipoll_api.dependencies import get_member
+        member = await get_member(account, resource)
+
+        user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
+        
         if isinstance(required_permissions, str):  # If only one permission is required
             required_permissions = [required_permissions]
 
