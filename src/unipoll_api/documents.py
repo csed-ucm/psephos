@@ -49,9 +49,9 @@ class Resource(Document):
     def create_group(self) -> None:
         Debug.info(f'New {self.get_document_type()} "{self.id}" has been created')
 
-    async def add_policy(self, member: "Group | Member", permissions, save: bool = True) -> "Policy":
-        new_policy = Policy(policy_holder_type='member',
-                            policy_holder=(await create_link(member)),
+    async def add_policy(self, policy_holder: "Group | Member", permissions, save: bool = True) -> "Policy":
+        new_policy = Policy(policy_holder_type=policy_holder.get_document_type(),  # type: ignore
+                            policy_holder=(await create_link(policy_holder)),
                             permissions=permissions,
                             parent_resource=(await create_link(self)))  # type: ignore
 
@@ -180,7 +180,7 @@ class Poll(Resource):
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     parent_resource: Link[Workspace] | Link[Group] | Link[Poll]
-    policy_holder_type: Literal["member", "group"]
+    policy_holder_type: Literal["Member", "Group"]
     policy_holder: Link["Group"] | Link["Member"]
     permissions: int
 
