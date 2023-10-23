@@ -2,6 +2,59 @@
 
 
 
+## v0.12.0 (2023-10-23)
+
+### Feature
+
+* feat: Added Member document ([`8199204`](https://github.com/unipoll/api/commit/8199204906b16fe2ca4170b68c2ad004ad571d62))
+
+### Fix
+
+* fix: Removed PathOperations import ([`1cbfc93`](https://github.com/unipoll/api/commit/1cbfc9382cf38609a6a7572ca84db150cf7a0b0c))
+
+* fix: Updated group request to get policies
+
+Updated route get_group_policies to find member using dependency and use it for get_policies action ([`c16a981`](https://github.com/unipoll/api/commit/c16a9812a3f54be8f3f3387ad38bbd71d4b88098))
+
+### Refactor
+
+* refactor: Fixed mypy issues ([`d6ec5b8`](https://github.com/unipoll/api/commit/d6ec5b83b7a0e14f31b28995b94e13f4b9b4f785))
+
+* refactor: Added get_document_type classmethod
+
+Added classmethod to Beanie Document get_document_type which returns Document type as a string ([`cfeebf7`](https://github.com/unipoll/api/commit/cfeebf7efacac5e46699baa1948c625e9fd23804))
+
+* refactor: Updated to accommodate member update ([`73e4017`](https://github.com/unipoll/api/commit/73e4017d3ce140bceba55ee43e779b657cd68fcd))
+
+* refactor: Deleted obsolete path_operations file
+
+This file included functions to read actions for building permissions and check permissions based on operation_id, both functions are not obsolete ([`095c103`](https://github.com/unipoll/api/commit/095c103f2aed2f9a66dfdcdf3de861d931185dc1))
+
+### Style
+
+* style: flake8 ([`b08c103`](https://github.com/unipoll/api/commit/b08c103344bbfc86c77544c2c4ba62f76d9a0124))
+
+* style: Updated comments
+
+Changed account to member ([`d29213a`](https://github.com/unipoll/api/commit/d29213a82dc473d081811e382982099cb4fb41a7))
+
+### Test
+
+* test: Updated tests to use new member document ([`8f7f352`](https://github.com/unipoll/api/commit/8f7f35244d09fe7159bf2f50c8980d32b1805e98))
+
+* test: Updated workspace tests due to member update ([`af1dd25`](https://github.com/unipoll/api/commit/af1dd25c9d1d74a8d32e7158361a0d557dfdc949))
+
+### Unknown
+
+* Merge pull request #77 from unipoll/members
+
+Updated Members ([`102afff`](https://github.com/unipoll/api/commit/102afff96b4df76433c4d497540f168084359040))
+
+* Update README.md
+
+Fixed link to developer wiki ([`a521dac`](https://github.com/unipoll/api/commit/a521dac3b95e70bc2a75c63eb5b961d89fb13df6))
+
+
 ## v0.11.3 (2023-10-17)
 
 ### Ci
