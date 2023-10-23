@@ -100,7 +100,7 @@ async def get_all_permissions(resource, member) -> Permissions:
     # Get policies for the resource
     for policy in resource.policies:
         # Get policy for the user
-        if policy.policy_holder_type == "member":
+        if policy.policy_holder_type == "Member":
             policy_holder_id = None
             if hasattr(policy.policy_holder, "id"):     # In case the policy_holder is an Account Document
                 policy_holder_id = policy.policy_holder.id
@@ -111,7 +111,7 @@ async def get_all_permissions(resource, member) -> Permissions:
                 permission_sum |= policy.permissions
                 # print("User permissions: ", policy.permissions)
         # If there is a group that user is a member of, add group permissions to the user permissions
-        elif policy.policy_holder_type == "group":
+        elif policy.policy_holder_type == "Group":
             # Try to fetch the group
             group = await policy.policy_holder.fetch()
             # BUG: sometimes links are not fetched properly

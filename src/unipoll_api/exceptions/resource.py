@@ -1,5 +1,5 @@
 from fastapi import status
-from unipoll_api.documents import Account, Resource, ResourceID
+from unipoll_api.documents import Account, Resource, ResourceID, Member
 from unipoll_api.utils import Debug
 
 
@@ -81,6 +81,6 @@ class AddingExistingMember(APIException):
 
 # Error while removing member
 class ErrorWhileRemovingMember(APIException):
-    def __init__(self, resource: Resource, user: Account):
+    def __init__(self, resource: Resource, member: Member):
         super().__init__(code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                         detail=f"Error while removing user {user.email} from {resource.name} #{resource.id}")
+                         detail=f"Error while removing user {member.id} from {resource.name} #{resource.id}")
