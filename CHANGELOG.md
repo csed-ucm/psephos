@@ -2,6 +2,27 @@
 
 
 
+## v0.12.1 (2023-10-23)
+
+### Fix
+
+* fix: Changed policy_holder_type for new policies
+
+The policy_holder_type was set to &#34;member&#34;, updated the method to use type of policy_holder via get_document_type() method ([`6f595ff`](https://github.com/unipoll/api/commit/6f595ffb31be2b257ce477a91348499317e303e5))
+
+### Refactor
+
+* refactor: Changed argument type in ErrorWhileRemovingMember
+
+Changed user: Account to member: Member ([`4301c36`](https://github.com/unipoll/api/commit/4301c36e258d206ff5ae94a2f69b87cc5636a4fa))
+
+### Unknown
+
+* Merge pull request #78 from unipoll/members
+
+Patch Policies ([`a5100c0`](https://github.com/unipoll/api/commit/a5100c0b39265c63744b39fcb3e37f95c7ae9941))
+
+
 ## v0.12.0 (2023-10-23)
 
 ### Feature

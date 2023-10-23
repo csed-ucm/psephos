@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unipoll-api"
-version = "0.12.0"
+version = "0.12.1"
 description = "Unipoll API"
 authors = [{email = "help@unipoll.cc"}, {name = "University Polling"}]
 readme = "README.md"
