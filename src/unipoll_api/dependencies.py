@@ -1,9 +1,9 @@
 from typing import Annotated
 from functools import wraps
-from bson import DBRef
+# from bson import DBRef
 from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
-from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member, Resource
+from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
 
 

@@ -1,6 +1,6 @@
 from typing import Literal, Any, Optional
 from pydantic import ConfigDict, BaseModel, Field
-from unipoll_api.documents import ResourceID, Account, Group, Member
+from unipoll_api.documents import ResourceID, Group, Member
 
 
 class Policy(BaseModel):

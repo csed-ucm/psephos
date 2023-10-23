@@ -48,8 +48,6 @@ async def create_group(workspace: Workspace,
     await Permissions.check_permissions(workspace, "add_groups", check_permissions)
     account = AccountManager.active_user.get()
 
-
-
     member = await get_member(account, workspace)
 
     # Check if group name is unique
