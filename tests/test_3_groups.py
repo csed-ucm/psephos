@@ -71,8 +71,8 @@ async def test_prepare_workspace(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     for i in response["members"]:
-        assert i["id"] in members
-        members.remove(i["id"])
+        assert i["account_id"] in members
+        members.remove(i["account_id"])
     assert members == []
 
 
@@ -177,7 +177,7 @@ async def test_get_group_info(client_test: AsyncClient):
     response = response.json()
     assert len(response["members"]) == 1
     temp = response["members"][0]
-    assert temp["id"] == active_user.id
+    assert temp["account_id"] == active_user.id
     assert temp["email"] == active_user.email
     assert temp["first_name"] == active_user.first_name
     assert temp["last_name"] == active_user.last_name
@@ -234,8 +234,8 @@ async def test_add_members_to_group(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     for i in response["members"]:
-        assert i["id"] in members
-        members.remove(i["id"])
+        assert i["account_id"] in members
+        members.remove(i["account_id"])
     assert members == []
 
     colored_dbg.test_success("All members have been successfully added to the group")
@@ -254,12 +254,17 @@ async def test_get_group_members(client_test: AsyncClient):
     response = response.json()
     assert len(response["members"]) == 10  # 10 accounts were added to the group
     for acc in accounts[:10]:
-        assert acc.model_dump(include={"id", "email", "first_name", "last_name"}) in response["members"]
+        for member in response["members"]:
+            if member["account_id"] == acc.id:
+                assert member["email"] == acc.email
+                assert member["first_name"] == acc.first_name
+                assert member["last_name"] == acc.last_name
+        # assert acc.model_dump(include={"id", "email", "first_name", "last_name"}) in response["members"]
 
     colored_dbg.test_success("The group returned the correct list of members")
 
 
-async def test_get_policy(client_test: AsyncClient):
+async def test_get_user_policy(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Getting list of member permissions in group [GET /groups/{group.id}/policies]")
     group = groups[0]
@@ -272,14 +277,14 @@ async def test_get_policy(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     policy = response["policies"][0]
+    
     # Creator of the group should have all permissions
     assert policy["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")  # type: ignore
 
     # Check permission of the rest of the members
-    students = accounts[1:10]
-    for account in students:
+    for account in accounts[1:10]:
         response = await client_test.get(f"/groups/{group.id}/policies",
-                                         params={"account_id": account.id},  # type: ignore
+                                         params={"account_id": str(account.id)},
                                          headers={"Authorization": f"Bearer {active_user.token}"})
         response = response.json()
         policy = response["policies"][0]
@@ -299,10 +304,10 @@ async def test_get_all_policies(client_test: AsyncClient):
     assert response.status_code == status.HTTP_200_OK
     response = response.json()
     assert len(response["policies"]) == 10  # 10 accounts were added to the group
-    temp_acc_list = [acc.model_dump(include={"id", "email", "first_name", "last_name"}) for acc in accounts]
+    temp_acc_list = [acc.id for acc in accounts]
     for policy in response["policies"]:
-        assert policy["policy_holder"] in temp_acc_list
-        if policy["policy_holder"]["id"] == accounts[0].id:
+        assert policy["policy_holder"]["account_id"] in temp_acc_list
+        if policy["policy_holder"]["account_id"] == accounts[0].id:
             assert policy["permissions"] == Permissions.GROUP_ALL_PERMISSIONS.name.split("|")
         else:
             assert policy["permissions"] == Permissions.GROUP_BASIC_PERMISSIONS.name.split("|")

@@ -57,9 +57,9 @@ PollPermissions = IntFlag("PollPermissions", ['get_poll',
 
 
 PermissionTypes = {
-    "workspace": WorkspacePermissions,
-    "group": GroupPermissions,
-    "poll": PollPermissions
+    "Workspace": WorkspacePermissions,
+    "Group": GroupPermissions,
+    "Poll": PollPermissions
 }
 
 
@@ -92,7 +92,7 @@ def compare_permissions(user_permission: Permissions, required_permission: Permi
 
 
 # TODO: Rename
-async def get_all_permissions(resource, account) -> Permissions:
+async def get_all_permissions(resource, member) -> Permissions:
     permission_sum = 0
     # print("resource: ", resource.name)
     # await resource.fetch_link("policies")
@@ -100,18 +100,18 @@ async def get_all_permissions(resource, account) -> Permissions:
     # Get policies for the resource
     for policy in resource.policies:
         # Get policy for the user
-        if policy.policy_holder_type == "account":
+        if policy.policy_holder_type == "Member":
             policy_holder_id = None
             if hasattr(policy.policy_holder, "id"):     # In case the policy_holder is an Account Document
                 policy_holder_id = policy.policy_holder.id
             elif hasattr(policy.policy_holder, "ref"):  # In case the policy_holder is a Link
                 policy_holder_id = policy.policy_holder.ref.id
-            if policy_holder_id == account.id:
+            if policy_holder_id == member.id:
                 # print("Found policy for user")
                 permission_sum |= policy.permissions
                 # print("User permissions: ", policy.permissions)
         # If there is a group that user is a member of, add group permissions to the user permissions
-        elif policy.policy_holder_type == "group":
+        elif policy.policy_holder_type == "Group":
             # Try to fetch the group
             group = await policy.policy_holder.fetch()
             # BUG: sometimes links are not fetched properly
@@ -123,7 +123,7 @@ async def get_all_permissions(resource, account) -> Permissions:
             if group:
                 await group.fetch_link("policies")
                 # print("Checking group: ", group.name)
-                if await get_all_permissions(group, account):
+                if await get_all_permissions(group, member):
                     permission_sum |= policy.permissions
                     # print("Group permissions: ", policy.permissions)
 
@@ -132,12 +132,12 @@ async def get_all_permissions(resource, account) -> Permissions:
 
 def convert_string_to_permission(resource_type: str, string: str):
     try:
-        # return eval(resource_type.capitalize() + "Permissions")[string]
-        if resource_type == "workspace":  # type: ignore
+        # return eval(get_document_type().capitalize() + "Permissions")[string]
+        if resource_type == "Workspace":  # type: ignore
             req_permissions = WorkspacePermissions[string]  # type: ignore
-        elif resource_type == "group":  # type: ignore
+        elif resource_type == "Group":  # type: ignore
             req_permissions = GroupPermissions[string]  # type: ignore
-        elif resource_type == "poll":  # type: ignore
+        elif resource_type == "Poll":  # type: ignore
             req_permissions = PollPermissions[string]  # type: ignore
         else:
             raise ValueError("Unknown resource type")
@@ -149,15 +149,19 @@ def convert_string_to_permission(resource_type: str, string: str):
 async def check_permissions(resource, required_permissions: str | list[str] | None = None, permission_check=True):
     if permission_check and required_permissions:
         account = unipoll_api.AccountManager.active_user.get()           # Get the active user
-        user_permissions = await get_all_permissions(resource, account)  # Get the user permissions
+
+        from unipoll_api.dependencies import get_member
+        member = await get_member(account, resource)
+
+        user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
         if isinstance(required_permissions, str):  # If only one permission is required
             required_permissions = [required_permissions]
 
-        permissions_list = [convert_string_to_permission(resource.resource_type, p) for p in required_permissions]
-        required_permission = eval(resource.resource_type.capitalize() + "Permissions")(sum(permissions_list))
+        permissions_list = [convert_string_to_permission(resource.get_document_type(), p) for p in required_permissions]
+        required_permission = eval(resource.get_document_type() + "Permissions")(sum(permissions_list))
 
         if not compare_permissions(user_permissions, required_permission):
             actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
             raise exceptions.ResourceExceptions.UserNotAuthorized(account,
-                                                                  f"{resource.resource_type} {resource.id}",
+                                                                  f"{resource.get_document_type()} {resource.id}",
                                                                   actions)

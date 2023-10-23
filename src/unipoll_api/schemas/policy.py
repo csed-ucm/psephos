@@ -1,18 +1,18 @@
 from typing import Literal, Any, Optional
 from pydantic import ConfigDict, BaseModel, Field
-from unipoll_api.documents import ResourceID, Account, Group
+from unipoll_api.documents import ResourceID, Group, Member
 
 
 class Policy(BaseModel):
     id: ResourceID
-    policy_holder_type: Literal["account", "group"]
-    policy_holder: Account | Group
+    policy_holder_type: Literal["Member", "Group"]
+    policy_holder: Member | Group
     permissions: int
 
 
 class PolicyShort(BaseModel):
     id: ResourceID
-    policy_holder_type: Literal["account", "group"]
+    policy_holder_type: Literal["Member", "Group"]
     policy_holder: Any = None
     permissions: Optional[Any] = None
 
@@ -101,17 +101,17 @@ class AddPermission(BaseModel):
         "example": {
             "permissions": [
                 {
-                    "type": "account",
+                    "type": "Account",
                     "id": "1a2b3c4d5e6f7g8h9i0j",
                     "permission": "eff",
                 },
                 {
-                    "type": "account",
+                    "type": "Account",
                     "id": "2a3b4c5d6e7f8g9h0i1j",
                     "permission": "a3",
                 },
                 {
-                    "type": "group",
+                    "type": "Group",
                     "id": "3a4b5c6d7e8f9g0h1i2j",
                     "permission": "1",
                 },

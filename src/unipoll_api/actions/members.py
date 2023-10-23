@@ -1,20 +1,24 @@
 from beanie import WriteRules
 from beanie.operators import In
-from unipoll_api.documents import Account, Group, ResourceID, Workspace
+from unipoll_api.documents import Account, Group, ResourceID, Workspace, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import MemberSchemas
 # from unipoll_api import AccountManager
 from unipoll_api.exceptions import ResourceExceptions
+from unipoll_api.dependencies import get_member
 
 
 async def get_members(resource: Workspace | Group, check_permissions: bool = True) -> MemberSchemas.MemberList:
     # Check if the user has permission to add members
     await Permissions.check_permissions(resource, "get_members", check_permissions)
 
-    def build_member_scheme(member: Account) -> MemberSchemas.Member:
-        member_data = member.model_dump(include={'id', 'first_name', 'last_name', 'email'})
-        member_scheme = MemberSchemas.Member(**member_data)
-        return member_scheme
+    def build_member_scheme(member: Member) -> MemberSchemas.Member:
+        account: Account = member.account  # type: ignore
+        return MemberSchemas.Member(id=member.id,
+                                    account_id=account.id,
+                                    first_name=account.first_name,
+                                    last_name=account.last_name,
+                                    email=account.email)
 
     member_list = [build_member_scheme(member) for member in resource.members]  # type: ignore
     # Return the list of members
@@ -36,29 +40,46 @@ async def add_members(resource: Workspace | Group,
     account_list = await Account.find(In(Account.id, accounts)).to_list()
     # Add the accounts to the group member list with basic permissions
 
+    new_members = []
+
     for account in account_list:
-        default_permissions = eval("Permissions." + resource.resource_type.upper() + "_BASIC_PERMISSIONS")
-        await resource.add_member(account, default_permissions, save=False)
+        default_permissions = eval("Permissions." + resource.get_document_type().upper() + "_BASIC_PERMISSIONS")
+        if resource.get_document_type() == "Group":
+            member = await get_member(account, resource.workspace)  # type: ignore
+            new_member = await resource.add_member(member, default_permissions, save=False)
+            new_members.append(new_member)
+        elif resource.get_document_type() == "Workspace":
+            new_member = await resource.add_member(account, default_permissions, save=False)
+            new_members.append(new_member)
     await resource.save(link_rule=WriteRules.WRITE)  # type: ignore
 
+    member_list = []
+    for new_member in new_members:
+        account: Account = new_member.account  # type: ignore
+        member_list.append(MemberSchemas.Member(id=new_member.id,
+                                                account_id=account.id,
+                                                first_name=account.first_name,
+                                                last_name=account.last_name,
+                                                email=account.email))
+
     # Return the list of members added to the group
-    return MemberSchemas.MemberList(members=[MemberSchemas.Member(**account.model_dump()) for account in account_list])
+    return MemberSchemas.MemberList(members=member_list)
 
 
 # Remove a member from a workspace
 async def remove_member(resource: Workspace | Group,
-                        account: Account,
+                        member: Member,
                         permission_check: bool = True) -> MemberSchemas.MemberList:
     # Check if the user has permission to add members
     await Permissions.check_permissions(resource, "remove_members", permission_check)
 
     # Check if the account is a member of the workspace
-    if account.id not in [ResourceID(member.id) for member in resource.members]:  # type: ignore
-        raise ResourceExceptions.UserNotMember(resource, account)
+    if member.id not in [ResourceID(member.id) for member in resource.members]:  # type: ignore
+        raise ResourceExceptions.ResourceNotFound("Member", member.id)
 
     # Remove the account from the workspace/group
-    if await resource.remove_member(account):
+    if await resource.remove_member(member):
         # Return the list of members added to the group
         member_list = [MemberSchemas.Member(**account.model_dump()) for account in resource.members]  # type: ignore
         return MemberSchemas.MemberList(members=member_list)
-    raise ResourceExceptions.ErrorWhileRemovingMember(resource, account)
+    raise ResourceExceptions.ErrorWhileRemovingMember(resource, member)

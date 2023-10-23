@@ -1,23 +1,25 @@
 from bson import DBRef
 from unipoll_api import AccountManager
 from unipoll_api import actions
-from unipoll_api.documents import Workspace, Account, Policy
+from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
+# from unipoll_api.dependencies import get_member
 
 
 # Get a list of workspaces where the account is a owner/member
 async def get_workspaces(account: Account | None = None) -> WorkspaceSchemas.WorkspaceList:
-    account = AccountManager.active_user.get()
+    account = AccountManager.active_user.get() if not account else account
     workspace_list = []
 
-    search_result = await Workspace.find(Workspace.members.id == account.id).to_list()  # type: ignore
+    members = await Member.find(Member.account.id == account.id, fetch_links=True).to_list()
+    workspaces = [member.workspace for member in members]
 
     # Create a workspace list for output schema using the search results
-    for workspace in search_result:
+    for workspace in workspaces:
         workspace_list.append(WorkspaceSchemas.WorkspaceShort(
-            **workspace.model_dump(exclude={'members', 'groups', 'permissions'})))
+            **workspace.model_dump(exclude={'groups', 'permissions'})))
 
     return WorkspaceSchemas.WorkspaceList(workspaces=workspace_list)
 
@@ -71,14 +73,14 @@ async def update_workspace(workspace: Workspace,
     await Permissions.check_permissions(workspace, "update_workspace", check_permissions)
     save_changes = False
 
-    # Check if user suplied a name
+    # Check if user supplied a name
     if input_data.name and input_data.name != workspace.name:
         # Check if workspace name is unique
         if await Workspace.find_one({"name": input_data.name}) and workspace.name != input_data.name:
             raise WorkspaceExceptions.NonUniqueName(input_data.name)
         workspace.name = input_data.name  # Update the name
         save_changes = True
-    # Check if user suplied a description
+    # Check if user supplied a description
     if input_data.description and input_data.description != workspace.description:
         workspace.description = input_data.description  # Update the description
         save_changes = True
@@ -86,7 +88,7 @@ async def update_workspace(workspace: Workspace,
     if save_changes:
         await Workspace.save(workspace)
     # Return the updated workspace
-    return WorkspaceSchemas.Workspace(**workspace.model_dump())
+    return WorkspaceSchemas.Workspace(**workspace.model_dump(include={'id', 'name', 'description'}))
 
 
 # Delete a workspace

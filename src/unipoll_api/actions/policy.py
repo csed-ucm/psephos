@@ -1,9 +1,10 @@
 from unipoll_api import AccountManager
-from unipoll_api.documents import Account, Workspace, Group, Policy, Resource
-from unipoll_api.schemas import MemberSchemas, PolicySchemas
+from unipoll_api.documents import Account, Workspace, Group, Policy, Resource, Member
+from unipoll_api.schemas import MemberSchemas, PolicySchemas, GroupSchemas
 from unipoll_api.exceptions import ResourceExceptions
 from unipoll_api.utils import Permissions
 from unipoll_api.utils.permissions import check_permissions
+from unipoll_api.dependencies import get_member
 
 
 # Helper function to get policies from a resource
@@ -14,15 +15,17 @@ async def get_policies_from_resource(resource: Resource) -> list[Policy]:
         await check_permissions(resource, "get_policies")
         return resource.policies  # type: ignore
     except ResourceExceptions.UserNotAuthorized:
+        print("User not authorized")
         account = AccountManager.active_user.get()
+        member = await get_member(account, resource)
         for policy in resource.policies:
-            if policy.policy_holder.ref.id == account.id:  # type: ignore
+            if policy.policy_holder.ref.id == member.id:  # type: ignore
                 policies.append(policy)  # type: ignore
         return policies
 
 
 # Get all policies of a workspace
-async def get_policies(policy_holder: Account | Group | None = None,
+async def get_policies(policy_holder: Member | Group | None = None,
                        resource: Resource | None = None) -> PolicySchemas.PolicyList:
     policy_list = []
     policy: Policy
@@ -58,16 +61,28 @@ async def get_policy(policy: Policy, permission_check: bool = True) -> PolicySch
 
     # Get the policy holder
     policy_holder = await policy.get_policy_holder()
-    member = MemberSchemas.Member(**policy_holder.model_dump())
+    member, group = None, None
+    if policy_holder.get_document_type() == "Member":
+        await policy_holder.fetch_link("account")
+        account: Account = policy_holder.account  # type: ignore
+        member = MemberSchemas.Member(id=policy_holder.id,
+                                      account_id=account.id,
+                                      email=account.email,
+                                      first_name=account.first_name,
+                                      last_name=account.last_name)
+    elif policy_holder.get_document_type() == "Group":
+        group = GroupSchemas.Group(id=policy_holder.id,
+                                   name=policy_holder.name,
+                                   description=policy_holder.description)
 
     # Get the permissions based on the resource type and convert it to a list of strings
-    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
+    permission_type = Permissions.PermissionTypes[parent_resource.get_document_type()]
     permissions = permission_type(policy.permissions).name.split('|')  # type: ignore
 
     # Return the policy
     return PolicySchemas.PolicyShort(id=policy.id,
                                      policy_holder_type=policy.policy_holder_type,
-                                     policy_holder=member.model_dump(exclude_unset=True),
+                                     policy_holder=member or group,
                                      permissions=permissions)
 
 
@@ -79,7 +94,7 @@ async def update_policy(policy: Policy,
 
     # Check if the user has the required permissions to update the policy
     await Permissions.check_permissions(parent_resource, "update_policies", check_permissions)
-    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
+    permission_type = Permissions.PermissionTypes[parent_resource.get_document_type()]
 
     # Calculate the new permission value from request
     new_permission_value = 0
@@ -93,7 +108,19 @@ async def update_policy(policy: Policy,
     await Policy.save(policy)
 
     policy_holder = await policy.get_policy_holder()
+    member, group = None, None
+    if policy_holder.get_document_type() == "Member":
+        await policy_holder.fetch_link("account")
+        account: Account = policy_holder.account  # type: ignore
+        member = MemberSchemas.Member(id=policy_holder.id,
+                                      account_id=account.id,
+                                      email=account.email,
+                                      first_name=account.first_name,
+                                      last_name=account.last_name)
+    elif policy_holder.get_document_type() == "Group":
+        group = GroupSchemas.Group(id=policy_holder.id,
+                                   name=policy_holder.name,
+                                   description=policy_holder.description)
 
-    return PolicySchemas.PolicyOutput(
-        permissions=permission_type(policy.permissions).name.split('|'),  # type: ignore
-        policy_holder=policy_holder.model_dump())
+    return PolicySchemas.PolicyOutput(permissions=permission_type(policy.permissions).name.split('|'),  # type: ignore
+                                      policy_holder=member or group)

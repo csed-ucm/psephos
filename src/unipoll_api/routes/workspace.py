@@ -114,10 +114,12 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
 
 
 # Update a workspace with the given id
-@router.patch("/{workspace_id}", response_description="Updated workspace", response_model=WorkspaceSchemas.Workspace)
+@router.patch("/{workspace_id}",
+              response_description="Updated workspace",
+              response_model=WorkspaceSchemas.Workspace,
+              response_model_exclude_none=True)
 async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace),
-                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)
-                           ):
+                           input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)):
     """
     Updates the workspace with the given id.
     Query parameters:
@@ -222,7 +224,8 @@ async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get
                                  account_id: ResourceID = Query(None)):
     try:
         account = await Dependencies.get_account(account_id) if account_id else None
-        return await actions.PolicyActions.get_policies(resource=workspace, policy_holder=account)
+        member = await Dependencies.get_member(account, workspace) if account else None
+        return await actions.PolicyActions.get_policies(resource=workspace, policy_holder=member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 

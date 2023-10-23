@@ -6,11 +6,10 @@ from unipoll_api.documents import ResourceID
 # Schema for the response with basic member info
 class Member(BaseModel):
     id: ResourceID
+    account_id: Optional[ResourceID] = None
     email: Optional[EmailStr] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "id": "1a2b3c4d5e6f7g8h9i0j",
