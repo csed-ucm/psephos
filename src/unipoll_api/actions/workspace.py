@@ -5,15 +5,15 @@ from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
-from unipoll_api.dependencies import get_member
+# from unipoll_api.dependencies import get_member
 
 
 # Get a list of workspaces where the account is a owner/member
 async def get_workspaces(account: Account | None = None) -> WorkspaceSchemas.WorkspaceList:
-    account = AccountManager.active_user.get()
+    account = AccountManager.active_user.get() if not account else account
     workspace_list = []
 
-    members = await Member.find(Member.account.id == account.id, fetch_links=True).to_list()    
+    members = await Member.find(Member.account.id == account.id, fetch_links=True).to_list()
     workspaces = [member.workspace for member in members]
 
     # Create a workspace list for output schema using the search results

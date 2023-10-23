@@ -106,24 +106,24 @@ class Workspace(Resource):
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
         return new_member
 
-    async def remove_member(self, member: "Member", save: bool = True) -> bool:
+    async def remove_member(self, member_to_delete: "Member", save: bool = True) -> bool:
         # Remove the account from the workspace
-        for _member in self.members:
-            if _member.id == member.id:  # type: ignore
-                self.members.remove(_member)
-                await _member.delete()
+        for member in self.members:
+            if member.id == member_to_delete.id:  # type: ignore
+                self.members.remove(member)
+                await member.delete()  # type: ignore
                 # type: ignore
                 Debug.info(f"Removed member {member.id} from {self.get_document_type()} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the workspace
-        await self.remove_policy_by_holder(member, save=False)  # type: ignore
+        await self.remove_policy_by_holder(member_to_delete, save=False)  # type: ignore
 
         # Remove the member from all groups in the workspace
         group: Group
         for group in self.groups:  # type: ignore
-            await group.remove_member(member, save=False)
-            await group.remove_policy_by_holder(member, save=False)
+            await group.remove_member(member_to_delete, save=False)
+            await group.remove_policy_by_holder(member_to_delete, save=False)
             await Group.save(group, link_rule=WriteRules.WRITE)
 
         if save:

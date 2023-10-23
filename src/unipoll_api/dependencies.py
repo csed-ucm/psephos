@@ -30,14 +30,14 @@ async def get_account(account_id: ResourceID) -> Account:
     return account
 
 
-async def get_member(account: Account, resource: Resource) -> Member:
+async def get_member(account: Account, resource: Workspace | Group) -> Member:
     """
     Returns a member with the given id.
     """
 
     for member in resource.members:
-        if member.account.id == account.id:
-            return member
+        if member.account.id == account.id:  # type: ignore
+            return member  # type: ignore
     raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
 
 
