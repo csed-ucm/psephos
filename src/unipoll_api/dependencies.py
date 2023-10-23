@@ -1,8 +1,9 @@
 from typing import Annotated
 from functools import wraps
+# from bson import DBRef
 from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
-from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy
+from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
 
 
@@ -27,6 +28,17 @@ async def get_account(account_id: ResourceID) -> Account:
     if not account:
         raise Exceptions.AccountExceptions.AccountNotFound(account_id)
     return account
+
+
+async def get_member(account: Account, resource: Workspace | Group) -> Member:
+    """
+    Returns a member with the given id.
+    """
+
+    for member in resource.members:
+        if member.account.id == account.id:  # type: ignore
+            return member  # type: ignore
+    raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
 
 
 async def websocket_auth(websocket: WebSocket,

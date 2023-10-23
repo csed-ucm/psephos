@@ -15,6 +15,7 @@ documentModels = [
     Documents.AccessToken,
     Documents.Resource,
     Documents.Account,
+    Documents.Member,
     Documents.Group,
     Documents.Workspace,
     Documents.Policy,
