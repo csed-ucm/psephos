@@ -1,11 +1,19 @@
 # from typing import ForwardRef, NewType, TypeAlias, Optional
 from typing import Literal
 from bson import DBRef
-from beanie import BackLink, Document, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
+from beanie import Document as BeanieDocument
+from beanie import BackLink, WriteRules, after_event, Insert, Link, PydanticObjectId  # BackLink
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from unipoll_api.utils import colored_dbg as Debug
 from unipoll_api.utils.token_db import BeanieBaseAccessToken
+
+
+# Document
+class Document(BeanieDocument):
+    @classmethod
+    def get_document_type(cls) -> str:
+        return cls._document_settings.name  # type: ignore
 
 
 # Create a link to the Document model
@@ -32,8 +40,6 @@ class AccessToken(BeanieBaseAccessToken, Document):  # type: ignore
 
 class Resource(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    resource_type: Literal["workspace", "group", "poll"]
-    document_type: Literal["resource"] = "resource"
     name: str = Field(
         title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
@@ -41,7 +47,7 @@ class Resource(Document):
 
     @after_event(Insert)
     def create_group(self) -> None:
-        Debug.info(f'New {self.resource_type} "{self.id}" has been created')
+        Debug.info(f'New {self.get_document_type()} "{self.id}" has been created')
 
     async def add_policy(self, member: "Group | Member", permissions, save: bool = True) -> "Policy":
         new_policy = Policy(policy_holder_type='member',
@@ -72,7 +78,6 @@ class Resource(Document):
 
 class Account(BeanieBaseUser, Document):  # type: ignore
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    document_type: Literal["account"] = "account"
     first_name: str = Field(
         default_factory=str,
         max_length=20,
@@ -86,8 +91,6 @@ class Account(BeanieBaseUser, Document):  # type: ignore
 
 
 class Workspace(Resource):
-    resource_type: Literal["workspace"] = "workspace"
-    document_type: Literal["workspace"] = "workspace"
     members: list[Link["Member"]] = []
     groups: list[Link["Group"]] = []
     polls: list[Link["Poll"]] = []
@@ -110,7 +113,7 @@ class Workspace(Resource):
                 self.members.remove(_member)
                 await _member.delete()
                 # type: ignore
-                Debug.info(f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                Debug.info(f"Removed member {member.id} from {self.get_document_type()} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the workspace
@@ -129,14 +132,12 @@ class Workspace(Resource):
 
 
 class Group(Resource):
-    resource_type: Literal["group"] = "group"
-    document_type: Literal["group"] = "group"
     workspace: BackLink[Workspace] = Field(original_field="groups")
     members: list[Link["Member"]] = []
     groups: list[Link["Group"]] = []
 
     async def add_member(self, member: "Member", permissions, save: bool = True) -> "Member":
-        if member.workspace.id != self.workspace.id:
+        if member.workspace.id != self.workspace.id:  # type: ignore
             from unipoll_api.exceptions import WorkspaceExceptions
             raise WorkspaceExceptions.UserNotMember(
                 self.workspace, member)  # type: ignore
@@ -149,18 +150,18 @@ class Group(Resource):
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
         return member
 
-    async def remove_member(self, account, save: bool = True) -> bool:
+    async def remove_member(self, member: "Member", save: bool = True) -> bool:
         # Remove the account from the group
-        for i, member in enumerate(self.members):
-            if account.id == member.id:  # type: ignore
-                self.members.remove(member)
+        for _member in self.members:
+            if _member.id == member.id:  # type: ignore
+                self.members.remove(_member)
                 # type: ignore
                 Debug.info(
-                    f"Removed member {member.id} from {self.resource_type} {self.id}")  # type: ignore
+                    f"Removed member {member.id} from {self.get_document_type()} {self.id}")  # type: ignore
                 break
 
         # Remove the policy from the group
-        await self.remove_policy_by_holder(account, save=False)  # type: ignore
+        await self.remove_policy_by_holder(member, save=False)  # type: ignore
 
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
@@ -169,9 +170,7 @@ class Group(Resource):
 
 class Poll(Resource):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    document_type: Literal["poll"] = "poll"
     workspace: Link[Workspace]
-    resource_type: Literal["poll"] = "poll"
     public: bool
     published: bool
     questions: list
@@ -180,7 +179,6 @@ class Poll(Resource):
 
 class Policy(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    document_type: Literal["policy"] = "policy"
     parent_resource: Link[Workspace] | Link[Group] | Link[Poll]
     policy_holder_type: Literal["member", "group"]
     policy_holder: Link["Group"] | Link["Member"]
@@ -208,7 +206,6 @@ class Policy(Document):
 
 class Member(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    document_type: Literal["member"] = "member"
     account: Link[Account]
     workspace: BackLink[Workspace] = Field(original_field="members")
     groups: list[BackLink[Group]] = Field(original_field="members")

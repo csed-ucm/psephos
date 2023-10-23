@@ -57,9 +57,9 @@ PollPermissions = IntFlag("PollPermissions", ['get_poll',
 
 
 PermissionTypes = {
-    "workspace": WorkspacePermissions,
-    "group": GroupPermissions,
-    "poll": PollPermissions
+    "Workspace": WorkspacePermissions,
+    "Group": GroupPermissions,
+    "Poll": PollPermissions
 }
 
 
@@ -132,12 +132,12 @@ async def get_all_permissions(resource, member) -> Permissions:
 
 def convert_string_to_permission(resource_type: str, string: str):
     try:
-        # return eval(resource_type.capitalize() + "Permissions")[string]
-        if resource_type == "workspace":  # type: ignore
+        # return eval(get_document_type().capitalize() + "Permissions")[string]
+        if resource_type == "Workspace":  # type: ignore
             req_permissions = WorkspacePermissions[string]  # type: ignore
-        elif resource_type == "group":  # type: ignore
+        elif resource_type == "Group":  # type: ignore
             req_permissions = GroupPermissions[string]  # type: ignore
-        elif resource_type == "poll":  # type: ignore
+        elif resource_type == "Poll":  # type: ignore
             req_permissions = PollPermissions[string]  # type: ignore
         else:
             raise ValueError("Unknown resource type")
@@ -154,15 +154,14 @@ async def check_permissions(resource, required_permissions: str | list[str] | No
         member = await get_member(account, resource)
 
         user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
-        
         if isinstance(required_permissions, str):  # If only one permission is required
             required_permissions = [required_permissions]
 
-        permissions_list = [convert_string_to_permission(resource.resource_type, p) for p in required_permissions]
-        required_permission = eval(resource.resource_type.capitalize() + "Permissions")(sum(permissions_list))
+        permissions_list = [convert_string_to_permission(resource.get_document_type(), p) for p in required_permissions]
+        required_permission = eval(resource.get_document_type() + "Permissions")(sum(permissions_list))
 
         if not compare_permissions(user_permissions, required_permission):
             actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
             raise exceptions.ResourceExceptions.UserNotAuthorized(account,
-                                                                  f"{resource.resource_type} {resource.id}",
+                                                                  f"{resource.get_document_type()} {resource.id}",
                                                                   actions)

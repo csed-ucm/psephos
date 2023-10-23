@@ -62,20 +62,21 @@ async def get_policy(policy: Policy, permission_check: bool = True) -> PolicySch
     # Get the policy holder
     policy_holder = await policy.get_policy_holder()
     member, group = None, None
-    if policy_holder.document_type == "member":
+    if policy_holder.get_document_type() == "Member":
         await policy_holder.fetch_link("account")
+        account: Account = policy_holder.account  # type: ignore
         member = MemberSchemas.Member(id=policy_holder.id,
-                                      account_id=policy_holder.account.id,
-                                      email=policy_holder.account.email,
-                                      first_name=policy_holder.account.first_name,
-                                      last_name=policy_holder.account.last_name)
-    elif policy_holder.document_type == "group":
+                                      account_id=account.id,
+                                      email=account.email,
+                                      first_name=account.first_name,
+                                      last_name=account.last_name)
+    elif policy_holder.get_document_type() == "Group":
         group = GroupSchemas.Group(id=policy_holder.id,
                                    name=policy_holder.name,
                                    description=policy_holder.description)
 
     # Get the permissions based on the resource type and convert it to a list of strings
-    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
+    permission_type = Permissions.PermissionTypes[parent_resource.get_document_type()]
     permissions = permission_type(policy.permissions).name.split('|')  # type: ignore
 
     # Return the policy
@@ -93,7 +94,7 @@ async def update_policy(policy: Policy,
 
     # Check if the user has the required permissions to update the policy
     await Permissions.check_permissions(parent_resource, "update_policies", check_permissions)
-    permission_type = Permissions.PermissionTypes[parent_resource.resource_type]
+    permission_type = Permissions.PermissionTypes[parent_resource.get_document_type()]
 
     # Calculate the new permission value from request
     new_permission_value = 0
@@ -107,17 +108,19 @@ async def update_policy(policy: Policy,
     await Policy.save(policy)
 
     policy_holder = await policy.get_policy_holder()
-    if policy_holder.document_type == "member":
+    member, group = None, None
+    if policy_holder.get_document_type() == "Member":
         await policy_holder.fetch_link("account")
-        policy_holder_schema = MemberSchemas.Member(id=policy_holder.id,
-                                                    account_id=policy_holder.account.id,
-                                                    email=policy_holder.account.email,
-                                                    first_name=policy_holder.account.first_name,
-                                                    last_name=policy_holder.account.last_name)
-    elif policy_holder.document_type == "group":
-        policy_holder_schema = GroupSchemas.Group(id=policy_holder.id,
-                                                  name=policy_holder.name,
-                                                  description=policy_holder.description)
+        account: Account = policy_holder.account  # type: ignore
+        member = MemberSchemas.Member(id=policy_holder.id,
+                                      account_id=account.id,
+                                      email=account.email,
+                                      first_name=account.first_name,
+                                      last_name=account.last_name)
+    elif policy_holder.get_document_type() == "Group":
+        group = GroupSchemas.Group(id=policy_holder.id,
+                                   name=policy_holder.name,
+                                   description=policy_holder.description)
 
     return PolicySchemas.PolicyOutput(permissions=permission_type(policy.permissions).name.split('|'),  # type: ignore
-                                      policy_holder=policy_holder_schema)
+                                      policy_holder=member or group)
