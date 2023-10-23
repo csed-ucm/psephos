@@ -141,7 +141,7 @@ class Group(Resource):
             raise WorkspaceExceptions.UserNotMember(
                 self.workspace, member)  # type: ignore
 
-        # Add the account to the group
+        # Add the member to the group's list of members
         self.members.append(member)  # type: ignore
         # Create a policy for the new member
         await self.add_policy(member, permissions, save=False)  # type: ignore
