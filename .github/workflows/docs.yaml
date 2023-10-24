@@ -3,6 +3,11 @@ name: Update docs
 on:
   workflow_dispatch:
   gollum:
+  workflow_run:
+    workflows: ["Update API Changelog"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
   docs: 
