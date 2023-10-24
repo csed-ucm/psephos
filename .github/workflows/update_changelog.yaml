@@ -1,4 +1,4 @@
-name: Release Package
+name: Update API Changelog
 
 on:
   workflow_dispatch:
