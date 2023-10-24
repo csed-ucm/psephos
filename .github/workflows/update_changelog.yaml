@@ -4,20 +4,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  update_changelog:
+  get_changelog:
     runs-on: arc-runner-k8s
     permissions: write-all
     steps:
-      - name: Generate a token
-        id: generate_token
-        uses: actions/create-github-app-token@v1
+      - uses: actions/checkout@v4
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PEM }}
-          owner: ${{ github.repository_owner }}
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Copy API changelog to artifacts
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          name: api_changelog
+          path: CHANGELOG.md
+  update_wiki:
+    needs: get_api_changelog
+    runs-on: arc-runner-k8s
+    permissions:
+      contents: write
+    steps:
+      - name: Force update git
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:git-core/ppa
+          sudo apt-get update
+          sudo apt-get install -y git
+      - name: Checkout docs
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           repository: unipoll/api.wiki
-          event-type: update_api_changelog
+      - name: Copy API changelog from artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: api_changelog
+          path: changelog.md
+      - name: Commit update
+        run: |
+          git config --global user.name 'Bot'
+          git config --global user.email 'bot@noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git add changelog.md
+          git commit -m "Update API changelog on release" && git push || echo "No changes to commit"
