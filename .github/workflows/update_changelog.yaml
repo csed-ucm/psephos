@@ -17,7 +17,7 @@ jobs:
           name: api_changelog
           path: CHANGELOG.md
   update_wiki:
-    needs: get_api_changelog
+    needs: get_changelog
     runs-on: arc-runner-k8s
     permissions:
       contents: write
