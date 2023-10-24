@@ -48,5 +48,5 @@ jobs:
           git config --global user.name 'Bot'
           git config --global user.email 'bot@noreply.github.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/unipoll/api.wiki
-          git add changelog.md
+          git add CHANGELOG.md
           git commit -m "Update API changelog on release" && git push || echo "No changes to commit"
