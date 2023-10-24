@@ -41,7 +41,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: api_changelog
-          path: changelog.md
       - name: List files
         run: ls -la
       - name: Commit update
