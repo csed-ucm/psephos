@@ -2,6 +2,12 @@ name: Update API Changelog
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Release Package"]
+    branches: [main]
+    types:
+      - completed
+    
 
 jobs:
   get_changelog:
@@ -31,7 +37,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: unipoll/api.wiki
-          owner: ${{ github.repository_owner }}}
       - name: Copy API changelog from artifacts
         uses: actions/download-artifact@v3
         with:
