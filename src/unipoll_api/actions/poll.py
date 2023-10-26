@@ -33,7 +33,7 @@ async def create_poll(workspace: Workspace,
                       input_data: PollSchemas.CreatePollRequest,
                       check_permissions: bool = True) -> PollSchemas.PollResponse:
     # Check if the user has permission to create polls
-    await Permissions.check_permissions(actions, "create_polls", check_permissions)
+    await Permissions.check_permissions(workspace, "create_polls", check_permissions)
 
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
