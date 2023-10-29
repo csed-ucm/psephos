@@ -7,22 +7,17 @@ from . import authentication as AuthenticationRoutes
 from . import group as GroupRoutes
 from . import poll as PollRoutes
 from . import workspace as WorkspaceRoutes
+from . import permissions as PermissionRoutes
+from . import members as MemberRoutes
+from . import policies as PolicyRoutes
 
 # Create main router
 router: APIRouter = APIRouter()
 
 # Add endpoints defined in the routes directory
-router.include_router(WorkspaceRoutes.open_router,
-                      prefix="/workspaces",
-                      tags=["Workspaces"],
-                      dependencies=[Depends(set_active_user)])
 router.include_router(WorkspaceRoutes.router,
                       prefix="/workspaces",
                       tags=["Workspaces"],
-                      dependencies=[Depends(set_active_user)])
-router.include_router(GroupRoutes.open_router,
-                      prefix="/groups",
-                      tags=["Groups"],
                       dependencies=[Depends(set_active_user)])
 router.include_router(GroupRoutes.router,
                       prefix="/groups",
@@ -39,3 +34,15 @@ router.include_router(AccountRoutes.router,
 router.include_router(AuthenticationRoutes.router,
                       prefix="/auth",
                       tags=["Authentication"])
+router.include_router(MemberRoutes.router,
+                      prefix="/members",
+                      tags=["Members"],
+                      dependencies=[Depends(set_active_user)])
+router.include_router(PolicyRoutes.router,
+                      prefix="/policies",
+                      tags=["Policies"],
+                      dependencies=[Depends(set_active_user)])
+router.include_router(PermissionRoutes.router,
+                      prefix="/permissions",
+                      tags=["Permissions"],
+                      dependencies=[Depends(set_active_user)])

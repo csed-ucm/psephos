@@ -1,52 +1,27 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi_versioning import version
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.actions import GroupActions, PermissionsActions, MembersActions, PolicyActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
-from unipoll_api.documents import Account, Group, Policy, ResourceID
+from unipoll_api.documents import Account, Group, Policy, ResourceID, Member
 
-
-# APIRouter creates path operations for user module
-open_router: APIRouter = APIRouter()
-# router: APIRouter = APIRouter(dependencies=[Depends(Dependencies.check_group_permission)])
-router: APIRouter = APIRouter()
-
-
-# Get groups
-@open_router.get("/", response_description="List of groups")
-async def get_all_groups(workspace: Annotated[ResourceID | None, Query()] = None,
-                         account: Annotated[ResourceID | None, Query()] = None,
-                         name: Annotated[str | None, Query()] = None
-                         ) -> GroupSchemas.GroupList:
-    return await GroupActions.get_groups(workspace=await Dependencies.get_workspace(workspace) if workspace else None,
-                                         account=await Dependencies.get_account(account) if account else None,
-                                         name=name)
-
-
-# Create a new group
-@open_router.post("/",
-                  status_code=201,
-                  response_description="Created Group",
-                  response_model=GroupSchemas.GroupCreateOutput)
-async def create_group(input_data: GroupSchemas.GroupCreateRequest = Body(...)):
-    try:
-        workspace = await Dependencies.get_workspace(input_data.workspace)
-        return await GroupActions.create_group(workspace, name=input_data.name, description=input_data.description)
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=str(e))
-
+router = APIRouter()
 
 query_params = list[Literal["policies", "members", "all"]]
 
 
 # Get group info by id
+
 @router.get("/{group_id}",
+            tags=["Groups"],
             response_description="Get a group",
             response_model=GroupSchemas.Group,
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
+@version(1)
 async def get_group(group: Group = Depends(Dependencies.get_group),
                     include: Annotated[query_params | None, Query()] = None):
     try:
@@ -65,9 +40,12 @@ async def get_group(group: Group = Depends(Dependencies.get_group),
 
 
 # Update group info
+
 @router.patch("/{group_id}",
+              tags=["Groups"],
               response_description="Update a group",
               response_model=GroupSchemas.GroupShort)
+@version(1)
 async def update_group(group_data: GroupSchemas.GroupUpdateRequest,
                        group: Group = Depends(Dependencies.get_group)):
     try:
@@ -77,9 +55,12 @@ async def update_group(group_data: GroupSchemas.GroupUpdateRequest,
 
 
 # Delete a group
+
 @router.delete("/{group_id}",
+               tags=["Groups"],
                status_code=status.HTTP_204_NO_CONTENT,
                response_description="Delete a group")
+@version(1)
 async def delete_group(group: Group = Depends(Dependencies.get_group)):
     try:
         await GroupActions.delete_group(group)
@@ -89,10 +70,13 @@ async def delete_group(group: Group = Depends(Dependencies.get_group)):
 
 
 # Get a list of group members
+
 @router.get("/{group_id}/members",
+            tags=["Group Members"],
             response_description="List of group members",
             response_model=MemberSchemas.MemberList,
             response_model_exclude_unset=True)
+@version(1)
 async def get_group_members(group: Group = Depends(Dependencies.get_group)):
     try:
         return await MembersActions.get_members(group)
@@ -101,9 +85,12 @@ async def get_group_members(group: Group = Depends(Dependencies.get_group)):
 
 
 # Add member to group
+
 @router.post("/{group_id}/members",
+             tags=["Group Members"],
              response_description="List of group members",
              response_model=MemberSchemas.MemberList)
+@version(1)
 async def add_group_members(member_data: MemberSchemas.AddMembers,
                             group: Group = Depends(Dependencies.get_group)):
     try:
@@ -113,11 +100,14 @@ async def add_group_members(member_data: MemberSchemas.AddMembers,
 
 
 # Remove members from the workspace
-@router.delete("/{group_id}/members/{account_id}",
+
+@router.delete("/{group_id}/members/{member_id}",
+               tags=["Group Members"],
                response_description="Updated list removed members",
                response_model_exclude_unset=True)
+@version(1)
 async def remove_group_member(group: Group = Depends(Dependencies.get_group),
-                              account: Account = Depends(Dependencies.get_account)):
+                              member: Member = Depends(Dependencies.get_member)):
     try:
         return await MembersActions.remove_member(group, account)
     except APIException as e:
@@ -125,9 +115,12 @@ async def remove_group_member(group: Group = Depends(Dependencies.get_group),
 
 
 # List all policies in the workspace
+
 @router.get("/{group_id}/policies",
+            tags=["Group Policies"],
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
+@version(1)
 async def get_group_policies(group: Group = Depends(Dependencies.get_group),
                              account_id: ResourceID = Query(None)) -> PolicySchemas.PolicyList:
     try:
@@ -139,9 +132,12 @@ async def get_group_policies(group: Group = Depends(Dependencies.get_group),
 
 
 # Set permissions for a user in a group
+
 @router.put("/{group_id}/policies/{policy_id}",
+            tags=["Group Policies"],
             response_description="Updated policy",
             response_model=PolicySchemas.PolicyOutput)
+@version(1)
 async def set_group_policy(group: Group = Depends(Dependencies.get_group),
                            policy: Policy = Depends(Dependencies.get_policy),
                            permissions: PolicySchemas.PolicyInput = Body(...)):
@@ -160,9 +156,12 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group),
 
 
 # Get All Group Permissions
-@open_router.get("/permissions",
-                 response_description="List of all Group permissions",
-                 response_model=PolicySchemas.PermissionList)
+
+@router.get("/permissions",
+            tags=["Groups"],
+            response_description="List of all Group permissions",
+            response_model=PolicySchemas.PermissionList)
+@version(1)
 async def get_group_permissions():
     try:
         return await PermissionsActions.get_group_permissions()

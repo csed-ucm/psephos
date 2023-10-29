@@ -6,7 +6,9 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
-from unipoll_api.routes import router
+from fastapi_versioning import VersionedFastAPI
+# from unipoll_api.routes import router, websocket
+from unipoll_api.routes import v1, v2, websocket
 from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
 from unipoll_api.__version__ import version
@@ -24,7 +26,20 @@ app = FastAPI(
 )
 
 # Add endpoints defined in the routes directory
-app.include_router(router)
+app.include_router(v1.router)
+app.include_router(v2.router)
+
+
+# Versioned API
+app = VersionedFastAPI(
+    app,
+    description=settings.app_description,  # Description of the application
+    # version=settings.app_version,          # Version of the application
+    version_format='{major}',
+    prefix_format='/v{major}',
+)
+
+app.include_router(websocket.router, prefix="/ws", tags=["WebSocket"])
 
 # Add CORS middleware to allow cross-origin requests
 origins = settings.origins.split(",")

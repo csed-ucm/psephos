@@ -5,6 +5,7 @@ from fastapi_users import BaseUserManager, models
 from fastapi_users.openapi import OpenAPIResponseType
 from fastapi_users.router.common import ErrorCode, ErrorModel
 from fastapi_users.authentication import Strategy
+from fastapi_versioning import version
 
 from unipoll_api import account_manager as AccountManager
 
@@ -39,12 +40,15 @@ login_responses: OpenAPIResponseType = {
 }
 
 
+
+
 @router.post(
     "/jwt/login",
     name=f"auth:{AccountManager.jwt_backend.name}.login",
     responses=login_responses,
     response_model_exclude_unset=True
 )
+@version(1)
 async def login(credentials: OAuth2PasswordRequestForm = Depends(),
                 user_manager: BaseUserManager[models.UP, models.ID] = Depends(AccountManager.get_user_manager),
                 token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
@@ -66,7 +70,10 @@ async def login(credentials: OAuth2PasswordRequestForm = Depends(),
 
 
 # Refresh the access token using the refresh token
+
+
 @router.post("/jwt/refresh", responses=login_responses, response_model_exclude_unset=True)
+@version(1)
 async def refresh_jwt(authorization: Annotated[str, Header(...)],
                       refresh_token: Annotated[str, Header(...)],
                       token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
@@ -84,7 +91,10 @@ async def refresh_jwt(authorization: Annotated[str, Header(...)],
 
 
 # Refresh the access token using the refresh token and Client ID
+
+
 @router.post("/jwt/postman_refresh", responses=login_responses, response_model_exclude_unset=True)
+@version(1)
 async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
                                      body: Annotated[str, Body(...)],
                                      token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
