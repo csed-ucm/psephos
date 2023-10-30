@@ -11,6 +11,13 @@ from . import workspace as WorkspaceRoutes
 router: APIRouter = APIRouter()
 
 # Add endpoints defined in the routes directory
+router.include_router(AuthenticationRoutes.router,
+                      prefix="/auth",
+                      tags=["Authentication"])
+router.include_router(AccountRoutes.router,
+                      prefix="/accounts",
+                      tags=["Accounts"],
+                      dependencies=[Depends(Dependencies.set_active_user)])
 router.include_router(WorkspaceRoutes.router,
                       prefix="/workspaces",
                       dependencies=[Depends(Dependencies.set_active_user)])
@@ -18,10 +25,3 @@ router.include_router(GroupRoutes.router,
                       prefix="/workspaces/{workspace_id}/groups",
                       dependencies=[Depends(Dependencies.set_active_user),
                                     Depends(Dependencies.get_workspace)])
-router.include_router(AccountRoutes.router,
-                      prefix="/accounts",
-                      tags=["Accounts"],
-                      dependencies=[Depends(Dependencies.set_active_user)])
-router.include_router(AuthenticationRoutes.router,
-                      prefix="/auth",
-                      tags=["Authentication"])

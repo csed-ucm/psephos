@@ -164,30 +164,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-# List all groups in the workspace
-@router.get("/{workspace_id}/groups",
-            tags=["Groups"],
-            response_description="List of all groups",
-            response_model=GroupSchemas.GroupList)
-async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace)):
-    try:
-        return await actions.GroupActions.get_groups(workspace)
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=str(e))
 
-
-# List all groups in the workspace
-@router.post("/{workspace_id}/groups",
-             status_code=201,
-             tags=["Groups"],
-             response_description="Created Group",
-             response_model=GroupSchemas.GroupCreateOutput)
-async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace),
-                       input_data: GroupSchemas.GroupCreateInput = Body(...)):
-    try:
-        return await actions.GroupActions.create_group(workspace, input_data.name, input_data.description)
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=str(e))
 
 
 # List all members in the workspace
@@ -311,5 +288,31 @@ async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace)
                       input_data: PollSchemas.CreatePollRequest = Body(...)):
     try:
         return await actions.PollActions.create_poll(workspace, input_data)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# List all groups in the workspace
+@router.get("/{workspace_id}/groups",
+            tags=["Groups"],
+            response_description="List of all groups",
+            response_model=GroupSchemas.GroupList)
+async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace)):
+    try:
+        return await actions.GroupActions.get_groups(workspace)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# List all groups in the workspace
+@router.post("/{workspace_id}/groups",
+             status_code=201,
+             tags=["Groups"],
+             response_description="Created Group",
+             response_model=GroupSchemas.GroupCreateOutput)
+async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace),
+                       input_data: GroupSchemas.GroupCreateInput = Body(...)):
+    try:
+        return await actions.GroupActions.create_group(workspace, input_data.name, input_data.description)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
