@@ -15,6 +15,13 @@ from . import policies as PolicyRoutes
 router: APIRouter = APIRouter()
 
 # Add endpoints defined in the routes directory
+router.include_router(AuthenticationRoutes.router,
+                      prefix="/auth",
+                      tags=["Authentication"])
+router.include_router(AccountRoutes.router,
+                      prefix="/accounts",
+                      tags=["Accounts"],
+                      dependencies=[Depends(set_active_user)])
 router.include_router(WorkspaceRoutes.router,
                       prefix="/workspaces",
                       tags=["Workspaces"],
@@ -23,17 +30,6 @@ router.include_router(GroupRoutes.router,
                       prefix="/groups",
                       tags=["Groups"],
                       dependencies=[Depends(set_active_user)])
-router.include_router(PollRoutes.router,
-                      prefix="/polls",
-                      tags=["Polls"],
-                      dependencies=[Depends(set_active_user)])
-router.include_router(AccountRoutes.router,
-                      prefix="/accounts",
-                      tags=["Accounts"],
-                      dependencies=[Depends(set_active_user)])
-router.include_router(AuthenticationRoutes.router,
-                      prefix="/auth",
-                      tags=["Authentication"])
 router.include_router(MemberRoutes.router,
                       prefix="/members",
                       tags=["Members"],
@@ -45,4 +41,8 @@ router.include_router(PolicyRoutes.router,
 router.include_router(PermissionRoutes.router,
                       prefix="/permissions",
                       tags=["Permissions"],
+                      dependencies=[Depends(set_active_user)])
+router.include_router(PollRoutes.router,
+                      prefix="/polls",
+                      tags=["Polls"],
                       dependencies=[Depends(set_active_user)])
