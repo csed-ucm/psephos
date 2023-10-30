@@ -1,7 +1,6 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
-from fastapi_versioning import version
 from unipoll_api import dependencies as Dependencies
 from unipoll_api import actions
 from unipoll_api.exceptions.resource import APIException
@@ -16,7 +15,6 @@ router: APIRouter = APIRouter()
 @router.get("",
             response_description="List of all workspaces",
             response_model=WorkspaceSchemas.WorkspaceList)
-@version(2)
 async def get_workspaces():
     """
     Returns all workspaces where the current user is a member.
@@ -33,7 +31,6 @@ async def get_workspaces():
              response_description="Created workspaces",
              status_code=201,
              response_model=WorkspaceSchemas.WorkspaceCreateOutput)
-@version(2)
 async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)):
     """
     Creates a new workspace for the current user.
@@ -58,7 +55,6 @@ query_params = list[Literal["all", "policies", "groups", "members", "polls"]]
             response_model=WorkspaceSchemas.Workspace,
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
-@version(2)
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace),
                         include: Annotated[query_params | None, Query()] = None):
     """
@@ -119,7 +115,6 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
               response_description="Updated workspace",
               response_model=WorkspaceSchemas.Workspace,
               response_model_exclude_none=True)
-@version(2)
 async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace),
                            input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)):
     """
@@ -142,7 +137,6 @@ async def update_workspace(workspace: Workspace = Depends(Dependencies.get_works
 @router.delete("/{workspace_id}",
                response_description="Deleted workspace",
                status_code=204)
-@version(2)
 async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_workspace)):
     """
     Deletes the workspace with the given id.

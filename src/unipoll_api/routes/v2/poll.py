@@ -1,7 +1,6 @@
 # APIRouter creates path operations for user module
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, Query, HTTPException
-from fastapi_versioning import version
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.documents import Poll
 from unipoll_api.exceptions.resource import APIException
@@ -17,7 +16,7 @@ query_params = list[Literal["all", "questions", "policies"]]
 
 
 # Get poll by id
-@version(2)
+
 @router.get("/{poll_id}",
             response_description="Poll details",
             response_model=PollSchemas.PollResponse,
@@ -40,7 +39,7 @@ async def get_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Update poll details
-@version(2)
+
 @router.patch("/{poll_id}",
               response_description="Update Poll detail",
               response_model=PollSchemas.PollResponse,
@@ -54,7 +53,7 @@ async def update_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Delete poll by id
-@version(2)
+
 @router.delete("/{poll_id}",
                response_description="Result of delete operation",
                status_code=204)
@@ -70,7 +69,6 @@ async def delete_poll(poll: Poll = Depends(Dependencies.get_poll)):
             response_description="Questions in a poll",
             response_model=QuestionSchemas.QuestionList,
             response_model_exclude_none=True)
-@version(2)
 async def get_questions(poll: Poll = Depends(Dependencies.get_poll),
                         include: Annotated[query_params | None, Query()] = None):
     try:
@@ -83,7 +81,6 @@ async def get_questions(poll: Poll = Depends(Dependencies.get_poll),
             response_description="Policy list of a poll",
             response_model=PolicySchemas.PolicyList,
             response_model_exclude_none=True)
-@version(2)
 async def get_policies(poll: Poll = Depends(Dependencies.get_poll),
                        include: Annotated[query_params | None, Query()] = None):
     try:

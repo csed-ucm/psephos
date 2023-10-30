@@ -1,7 +1,6 @@
 
 from typing import Annotated
 from fastapi import APIRouter, Body, HTTPException, Query
-from fastapi_versioning import version
 from unipoll_api import actions as Actions
 from unipoll_api import documents as Documents
 from unipoll_api import schemas as Schemas
@@ -12,7 +11,6 @@ router = APIRouter()
 
 
 @router.get("", response_description="List of groups", response_model=Schemas.MemberSchemas.MemberList)
-@version(2)
 async def get_members(workspace: Annotated[Documents.ResourceID | None, Query()] = None,
                       group: Annotated[Documents.ResourceID | None, Query()] = None):
     if workspace:
@@ -30,7 +28,6 @@ async def get_members(workspace: Annotated[Documents.ResourceID | None, Query()]
              status_code=201,
              response_description="Member list",
              response_model=Schemas.MemberSchemas.MemberList)
-@version(2)
 async def add_members(input_data: Schemas.MemberSchemas.AddMembersRequest = Body(...)):
     try:
         if input_data.workspace:

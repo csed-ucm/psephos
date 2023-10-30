@@ -1,7 +1,6 @@
 
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi_versioning import version
 from unipoll_api import actions as Actions
 from unipoll_api import documents as Documents
 from unipoll_api import schemas as Schemas
@@ -12,7 +11,6 @@ router = APIRouter()
 
 
 @router.get("", response_description="List of groups", response_model=Schemas.PolicySchemas.PolicyList)
-@version(2)
 async def get_policies(policy_holder: Annotated[Documents.ResourceID | None, Query()] = None,
                        workspace: Annotated[Documents.ResourceID | None, Query()] = None,
                        group: Annotated[Documents.ResourceID | None, Query()] = None):
@@ -28,7 +26,6 @@ async def get_policies(policy_holder: Annotated[Documents.ResourceID | None, Que
 
 
 @router.get("/{policy_id}", response_description="Policy")
-@version(2)
 async def get_policy(policy: Documents.Policy = Depends(Dependencies.get_policy)):
     try:
         return await Actions.PolicyActions.get_policy(policy=policy)
@@ -37,8 +34,8 @@ async def get_policy(policy: Documents.Policy = Depends(Dependencies.get_policy)
 
 
 # Create a new group
-# @version(2)
-# @router.post("/",
+# 
+# # @router.post("/",
 #              status_code=201,
 #              response_description="Member list",
 #              response_model=Schemas.MemberSchemas.MemberList)

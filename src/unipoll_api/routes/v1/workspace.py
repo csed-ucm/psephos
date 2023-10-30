@@ -1,11 +1,10 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
-from fastapi_versioning import version
 from unipoll_api import dependencies as Dependencies
 from unipoll_api import actions
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.documents import Account, Workspace, ResourceID, Policy, Member
+from unipoll_api.documents import Workspace, ResourceID, Policy, Member
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
 
 
@@ -23,8 +22,6 @@ workspace_polls_router: APIRouter = APIRouter(tags=["Workspace Polls"])
             tags=["Workspaces"],
             response_description="List of all workspaces",
             response_model=WorkspaceSchemas.WorkspaceList)
-
-@version(1)
 async def get_workspaces():
     """
     Returns all workspaces where the current user is a member.
@@ -42,8 +39,6 @@ async def get_workspaces():
              response_description="Created workspaces",
              status_code=201,
              response_model=WorkspaceSchemas.WorkspaceCreateOutput)
-
-@version(1)
 async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = Body(...)):
     """
     Creates a new workspace for the current user.
@@ -69,8 +64,6 @@ query_params = list[Literal["all", "policies", "groups", "members", "polls"]]
             response_model=WorkspaceSchemas.Workspace,
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
-
-@version(1)
 async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspace),
                         include: Annotated[query_params | None, Query()] = None):
     """
@@ -132,8 +125,6 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
               response_description="Updated workspace",
               response_model=WorkspaceSchemas.Workspace,
               response_model_exclude_none=True)
-
-@version(1)
 async def update_workspace(workspace: Workspace = Depends(Dependencies.get_workspace),
                            input_data: WorkspaceSchemas.WorkspaceUpdateRequest = Body(...)):
     """
@@ -157,8 +148,6 @@ async def update_workspace(workspace: Workspace = Depends(Dependencies.get_works
                tags=["Workspaces"],
                response_description="Deleted workspace",
                status_code=204)
-
-@version(1)
 async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_workspace)):
     """
     Deletes the workspace with the given id.
@@ -180,8 +169,6 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
             tags=["Groups"],
             response_description="List of all groups",
             response_model=GroupSchemas.GroupList)
-
-@version(1)
 async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
         return await actions.GroupActions.get_groups(workspace)
@@ -195,7 +182,6 @@ async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace))
              tags=["Groups"],
              response_description="Created Group",
              response_model=GroupSchemas.GroupCreateOutput)
-@version(1)
 async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace),
                        input_data: GroupSchemas.GroupCreateInput = Body(...)):
     try:
@@ -211,7 +197,6 @@ async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace
             response_description="List of all groups",
             response_model=MemberSchemas.MemberList,
             response_model_exclude_unset=True)
-@version(1)
 async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
         return await actions.MembersActions.get_members(workspace)
@@ -225,7 +210,6 @@ async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_
              tags=["Workspace Members"],
              response_description="List added members",
              response_model=MemberSchemas.MemberList)
-@version(1)
 async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace),
                                 member_data: MemberSchemas.AddMembers = Body(...)):
     try:
@@ -240,7 +224,6 @@ async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_
                tags=["Workspace Members"],
                response_description="Updated list removed members",
                response_model_exclude_unset=True)
-@version(1)
 async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.get_workspace),
                                   member: Member = Depends(Dependencies.get_member)):
     try:
@@ -255,7 +238,6 @@ async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.ge
             tags=["Workspace Policies"],
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
-@version(1)
 async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get_workspace),
                                  account_id: ResourceID = Query(None)):
     try:
@@ -272,7 +254,6 @@ async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get
             tags=["Workspace Policies"],
             response_description="Updated permissions",
             response_model=PolicySchemas.PolicyOutput)
-@version(1)
 async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_workspace),
                                policy: Policy = Depends(Dependencies.get_policy),
                                permissions: PolicySchemas.PolicyInput = Body(...)):
@@ -298,7 +279,6 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
             tags=["Workspaces"],
             response_description="List of all workspace permissions",
             response_model=PolicySchemas.PermissionList)
-@version(1)
 async def get_workspace_permissions():
     try:
         return await actions.PermissionsActions.get_workspace_permissions()
@@ -313,7 +293,6 @@ async def get_workspace_permissions():
             response_description="List of all polls in the workspace",
             response_model=PollSchemas.PollList,
             response_model_exclude_none=True)
-@version(1)
 async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
         return await actions.PollActions.get_polls(workspace)
@@ -328,7 +307,6 @@ async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace)):
              response_description="Created poll",
              status_code=201,
              response_model=PollSchemas.PollResponse)
-@version(1)
 async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace),
                       input_data: PollSchemas.CreatePollRequest = Body(...)):
     try:

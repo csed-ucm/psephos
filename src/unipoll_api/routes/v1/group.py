@@ -1,12 +1,12 @@
 # FastAPI
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
-from fastapi_versioning import version
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.actions import GroupActions, PermissionsActions, MembersActions, PolicyActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
-from unipoll_api.documents import Account, Group, Policy, ResourceID, Member
+from unipoll_api.documents import Group, Policy, ResourceID, Member
+
 
 router = APIRouter()
 
@@ -21,7 +21,6 @@ query_params = list[Literal["policies", "members", "all"]]
             response_model=GroupSchemas.Group,
             response_model_exclude_defaults=True,
             response_model_exclude_none=True)
-@version(1)
 async def get_group(group: Group = Depends(Dependencies.get_group),
                     include: Annotated[query_params | None, Query()] = None):
     try:
@@ -45,7 +44,6 @@ async def get_group(group: Group = Depends(Dependencies.get_group),
               tags=["Groups"],
               response_description="Update a group",
               response_model=GroupSchemas.GroupShort)
-@version(1)
 async def update_group(group_data: GroupSchemas.GroupUpdateRequest,
                        group: Group = Depends(Dependencies.get_group)):
     try:
@@ -60,7 +58,6 @@ async def update_group(group_data: GroupSchemas.GroupUpdateRequest,
                tags=["Groups"],
                status_code=status.HTTP_204_NO_CONTENT,
                response_description="Delete a group")
-@version(1)
 async def delete_group(group: Group = Depends(Dependencies.get_group)):
     try:
         await GroupActions.delete_group(group)
@@ -76,7 +73,6 @@ async def delete_group(group: Group = Depends(Dependencies.get_group)):
             response_description="List of group members",
             response_model=MemberSchemas.MemberList,
             response_model_exclude_unset=True)
-@version(1)
 async def get_group_members(group: Group = Depends(Dependencies.get_group)):
     try:
         return await MembersActions.get_members(group)
@@ -90,7 +86,6 @@ async def get_group_members(group: Group = Depends(Dependencies.get_group)):
              tags=["Group Members"],
              response_description="List of group members",
              response_model=MemberSchemas.MemberList)
-@version(1)
 async def add_group_members(member_data: MemberSchemas.AddMembers,
                             group: Group = Depends(Dependencies.get_group)):
     try:
@@ -105,7 +100,6 @@ async def add_group_members(member_data: MemberSchemas.AddMembers,
                tags=["Group Members"],
                response_description="Updated list removed members",
                response_model_exclude_unset=True)
-@version(1)
 async def remove_group_member(group: Group = Depends(Dependencies.get_group),
                               member: Member = Depends(Dependencies.get_member)):
     try:
@@ -120,7 +114,6 @@ async def remove_group_member(group: Group = Depends(Dependencies.get_group),
             tags=["Group Policies"],
             response_description="List of all policies",
             response_model=PolicySchemas.PolicyList)
-@version(1)
 async def get_group_policies(group: Group = Depends(Dependencies.get_group),
                              account_id: ResourceID = Query(None)) -> PolicySchemas.PolicyList:
     try:
@@ -137,7 +130,6 @@ async def get_group_policies(group: Group = Depends(Dependencies.get_group),
             tags=["Group Policies"],
             response_description="Updated policy",
             response_model=PolicySchemas.PolicyOutput)
-@version(1)
 async def set_group_policy(group: Group = Depends(Dependencies.get_group),
                            policy: Policy = Depends(Dependencies.get_policy),
                            permissions: PolicySchemas.PolicyInput = Body(...)):
@@ -161,7 +153,6 @@ async def set_group_policy(group: Group = Depends(Dependencies.get_group),
             tags=["Groups"],
             response_description="List of all Group permissions",
             response_model=PolicySchemas.PermissionList)
-@version(1)
 async def get_group_permissions():
     try:
         return await PermissionsActions.get_group_permissions()
