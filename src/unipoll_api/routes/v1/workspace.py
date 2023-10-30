@@ -164,11 +164,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-
-
-
 # List all members in the workspace
-
 @router.get("/{workspace_id}/members",
             tags=["Workspace Members"],
             response_description="List of all groups",
@@ -182,7 +178,6 @@ async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_
 
 
 # Add members to the workspace
-
 @router.post("/{workspace_id}/members",
              tags=["Workspace Members"],
              response_description="List added members",
@@ -196,7 +191,6 @@ async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_
 
 
 # Remove member from the workspace
-
 @router.delete("/{workspace_id}/members/{member_id}",
                tags=["Workspace Members"],
                response_description="Updated list removed members",
@@ -210,7 +204,6 @@ async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.ge
 
 
 # List all policies in the workspace
-
 @router.get("/{workspace_id}/policies",
             tags=["Workspace Policies"],
             response_description="List of all policies",
@@ -226,7 +219,6 @@ async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get
 
 
 # Set permissions for a member in a workspace
-
 @router.put("/{workspace_id}/policies/{policy_id}",
             tags=["Workspace Policies"],
             response_description="Updated permissions",
@@ -251,7 +243,6 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
 
 
 # Get All Workspace Permissions
-
 @router.get("/permissions",
             tags=["Workspaces"],
             response_description="List of all workspace permissions",
@@ -264,7 +255,6 @@ async def get_workspace_permissions():
 
 
 # Get Workspace Polls
-
 @router.get("/{workspace_id}/polls",
             tags=["Polls"],
             response_description="List of all polls in the workspace",
@@ -278,7 +268,6 @@ async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace)):
 
 
 # Create a new poll in the workspace
-
 @router.post("/{workspace_id}/polls",
              tags=["Polls"],
              response_description="Created poll",
