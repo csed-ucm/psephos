@@ -7,7 +7,6 @@ from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
 # from unipoll_api.routes import router, websocket
-from unipoll_api import context
 from unipoll_api.routes import create_router
 from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
