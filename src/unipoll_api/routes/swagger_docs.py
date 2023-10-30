@@ -42,10 +42,20 @@ def create_doc_router(app, default_version):
     async def swagger_ui_redirect():
         return get_swagger_ui_oauth2_redirect_html()
 
+    # Default ReDoc
     @doc_router.get("/redoc", include_in_schema=False)
-    async def redoc_html():
+    async def default_redoc_html():
         return get_redoc_html(
-            openapi_url="/openapi.json",
+            openapi_url=f"/v{default_version}/openapi.json",
+            title=app.title + " - ReDoc",
+            redoc_js_url="https://unpkg.com/redoc@next/bundles/redoc.standalone.js",
+        )
+
+    # Versioned ReDoc
+    @doc_router.get("/v{version}/redoc", include_in_schema=False)
+    async def versioned_redoc_html(version: int):
+        return get_redoc_html(
+            openapi_url=f"/v{version}/openapi.json",
             title=app.title + " - ReDoc",
             redoc_js_url="https://unpkg.com/redoc@next/bundles/redoc.standalone.js",
         )
