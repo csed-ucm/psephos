@@ -20,6 +20,7 @@ settings = get_settings()
 # Create FastAPI application
 app = FastAPI(
     docs_url=None,                         # Disable default docs
+    redoc_url=None,                        # Disable default redoc
     title=settings.app_name,               # Title of the application
     description=settings.app_description,  # Description of the application
     version=settings.app_version,          # Version of the application
