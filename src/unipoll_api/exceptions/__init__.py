@@ -5,3 +5,4 @@ from . import policy as PolicyExceptions  # noqa: F401
 from . import poll as PollExceptions  # noqa: F401
 from . import resource as ResourceExceptions  # noqa: F401
 from . import workspace as WorkspaceExceptions  # noqa: F401
+from . import websocket as WebSocketExceptions  # noqa: F401
