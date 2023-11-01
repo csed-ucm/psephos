@@ -39,8 +39,6 @@ login_responses: OpenAPIResponseType = {
 }
 
 
-
-
 @router.post(
     "/jwt/login",
     name=f"auth:{AccountManager.jwt_backend.name}.login",
