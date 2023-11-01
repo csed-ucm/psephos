@@ -2,8 +2,9 @@
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from unipoll_api.websocket_manager import WebSocketManager
 from unipoll_api.dependencies import websocket_auth
-
-
+# from unipoll_api.account_manager import active_user
+# from unipoll_api import dependencies as Dependencies
+from unipoll_api.documents import Account
 router: APIRouter = APIRouter()
 
 # Create a connection manager to manage WebSocket connections
@@ -11,19 +12,13 @@ manager = WebSocketManager()
 
 
 @router.websocket("")
-async def open_websocket_endpoint(websocket: WebSocket, auth: dict = Depends(websocket_auth)):
+async def open_websocket_endpoint(websocket: WebSocket,
+                                  user: Account = Depends(websocket_auth)):
     await manager.connect(websocket)
-    print("auth: ", auth)
-    if auth["cookie"]:
-        print("cookie: ", auth["cookie"])
-        # account_id = AccessToken.find(user_id=auth.token)
-    elif auth["token"]:
-        print("token: ", auth["token"])
-    else:
-        print("no auth")
+    await websocket.send_text(f"Hello, {user.first_name}")
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await manager.send_personal_message(f"You wrote: {data}")
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        await manager.disconnect(websocket)

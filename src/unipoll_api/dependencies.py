@@ -5,6 +5,7 @@ from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
 from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
+from unipoll_api.account_manager import get_access_token_db
 
 
 # Wrapper to handle exceptions and raise HTTPException
@@ -43,8 +44,16 @@ async def get_member(account: Account, resource: Workspace | Group) -> Member:
 
 async def websocket_auth(websocket: WebSocket,
                          session: Annotated[str | None, Cookie()] = None,
-                         token: Annotated[str | None, Query()] = None) -> dict:
-    return {"cookie": session, "token": token}
+                         token: Annotated[str | None, Query()] = None,
+                         token_db=Depends(get_access_token_db)
+                         ) -> dict:
+
+    if token:
+        token_data = await token_db.get_by_token(token)
+        user = await get_account(token_data.user_id)
+        return user
+
+    raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 # Dependency for getting a workspace with the given id
