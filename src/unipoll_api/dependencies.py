@@ -1,7 +1,7 @@
 from typing import Annotated
 from functools import wraps
 # from bson import DBRef
-from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
+from fastapi import Cookie, Depends, Query, HTTPException, WebSocket, WebSocketException
 from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
@@ -48,12 +48,11 @@ async def websocket_auth(websocket: WebSocket,
                          token_db=Depends(get_access_token_db)
                          ) -> dict:
 
+    user = None
     if token:
         token_data = await token_db.get_by_token(token)
         user = await get_account(token_data.user_id)
-        return user
-
-    raise HTTPException(status_code=401, detail="Unauthorized")
+    return user
 
 
 # Dependency for getting a workspace with the given id
