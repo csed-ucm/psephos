@@ -1,4 +1,5 @@
-from fastapi import WebSocket, Depends
+from fastapi import WebSocket
+from unipoll_api.schemas.websocket import Message
 
 
 class WebSocketManager:
@@ -18,3 +19,7 @@ class WebSocketManager:
     async def broadcast(self, message: str) -> None:
         for connection in self.active_connections:
             await connection.send_text(message)
+
+
+def action_parser(message: Message) -> any:
+    return message.action
