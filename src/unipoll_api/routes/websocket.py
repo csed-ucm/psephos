@@ -1,5 +1,5 @@
 # Handle WebSocket connections
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, WebSocketException
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, WebSocketException, HTTPException
 from unipoll_api.websocket_manager import WebSocketManager, action_parser
 from unipoll_api.dependencies import websocket_auth, set_active_user
 from unipoll_api.documents import Account
@@ -42,7 +42,7 @@ async def open_websocket_endpoint(websocket: WebSocket, user: Account = Depends(
                 # Respond to the client with the result of the action
                 await manager.send_personal_message(await action_parser(message), websocket)
             # Catch API exceptions and send them to the client
-            except APIException as e:
+            except (APIException, HTTPException) as e:
                 await manager.send_personal_message({'error': e.detail}, websocket)
     # Disconnect the client when the connection is closed
     except WebSocketDisconnect:
