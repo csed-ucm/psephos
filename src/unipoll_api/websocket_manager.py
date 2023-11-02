@@ -1,6 +1,7 @@
 from fastapi import WebSocket
 from typing import Any
 import inspect
+from pydantic import BaseModel
 from unipoll_api.schemas.websocket import Message
 from unipoll_api import actions
 from unipoll_api.exceptions import websocket as WebSocketExceptions
@@ -44,9 +45,10 @@ def filter_arguments(action, data):
 functions = {name: func for name, func in inspect.getmembers(actions, inspect.isfunction)}
 
 
-async def action_parser(message: Message) -> Any:
+async def action_parser(message: Message) -> BaseModel:
     action = functions.get(message.action)
     if not action:
         raise WebSocketExceptions.InvalidAction(message.action)
     args = filter_arguments(action, message.data)
-    return (await action(**args)).model_dump()
+    response: BaseModel = await action(**args)
+    return response.model_dump(exclude_none=True)
