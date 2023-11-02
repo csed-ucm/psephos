@@ -3,7 +3,8 @@ from typing import Any
 import inspect
 from pydantic import BaseModel
 from unipoll_api.schemas.websocket import Message
-from unipoll_api import actions
+# from unipoll_api import actions
+from unipoll_api.actions import WebsocketActions
 from unipoll_api.exceptions import websocket as WebSocketExceptions
 
 
@@ -28,21 +29,21 @@ class WebSocketManager:
 
 def filter_arguments(action, data):
     sig = inspect.signature(action)
-    required_args = []
+    args = {}
     for param in sig.parameters.values():
-        if param.kind == param.POSITIONAL_OR_KEYWORD and param.default == param.empty: 
-            required_args.append(param.name)
+        if param.kind == param.POSITIONAL_OR_KEYWORD:
+            args[param.name] = param.default == param.empty
 
     filtered_args = {}
-    for key in required_args:
+    for key, required in args.items():
         value = data.get(key)
-        if not value:
-            raise WebSocketExceptions.ActionMissingRequiredArgs(action.__name__, required_args, list(data.keys()))
+        if required and not value:
+            raise WebSocketExceptions.ActionMissingRequiredArgs(action.__name__, args, list(data.keys()))
         filtered_args[key] = value
     return filtered_args
 
 
-functions = {name: func for name, func in inspect.getmembers(actions, inspect.isfunction)}
+functions = {name: func for name, func in inspect.getmembers(WebsocketActions, inspect.isfunction)}
 
 
 async def action_parser(message: Message) -> BaseModel:
