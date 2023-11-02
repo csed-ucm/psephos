@@ -1,5 +1,4 @@
 from fastapi import WebSocket
-from typing import Any
 import inspect
 from pydantic import BaseModel
 from unipoll_api.schemas.websocket import Message
