@@ -51,4 +51,6 @@ async def action_parser(message: Message) -> BaseModel:
         raise WebSocketExceptions.InvalidAction(message.action)
     args = filter_arguments(action, message.data)
     response: BaseModel = await action(**args)
+    if not response:
+        response = {"status": "success"}
     return response.model_dump(exclude_none=True)
