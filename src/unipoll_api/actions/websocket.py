@@ -2,6 +2,8 @@ from typing import Literal
 from unipoll_api import dependencies
 from . import WorkspaceActions
 
+from unipoll_api.schemas import WorkspaceSchemas
+
 from unipoll_api.documents import ResourceID
 
 
@@ -12,7 +14,7 @@ async def get_workspaces():
 
 
 async def create_workspace(name: str, description: str = None):
-    data = {"name": name, "description": description}
+    data = WorkspaceSchemas.WorkspaceCreateInput(name=name, description=description)
     return await WorkspaceActions.create_workspace(data)
 
 
