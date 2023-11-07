@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.get("/updates",
-            response=EventSourceResponse)
+            response_class=EventSourceResponse)
 async def event_log():
     updates = update_generator()
     return EventSourceResponse(updates)
