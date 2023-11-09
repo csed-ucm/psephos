@@ -54,6 +54,7 @@ class Resource(Document):
         title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
     policies: list[Link["Policy"]] = []
+    events: list[Link["Event"]] = []
 
     @after_event(Insert)
     def create_group(self) -> None:
@@ -84,6 +85,14 @@ class Resource(Document):
                 self.policies.remove(policy)
                 if save:
                     await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+
+    async def log_event(self, data: dict, save: bool = True) -> "Event":
+        new_event = await Event(resource_id=self.id, data=data).create()  # type: ignore
+
+        self.events.append(new_event)  # type: ignore
+        if save:
+            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+        return new_event
 
 
 class Account(BeanieBaseUser, Document):  # type: ignore
