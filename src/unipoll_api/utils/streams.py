@@ -3,7 +3,8 @@ from unipoll_api.documents import Resource
 from . import colored_dbg as Debug
 
 
-async def update_generator(resource: Resource):
+# async def update_generator(resource: Resource):
+async def update_generator():
     i = 0
     try:
         while True:
