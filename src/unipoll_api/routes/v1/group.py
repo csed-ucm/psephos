@@ -118,7 +118,7 @@ async def get_group_policies(group: Group = Depends(Dependencies.get_group),
                              account_id: ResourceID = Query(None)) -> PolicySchemas.PolicyList:
     try:
         account = await Dependencies.get_account(account_id) if account_id else None
-        member = await Dependencies.get_member(account, group) if account else None
+        member = await Dependencies.get_member_by_account(account, group) if account else None
         return await PolicyActions.get_policies(resource=group, policy_holder=member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

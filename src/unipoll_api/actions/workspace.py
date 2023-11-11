@@ -5,7 +5,7 @@ from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
-# from unipoll_api.dependencies import get_member
+# from unipoll_api.dependencies import get_member_by_account
 
 
 # Get a list of workspaces where the account is a owner/member

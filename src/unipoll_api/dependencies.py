@@ -31,7 +31,18 @@ async def get_account(account_id: ResourceID) -> Account:
     return account
 
 
-async def get_member(account: Account, resource: Workspace | Group) -> Member:
+@http_dependency
+async def get_member(member_id: ResourceID) -> Member:
+    """
+    Returns a member with the given id.
+    """
+    member = await Member.get(member_id)
+    if not member:
+        raise Exceptions.ResourceExceptions.ResourceNotFound("member", member_id)
+    return member
+
+
+async def get_member_by_account(account: Account, resource: Workspace | Group) -> Member:
     """
     Returns a member with the given id.
     """
@@ -46,7 +57,7 @@ async def websocket_auth(websocket: WebSocket,
                          session: Annotated[str | None, Cookie()] = None,
                          token: Annotated[str | None, Query()] = None,
                          token_db=Depends(get_access_token_db)
-                         ) -> dict:
+                         ) -> Account:
 
     if token:
         token_data = await token_db.get_by_token(token)

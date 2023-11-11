@@ -5,7 +5,7 @@ from unipoll_api.utils import Permissions
 from unipoll_api.schemas import MemberSchemas
 # from unipoll_api import AccountManager
 from unipoll_api.exceptions import ResourceExceptions
-from unipoll_api.dependencies import get_member
+from unipoll_api.dependencies import get_member_by_account
 
 
 async def get_members(resource: Workspace | Group,
@@ -46,7 +46,7 @@ async def add_members(resource: Workspace | Group,
     for account in account_list:
         default_permissions = eval("Permissions." + resource.get_document_type().upper() + "_BASIC_PERMISSIONS")
         if resource.get_document_type() == "Group":
-            member = await get_member(account, resource.workspace)  # type: ignore
+            member = await get_member_by_account(account, resource.workspace)  # type: ignore
             new_member = await resource.add_member(member, default_permissions, save=False)
             new_members.append(new_member)
         elif resource.get_document_type() == "Workspace":

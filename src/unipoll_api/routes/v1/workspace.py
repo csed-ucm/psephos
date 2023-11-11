@@ -212,7 +212,7 @@ async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get
                                  account_id: ResourceID = Query(None)):
     try:
         account = await Dependencies.get_account(account_id) if account_id else None
-        member = await Dependencies.get_member(account, workspace) if account else None
+        member = await Dependencies.get_member_by_account(account, workspace) if account else None
         return await actions.PolicyActions.get_policies(resource=workspace, policy_holder=member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
