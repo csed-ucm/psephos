@@ -103,7 +103,7 @@ async def add_group_members(member_data: MemberSchemas.AddMembers,
 async def remove_group_member(group: Group = Depends(Dependencies.get_group),
                               member: Member = Depends(Dependencies.get_member)):
     try:
-        return await MembersActions.remove_member(group, account)
+        return await MembersActions.remove_member(group, member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
