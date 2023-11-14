@@ -2,6 +2,8 @@
 from datetime import datetime
 from typing import Literal
 from bson import DBRef
+from collections import deque
+from queue import Queue
 from beanie import Document as BeanieDocument
 from beanie import (
     BackLink,
@@ -54,7 +56,8 @@ class Resource(Document):
         title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
     policies: list[Link["Policy"]] = []
-    events: list[Link["Event"]] = []
+    # events: Queue = Queue()
+    events: deque = deque()
 
     @after_event(Insert)
     def create_group(self) -> None:
@@ -87,9 +90,9 @@ class Resource(Document):
                     await self.save(link_rule=WriteRules.WRITE)  # type: ignore
 
     async def log_event(self, data: dict, save: bool = True) -> "Event":
-        new_event = await Event(resource_id=self.id, data=data).create()  # type: ignore
+        new_event = await Event(resource_id=str(self.id), data=data).create()  # type: ignore
 
-        self.events.append(new_event)  # type: ignore
+        self.events.append({"time": datetime.now(), "event": data})
         if save:
             await self.save(link_rule=WriteRules.WRITE)  # type: ignore
         return new_event
@@ -234,9 +237,12 @@ class Member(Document):
 # https://docs.mongodb.com/manual/core/timeseries-collections
 class Event(Document):
     ts: datetime = Field(default_factory=datetime.now)
-    resource: BackLink[Resource] = Field(original_field="event_log")
+    # resource: BackLink[Resource] = Field(original_field="event_log")
     resource_id: str = Field(default_factory=str)
     data: dict
+
+    # @after_event(Insert)
+    # def 
 
     class Settings:
         timeseries = TimeSeriesConfig(
