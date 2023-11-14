@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import uvicorn
 import os
@@ -13,6 +14,9 @@ from unipoll_api.config import get_settings
 from unipoll_api.__version__ import version
 from unipoll_api.utils import cli_args, colored_dbg
 
+
+# Application start time
+start_time = datetime.now()
 
 # Apply setting from configuration file
 settings = get_settings()
