@@ -85,12 +85,8 @@ class Resource(Document):
                 if save:
                     await self.save(link_rule=WriteRules.WRITE)  # type: ignore
 
-    async def log_event(self, data: dict, save: bool = True) -> "Event":
+    async def log_event(self, data: dict) -> "Event":
         new_event = await Event(resource_id=str(self.id), data=data).create()  # type: ignore
-
-        self.events.append({"time": datetime.now(), "event": data})
-        if save:
-            await self.save(link_rule=WriteRules.WRITE)  # type: ignore
         return new_event
 
 
