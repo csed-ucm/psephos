@@ -28,6 +28,8 @@ class Settings(BaseSettings):  # type: ignore
     port: int = 9000
     reload: bool = True
     model_config = SettingsConfigDict(env_file=".env")
+    redis_host: str = Field(default="localhost", title="Redis Host", description="The host of the Redis database.")
+    redis_port: int = Field(default=6379, title="Redis Port", description="The port of the Redis database.")
 
 
 @lru_cache()
