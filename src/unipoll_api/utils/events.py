@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
-from unipoll_api.documents import ResourceID, Event
+from unipoll_api.documents import ResourceID, Event, Resource
+from unipoll_api.redis import publish_message
 from . import colored_dbg as Debug
 
 
@@ -20,3 +21,16 @@ async def get_event_stream(resource_id: ResourceID):
     except asyncio.CancelledError as e:
         Debug.info("Disconnected from client (via refresh/close)")
         raise e
+
+
+async def notify_members(resource: Resource, message: dict):
+    try:
+        timestamp = datetime.now()
+        for member in resource.members:
+            # print(member)
+            data = {"recipient_id": str(member.account.id),
+                    "timestamp": str(timestamp),
+                    "message": message}
+            await publish_message(data)
+    except Exception as e:
+        print(e)
