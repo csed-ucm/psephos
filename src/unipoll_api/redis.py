@@ -19,9 +19,9 @@ connection: Redis = redis.asyncio.from_url(
 )
 
 
-async def publish_message(message: dict):
+async def publish_message(data: dict):
     try:
-        await connection.publish(PUSH_NOTIFICATIONS_CHANNEL, json.dumps(message))
+        await connection.publish(PUSH_NOTIFICATIONS_CHANNEL, json.dumps(data))
     except redis.exceptions.ConnectionError as e:
         print("Connection error:", e)
     except Exception as e:
