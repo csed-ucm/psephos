@@ -1,9 +1,12 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi import Body
 from sse_starlette.sse import EventSourceResponse
 from datetime import datetime
-from unipoll_api.documents import ResourceID, Workspace, Event
+from unipoll_api.redis import listen_to_channel, publish_message, connection
+from unipoll_api.documents import Account, ResourceID, Workspace, Event
 from unipoll_api.utils.events import event_generator, get_updates, timeseries_generator
+from unipoll_api.dependencies import get_current_active_user
+
 
 router = APIRouter()
 
@@ -53,5 +56,25 @@ async def timeseries(resource_id: ResourceID):
     try:
         workspace = await Workspace.get(resource_id)
         return EventSourceResponse(timeseries_generator(workspace))
+    except Exception as e:
+        print(e)
+
+
+@router.post("/redis/push")
+async def redis_push(user: Account = Depends(get_current_active_user)):
+    try:
+        message = {
+            "time": datetime.now().isoformat(),
+            "message": "Hello World!"
+        }
+        await publish_message({"recipient_id": str(user.id), "message": message})
+    except Exception as e:
+        print(e)
+
+
+@router.get("/redis/subscribe")
+async def redis_subscribe(user: Account = Depends(get_current_active_user)):
+    try:
+        return EventSourceResponse(listen_to_channel(str(user.id)))
     except Exception as e:
         print(e)
