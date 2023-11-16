@@ -56,13 +56,15 @@ async def mongodb_subscribe(resource_id: ResourceID):
 
 # Endpoint to push notifications to a user
 @router.post("/redis/push")
-async def redis_push(user: Account = Depends(get_current_active_user)):
+async def redis_push(user: Account = Depends(get_current_active_user),
+                     message: dict = Body(...)):
     try:
-        message = {
-            "time": datetime.now().isoformat(),
-            "message": "Hello World!"
+        data = {
+            "recipient_id": str(user.id),
+            "timestamp": datetime.now().isoformat(),
+            "message": message
         }
-        await publish_message({"recipient_id": str(user.id), "message": message})
+        await publish_message(data)
     except Exception as e:
         print(e)
 
