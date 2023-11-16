@@ -52,9 +52,9 @@ app.add_middleware(
 async def on_startup() -> None:
     # Simplify operation IDs so that generated API clients have simpler function names
     # Each route will have its operation ID set to the method name
-    for route in app.routes:
-        if isinstance(route, APIRoute):
-            route.operation_id = route.name
+    # for route in app.routes:
+    #     if isinstance(route, APIRoute):
+    #         route.operation_id = route.name
 
     await init_beanie(
         database=mainDB,  # type: ignore
