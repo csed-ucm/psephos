@@ -2,8 +2,6 @@
 from datetime import datetime
 from typing import Literal
 from bson import DBRef
-from collections import deque
-from queue import Queue
 from beanie import Document as BeanieDocument
 from beanie import (
     BackLink,
@@ -56,8 +54,6 @@ class Resource(Document):
         title="Name", description="Name of the resource", min_length=3, max_length=50)
     description: str = Field(default="", title="Description", max_length=1000)
     policies: list[Link["Policy"]] = []
-    # events: Queue = Queue()
-    events: deque = deque()
 
     @after_event(Insert)
     def create_group(self) -> None:
