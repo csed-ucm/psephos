@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import Body
 from sse_starlette.sse import EventSourceResponse
 from datetime import datetime
-from unipoll_api.redis import listen_to_channel, publish_message, connection
-from unipoll_api.documents import Account, ResourceID, Workspace, Event
-from unipoll_api.utils.events import event_generator, get_updates, timeseries_generator
+from unipoll_api.redis import listen_to_channel, publish_message
+from unipoll_api.documents import Account, ResourceID, Workspace  # Event
+from unipoll_api.utils.events import get_updates, get_event_stream
 from unipoll_api.dependencies import get_current_active_user
-
+from unipoll_api.exceptions import ResourceExceptions
 
 router = APIRouter()
 
 
+# For testing purposes only
+# Endpoint to get all events for a resource
+# Accepts a query parameter "since" to get all events after a certain time
 @router.get("/updates/{resource_id}")
 async def event_log(resource_id: ResourceID,
                     since: str = ""):
@@ -20,46 +23,38 @@ async def event_log(resource_id: ResourceID,
             time = start_time
         else:
             time = datetime.fromisoformat(since)
-        workspace = await Workspace.get(resource_id)
-        return await get_updates(workspace, time)
+        return await get_updates(resource_id, time)
     except Exception as e:
         print(e)
         return HTTPException(status_code=404, detail="Resource not found")
 
-@router.post("/updates/{workspace_id}")
+
+# For testing purposes only
+# Endpoint to log an event for a resource(workspace)
+@router.post("/workspace/{workspace_id}/log")
 async def generate_event(workspace_id: ResourceID,
                          event: dict = Body(...)):
     try:
         workspace = await Workspace.get(workspace_id)
-        new_event = await workspace.log_event(data={"message": "Event generated"})
-
-        # BUG: Does not work, since workspace.events reference is not updated
-        # FIXME: Find a way to keep a reference to the workspace.events list outside the function
-
+        if not workspace:
+            raise ResourceExceptions.ResourceNotFound("Workspace", workspace_id)
+        new_event = await workspace.log_event(data={"message": event})
         return new_event
     except Exception as e:
         print(e)
 
 
-@router.get("/subscribe/{workspace_id}")
-async def subscribe(workspace_id: ResourceID):
+# For testing purposes only
+# Endpoint to get new events, that occur after this request
+@router.get("/resource/{resource_id}/subscribe")
+async def mongodb_subscribe(resource_id: ResourceID):
     try:
-        workspace = await Workspace.get(workspace_id)
-        # get_updates = event_generator(workspace)
-        return EventSourceResponse(event_generator(workspace))
+        return EventSourceResponse(get_event_stream(resource_id))
     except Exception as e:
         print(e)
 
 
-@router.get("/timeseries/{resource_id}")
-async def timeseries(resource_id: ResourceID):
-    try:
-        workspace = await Workspace.get(resource_id)
-        return EventSourceResponse(timeseries_generator(workspace))
-    except Exception as e:
-        print(e)
-
-
+# Endpoint to push notifications to a user
 @router.post("/redis/push")
 async def redis_push(user: Account = Depends(get_current_active_user)):
     try:
@@ -72,6 +67,7 @@ async def redis_push(user: Account = Depends(get_current_active_user)):
         print(e)
 
 
+# Endpoint to user notifications
 @router.get("/redis/subscribe")
 async def redis_subscribe(user: Account = Depends(get_current_active_user)):
     try:
