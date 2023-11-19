@@ -2,12 +2,13 @@ import json
 import uvicorn
 import os
 import argparse
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi import utils as OpenAPIUtils
 from beanie import init_beanie
 # from unipoll_api.routes import router, websocket
-from unipoll_api.routes import create_router
+from unipoll_api.routes import create_router, v1_router, v2_router
 from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
 from unipoll_api.__version__ import version
@@ -118,7 +119,21 @@ def setup():
 
 def get_openapi():
     if not app.openapi_schema:
-        openapi_schema = app.openapi()
+        from unipoll_api.routes import generate_unique_id
+
+        router = APIRouter()
+        router.include_router(v1_router, 
+                              prefix="/v1",
+                              generate_unique_id_function=generate_unique_id(1))
+        router.include_router(v2_router, 
+                              prefix="/v2",
+                              generate_unique_id_function=generate_unique_id(2))
+        
+
+        openapi_schemas = OpenAPIUtils.get_openapi(title=app.title,
+                                                   version=settings.app_version,
+                                                   routes=router.routes)
+        openapi_schema = openapi_schemas
         app.openapi_schema = openapi_schema
     json.dump(app.openapi_schema, open("openapi.json", "w"), indent=2)
 
