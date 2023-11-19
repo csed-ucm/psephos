@@ -47,8 +47,6 @@ async def delete_my_account():
 
 
 # Delete user account by id
-
-
 @router.delete("/{id}",
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(account: Account = Depends(get_account)):
