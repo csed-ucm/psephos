@@ -83,7 +83,7 @@ def cli_entry_point():
     elif args.command == "setup":
         setup()
     elif args.command == "get-openapi":
-        get_openapi()
+        get_openapi(args.version)
     else:
         print("Invalid command")
 
@@ -116,18 +116,16 @@ def setup():
     # Print success message
     print(f"Your configuration has been saved to {os.getcwd()}/.env")
 
-
-def get_openapi():
+# TODO: Get version list dynamically
+def get_openapi(versions: list[int] = [1, 2]):
     if not app.openapi_schema:
-        from unipoll_api.routes import generate_unique_id
+        from unipoll_api.routes import generate_unique_id, API_VERSIONS
 
         router = APIRouter()
-        router.include_router(v1_router, 
-                              prefix="/v1",
-                              generate_unique_id_function=generate_unique_id(1))
-        router.include_router(v2_router, 
-                              prefix="/v2",
-                              generate_unique_id_function=generate_unique_id(2))
+        for i in versions:
+            router.include_router(API_VERSIONS[f'v{i}'],
+                                  prefix=f"/v{i}",
+                                  generate_unique_id_function=generate_unique_id(i))
         
 
         openapi_schemas = OpenAPIUtils.get_openapi(title=app.title,
