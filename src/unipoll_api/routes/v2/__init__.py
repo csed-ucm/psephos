@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 from unipoll_api.dependencies import set_active_user
 
 # Import endpoints defined in the routes directory
-from . import account as AccountRoutes
-from . import authentication as AuthenticationRoutes
-from . import group as GroupRoutes
-from . import poll as PollRoutes
-from . import workspace as WorkspaceRoutes
+from . import accounts as AccountRoutes
+from . import authentications as AuthenticationRoutes
+from . import groups as GroupRoutes
+from . import polls as PollRoutes
+from . import workspaces as WorkspaceRoutes
 from . import permissions as PermissionRoutes
 from . import members as MemberRoutes
 from . import policies as PolicyRoutes
