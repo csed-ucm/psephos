@@ -10,6 +10,7 @@ from unipoll_api import exceptions as Exceptions
 router = APIRouter()
 
 
+# Get members of a workspace or group
 @router.get("", response_description="List of groups", response_model=Schemas.MemberSchemas.MemberList)
 async def get_members(workspace: Annotated[Documents.ResourceID | None, Query()] = None,
                       group: Annotated[Documents.ResourceID | None, Query()] = None):
@@ -23,7 +24,7 @@ async def get_members(workspace: Annotated[Documents.ResourceID | None, Query()]
     return await Actions.MembersActions.get_members(resource=resource)
 
 
-# Create a new group
+# Add members to a workspace or group
 @router.post("",
              status_code=201,
              response_description="Member list",
