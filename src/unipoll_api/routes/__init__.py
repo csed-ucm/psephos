@@ -7,6 +7,11 @@ from .swagger_docs import create_doc_router
 from .websocket import router as websocket_router
 
 
+API_VERSIONS = {
+    "v1": v1_router,
+    "v2": v2_router,
+}
+
 # Function to generate unique operation IDs for different API versions
 def generate_unique_id(version: int):
     def func(route: APIRoute):
