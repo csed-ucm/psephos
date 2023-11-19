@@ -80,4 +80,4 @@ cookie_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[Account, PydanticObjectId](get_user_manager, [jwt_backend, cookie_backend])  # type: ignore
 
 get_current_active_user = fastapi_users.current_user(active=True)
-active_user: ContextVar = ContextVar("active_user")
+active_user: ContextVar[Account] = ContextVar("active_user")
