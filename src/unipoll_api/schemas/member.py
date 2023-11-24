@@ -3,6 +3,7 @@ from pydantic import ConfigDict, BaseModel, EmailStr, Field, root_validator
 from unipoll_api.documents import ResourceID
 
 
+
 # Schema for the response with basic member info
 class Member(BaseModel):
     id: ResourceID
@@ -43,7 +44,9 @@ class AddMembersRequest(BaseModel):
     @root_validator(pre=True)
     def validate_resource(cls, values):
         if sum([bool(v) for v in values.values()]) != 2:
-            raise ValueError('Either Workspace or Groups must be specified.')
+            # raise ValueError('Either Workspace or Groups must be specified.')
+            from unipoll_api.exceptions.resource import APIException
+            raise APIException(422, "Either Workspace or Group must be specified") 
         return values
 
     model_config = ConfigDict(validate_assignment=True, json_schema_extra={
