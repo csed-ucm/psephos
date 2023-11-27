@@ -2,6 +2,14 @@ import json
 import uvicorn
 import os
 import argparse
+
+# NOTE: The plugins must be initialized before importing any models
+# FIXME: This is a workaround to fix the issue with the import order
+# Initialize plugins
+from unipoll_api.plugins import init_plugins
+init_plugins()
+
+
 from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
