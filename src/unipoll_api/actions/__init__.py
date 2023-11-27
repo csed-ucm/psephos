@@ -1,8 +1,18 @@
-from . import account as AccountActions  # noqa: F401
-from . import group as GroupActions  # noqa: F401
-from . import policy as PolicyActions  # noqa: F401
-from . import poll as PollActions  # noqa: F401
-from . import authentication as AuthActions  # noqa: F401
-from . import workspace as WorkspaceActions  # noqa: F401
-from . import permissions as PermissionsActions  # noqa: F401
-from . import members as MembersActions  # noqa: F401
+from unipoll_api.plugins import run_plugins
+
+from functools import wraps
+
+
+def plugins(f):
+    @wraps(f)
+    async def wrapper(*args, **kwds):
+        print("Action Wrapper")
+        print(f"Action: {f}")
+        print(f"Args: {args}")
+        print(f"Kwds: {kwds}")
+        print("\n")
+        res = await run_plugins(action=f(*args, **kwds))
+        print(f"\nWrapper Result: {res}")
+        
+        return res
+    return wrapper
