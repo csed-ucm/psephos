@@ -1,10 +1,7 @@
 from bson import DBRef
 from beanie.odm.bulk import BulkWriter
 from unipoll_api import AccountManager
-from . import group as GroupActions
-from . import policy as PolicyActions
-from . import poll as PollActions
-from . import members as MembersActions
+from . import plugins, group as GroupActions, policy as PolicyActions, poll as PollActions, members as MembersActions
 from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
@@ -49,6 +46,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
+@plugins
 async def get_workspace(workspace: Workspace,
                         include_groups: bool = False,
                         include_policies: bool = False,
