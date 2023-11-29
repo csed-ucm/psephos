@@ -28,6 +28,8 @@ class Settings(BaseSettings):  # type: ignore
     port: int = 9000
     reload: bool = True
     model_config = SettingsConfigDict(env_file=".env")
+    # plugins: list = ["timer"]
+    plugins: list = ["test_plugin"]
 
 
 @lru_cache()
