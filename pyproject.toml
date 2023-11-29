@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-unipoll-api = "unipoll_api.app:cli_entry_point"
+unipoll-api = "unipoll_api.entry_points:cli_entry_point"
 
 [project.optional-dependencies]
 dev = [

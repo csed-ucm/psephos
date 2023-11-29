@@ -1,26 +1,11 @@
-import json
-import uvicorn
-import os
-import argparse
-
-# NOTE: The plugins must be initialized before importing any models
-# FIXME: This is a workaround to fix the issue with the import order
-# Initialize plugins
-from unipoll_api.plugins import init_plugins
-init_plugins()
-
-
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi import utils as OpenAPIUtils
 from beanie import init_beanie
 # from unipoll_api.routes import router, websocket
 from unipoll_api.routes import create_router, v1_router, v2_router
 from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
-from unipoll_api.__version__ import version
-from unipoll_api.utils import cli_args, colored_dbg
 
 
 # Apply setting from configuration file
@@ -65,83 +50,3 @@ async def on_startup() -> None:
         database=mainDB,  # type: ignore
         document_models=documentModels  # type: ignore
     )
-
-
-# Run the application
-def start_server(host: str = settings.host, port: int = settings.port, reload: bool = settings.reload):
-    uvicorn.run('unipoll_api.app:app', reload=reload, host=host, port=port)
-
-
-# Check if IP address is valid
-def check_ip(arg_value):
-    address = arg_value.split(".")
-    if len(address) != 4:
-        raise argparse.ArgumentTypeError("invalid host value")
-    for i in address:
-        if int(i) > 255 or int(i) < 0:
-            raise argparse.ArgumentTypeError("invalid host value")
-    return arg_value
-
-
-def cli_entry_point():
-    args = cli_args.parse_args()
-
-    if args.command == "run":
-        run(args.host, args.port, args.reload)
-    elif args.command == "setup":
-        setup()
-    elif args.command == "get-openapi":
-        get_openapi(args.version)
-    else:
-        print("Invalid command")
-
-
-def run(host=settings.host, port=settings.port, reload=settings.reload):
-    # args = run_parser.parse_args()
-    colored_dbg.info("University Polling API v{}".format(version))
-    start_server(host, port, reload)
-
-
-def setup():
-    # Print current directory
-    # print("Current directory: {}".format(os.getcwd()))
-
-    # Get user input
-    host = input("Host IP address [{}]: ".format(settings.host))
-    port = input("Host port number [{}]: ".format(settings.port))
-    mongodb_url = input("MongoDB URL [{}]: ".format(settings.mongodb_url))
-    origins = input("Origins [{}]: ".format(settings.origins))
-    admin_email = input("Admin email [{}]: ".format(settings.admin_email))
-
-    # Write to .env file
-    with open(".env", "w") as f:
-        f.write("HOST={}\n".format(host if host else settings.host))
-        f.write("PORT={}\n".format(port if port else settings.port))
-        f.write("MONGODB_URL={}\n".format(mongodb_url if mongodb_url else settings.mongodb_url))
-        f.write("ORIGINS={}\n".format(origins if origins else settings.origins))
-        f.write("ADMIN_EMAIL={}\n".format(admin_email if admin_email else settings.admin_email))
-
-    # Print success message
-    print(f"Your configuration has been saved to {os.getcwd()}/.env")
-
-# TODO: Get version list dynamically
-def get_openapi(versions: list[int] = [1, 2]):
-    if not app.openapi_schema:
-        from unipoll_api.routes import generate_unique_id, API_VERSIONS
-
-        router = APIRouter()
-        for i in versions:
-            router.include_router(API_VERSIONS[f'v{i}'],
-                                  prefix=f"/v{i}",
-                                  generate_unique_id_function=generate_unique_id(i))
-        
-
-        openapi_schemas = OpenAPIUtils.get_openapi(title=app.title,
-                                                   version=settings.app_version,
-                                                   routes=router.routes)
-        openapi_schema = openapi_schemas
-        app.openapi_schema = openapi_schema
-    json.dump(app.openapi_schema, open("openapi.json", "w"), indent=2)
-
-    # Print success message
-    print(f"OpenAPI schema saved to {os.getcwd()}/openapi.json")
