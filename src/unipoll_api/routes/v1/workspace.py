@@ -243,15 +243,15 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
 
 
 # Get All Workspace Permissions
-@router.get("/permissions",
-            tags=["Workspaces"],
-            response_description="List of all workspace permissions",
-            response_model=PolicySchemas.PermissionList)
-async def get_workspace_permissions():
-    try:
-        return await actions.PermissionsActions.get_workspace_permissions()
-    except APIException as e:
-        raise HTTPException(status_code=e.code, detail=str(e))
+# @router.get("/permissions",
+#             tags=["Workspaces"],
+#             response_description="List of all workspace permissions",
+#             response_model=PolicySchemas.PermissionList)
+# async def get_workspace_permissions():
+#     try:
+#         return await actions.PermissionsActions.get_workspace_permissions()
+#     except APIException as e:
+#         raise HTTPException(status_code=e.code, detail=str(e))
 
 
 # Get Workspace Polls
