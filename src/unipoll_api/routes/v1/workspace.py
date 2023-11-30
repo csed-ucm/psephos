@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from unipoll_api import dependencies as Dependencies
 from unipoll_api import actions
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.documents import Workspace, ResourceID, Policy, Member
+from unipoll_api.documents import Poll, Workspace, ResourceID, Policy, Member
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
 
 
@@ -277,6 +277,62 @@ async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace)
                       input_data: PollSchemas.CreatePollRequest = Body(...)):
     try:
         return await actions.PollActions.create_poll(workspace, input_data)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get a poll in the workspace
+@router.get("/{workspace_id}/polls/{poll_id}",
+            tags=["Polls"],
+            response_description="Poll data",
+            response_model=PollSchemas.PollResponse)
+async def get_poll(workspace: Workspace = Depends(Dependencies.get_workspace),
+                   poll: Poll = Depends(Dependencies.get_poll),
+                   include: Annotated[list[Literal["all", "policies", "questions"]] | None, Query()] = None):
+    try:
+        params = {}
+        if include:
+            if "all" in include:
+                params = {"include_groups": True,
+                          "include_members": True,
+                          "include_policies": True,
+                          "include_polls": True}
+            else:
+                if "groups" in include:
+                    params["include_groups"] = True
+                if "members" in include:
+                    params["include_members"] = True
+                if "policies" in include:
+                    params["include_policies"] = True
+                if "polls" in include:
+                    params["include_polls"] = True
+        return await actions.PollActions.get_poll(poll, **params)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Update a poll in the workspace
+@router.patch("/{workspace_id}/polls/{poll_id}",
+              tags=["Polls"],
+              response_description="Updated poll",
+              response_model=PollSchemas.PollResponse)
+async def update_poll(poll: Poll = Depends(Dependencies.get_poll),
+                      input_data: PollSchemas.UpdatePollRequest = Body(...)):
+    try:
+        return await actions.PollActions.update_poll(poll, input_data)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Delete a poll in the workspace
+@router.delete("/{workspace_id}/polls/{poll_id}",
+               tags=["Polls"],
+               response_description="Deleted poll",
+               status_code=204)
+async def delete_poll(poll: Poll = Depends(Dependencies.get_poll)):
+    try:
+        await actions.PollActions.delete_poll(poll)
+        return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
