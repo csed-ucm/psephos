@@ -38,21 +38,23 @@ async def get_group_permissions():
 async def get_member_permissions(member: Member = Depends(Dependencies.get_member),
                                  workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
-        workspace_permissions = await Permissions.get_all_permissions(member, workspace)
+        # await member.fetch_all_links()
+        
+        workspace_permissions = await Permissions.get_all_permissions(workspace, member)
         group_permissions = {}
-        for group in member.groups:
-            group_permissions[group.id] = await Permissions.get_all_permissions(member, group)
+        for group in workspace.groups:
+            group_permissions[group.id] = await Permissions.get_all_permissions(group, member)
         
         return {
             "permissions": {
                 "workspace": {
-                    "id": workspace.id,
-                    "permissions": workspace_permissions,
+                    "id": str(workspace.id),
+                    "permissions": Permissions.convert_permission_to_string(workspace_permissions, "Workspace"),
                 },
                 "groups": [ {
-                        "id": group.id,
-                        "permissions": group_permissions[group.id]
-                    } for group in member.groups 
+                        "id": str(group_id),
+                        "permissions": Permissions.convert_permission_to_string(permissions, "Group")
+                    } for group_id, permissions in group_permissions.items() 
                 ]
             }
         }
