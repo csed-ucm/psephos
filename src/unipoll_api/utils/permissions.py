@@ -1,4 +1,5 @@
 from enum import IntFlag
+import re
 import unipoll_api
 from unipoll_api import exceptions
 
@@ -128,6 +129,13 @@ async def get_all_permissions(resource, member) -> Permissions:
                     # print("Group permissions: ", policy.permissions)
 
     return permission_sum  # type: ignore
+
+
+def convert_permission_to_string(permissions: Permissions, resource_type) -> list[str]:
+    # return eval(get_document_type().capitalize() + "Permissions")[string]
+    print(permissions)
+    permission_type = PermissionTypes[resource_type]
+    return permission_type(permissions).name.split('|')  # type: ignore
 
 
 def convert_string_to_permission(resource_type: str, string: str):
