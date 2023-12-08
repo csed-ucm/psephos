@@ -148,7 +148,7 @@ def convert_string_to_permission(resource_type: str, string: str):
 
 async def check_permissions(resource, required_permissions: str | list[str] | None = None, permission_check=True):
     if permission_check and required_permissions:
-        account = unipoll_api.AccountManager.active_user.get()           # Get the active user
+        account = unipoll_api.AccountManager.active_user.get()  # Get the active user
 
         from unipoll_api.dependencies import get_member
         member = await get_member(account, resource)
