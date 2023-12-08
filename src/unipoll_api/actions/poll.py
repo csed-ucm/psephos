@@ -10,20 +10,22 @@ async def get_polls(workspace: Workspace | None = None,
                     check_permissions: bool = True) -> PollSchemas.PollList:
     all_workspaces = [workspace] if workspace else await Workspace.find(fetch_links=True).to_list()
 
-    poll_list = []
+    polls = []
     for workspace in all_workspaces:
         try:
             await Permissions.check_permissions(workspace, "get_polls", check_permissions)
-            poll_list += workspace.polls  # type: ignore
+            polls += workspace.polls  # type: ignore
         except ResourceExceptions.UserNotAuthorized:
             poll: Poll
             for poll in workspace.polls:  # type: ignore
                 if poll.public:
-                    poll_list.append(poll)
+                    polls.append(poll)
                 else:
-                    poll_list.append(await get_poll(poll, check_permissions))  # type: ignore
+                    polls.append(await get_poll(poll, check_permissions))  # type: ignore
+
+    poll_list = []
     # Build poll list and return the result
-    for poll in poll_list:  # type: ignore
+    for poll in polls:  # type: ignore
         poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
 
@@ -42,13 +44,13 @@ async def create_poll(workspace: Workspace,
             raise PollExceptions.NonUniqueName(poll)
 
     # Create a new poll
-    new_poll = Poll(name=input_data.name,
-                    description=input_data.description,
-                    workspace=workspace,  # type: ignore
-                    public=input_data.public,
-                    published=input_data.published,
-                    questions=input_data.questions,
-                    policies=[])
+    new_poll = await Poll(name=input_data.name,
+                          description=input_data.description,
+                          workspace=workspace,  # type: ignore
+                          public=input_data.public,
+                          published=input_data.published,
+                          questions=input_data.questions,
+                          policies=[]).save()
 
     # Check if poll was created
     if not new_poll:
@@ -59,7 +61,14 @@ async def create_poll(workspace: Workspace,
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
     # Return the new poll
-    return PollSchemas.PollResponse(**new_poll.model_dump())
+    return PollSchemas.PollResponse(id=new_poll.id,
+                                    name=new_poll.name,
+                                    description=new_poll.description,
+                                    public=new_poll.public,
+                                    published=new_poll.published,
+                                    workspace=WorkspaceSchemas.WorkspaceShort(**workspace.model_dump()),
+                                    questions=new_poll.questions,
+                                    policies=new_poll.policies)
 
 
 async def get_poll(poll: Poll,
