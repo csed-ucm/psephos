@@ -169,12 +169,10 @@ class Group(Resource):
 
 
 class Poll(Resource):
-    id: ResourceID = Field(default_factory=ResourceID, alias="_id")
-    workspace: Link[Workspace]
+    workspace: BackLink[Workspace] = Field(original_field="polls")
     public: bool
     published: bool
     questions: list
-    policies: list[Link["Policy"]]
 
 
 class Policy(Document):
