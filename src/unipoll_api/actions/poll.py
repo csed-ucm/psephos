@@ -22,7 +22,7 @@ async def get_polls(workspace: Workspace | None = None,
                     polls.append(poll)
                 else:
                     polls.append(await get_poll(poll, check_permissions))  # type: ignore
-    
+
     poll_list = []
     # Build poll list and return the result
     for poll in polls:  # type: ignore
@@ -42,8 +42,6 @@ async def create_poll(workspace: Workspace,
     for poll in workspace.polls:  # type: ignore
         if poll.name == input_data.name:
             raise PollExceptions.NonUniqueName(poll)
-
-    
 
     # Create a new poll
     new_poll = await Poll(name=input_data.name,
@@ -68,7 +66,7 @@ async def create_poll(workspace: Workspace,
                                     description=new_poll.description,
                                     public=new_poll.public,
                                     published=new_poll.published,
-                                    workspace= WorkspaceSchemas.WorkspaceShort(**workspace.model_dump()),
+                                    workspace=WorkspaceSchemas.WorkspaceShort(**workspace.model_dump()),
                                     questions=new_poll.questions,
                                     policies=new_poll.policies)
 
