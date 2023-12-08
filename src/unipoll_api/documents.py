@@ -132,7 +132,7 @@ class Workspace(Resource):
 
 
 class Group(Resource):
-    workspace: BackLink[Workspace] = Field(original_field="groups")
+    workspace: BackLink[Workspace] = Field(original_field="groups")  # type: ignore
     members: list[Link["Member"]] = []
     groups: list[Link["Group"]] = []
 
@@ -169,7 +169,7 @@ class Group(Resource):
 
 
 class Poll(Resource):
-    workspace: BackLink[Workspace] = Field(original_field="polls")
+    workspace: BackLink[Workspace] = Field(original_field="polls")  # type: ignore
     public: bool
     published: bool
     questions: list
@@ -205,6 +205,6 @@ class Policy(Document):
 class Member(Document):
     id: ResourceID = Field(default_factory=ResourceID, alias="_id")
     account: Link[Account]
-    workspace: BackLink[Workspace] = Field(original_field="members")
-    groups: list[BackLink[Group]] = Field(original_field="members")
+    workspace: BackLink[Workspace] = Field(original_field="members")  # type: ignore
+    groups: list[BackLink[Group]] = Field(original_field="members")  # type: ignore
     policies: list[Link[Policy]] = []
