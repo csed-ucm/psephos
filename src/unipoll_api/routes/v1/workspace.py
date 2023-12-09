@@ -293,19 +293,13 @@ async def get_poll(workspace: Workspace = Depends(Dependencies.get_workspace),
         params = {}
         if include:
             if "all" in include:
-                params = {"include_groups": True,
-                          "include_members": True,
-                          "include_policies": True,
-                          "include_polls": True}
+                params = {"include_questions": True,
+                          "include_policies": True}
             else:
                 if "groups" in include:
-                    params["include_groups"] = True
-                if "members" in include:
-                    params["include_members"] = True
+                    params["include_questions"] = True
                 if "policies" in include:
                     params["include_policies"] = True
-                if "polls" in include:
-                    params["include_polls"] = True
         return await actions.PollActions.get_poll(poll, **params)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
