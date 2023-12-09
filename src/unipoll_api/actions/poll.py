@@ -1,9 +1,10 @@
 from beanie import WriteRules
-from unipoll_api.documents import Poll, Workspace
+from unipoll_api.account_manager import active_user
+from unipoll_api.documents import Member, Poll, Workspace
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
 from unipoll_api.exceptions import ResourceExceptions, PollExceptions
-from unipoll_api import actions
+from unipoll_api import actions, dependencies
 
 
 async def get_polls(workspace: Workspace | None = None,
@@ -37,6 +38,8 @@ async def create_poll(workspace: Workspace,
     # Check if the user has permission to create polls
     await Permissions.check_permissions(workspace, "create_polls", check_permissions)
 
+    member: Member = await dependencies.get_member_by_account(active_user.get(), workspace)
+
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
     for poll in workspace.polls:  # type: ignore
@@ -44,17 +47,20 @@ async def create_poll(workspace: Workspace,
             raise PollExceptions.NonUniqueName(poll)
 
     # Create a new poll
-    new_poll = await Poll(name=input_data.name,
+    new_poll: Poll = Poll(name=input_data.name,
                           description=input_data.description,
                           workspace=workspace,  # type: ignore
                           public=input_data.public,
                           published=input_data.published,
                           questions=input_data.questions,
-                          policies=[]).save()
+                          policies=[])
 
     # Check if poll was created
     if not new_poll:
         raise PollExceptions.ErrorWhileCreating(new_poll)
+    
+    # Add the user as the owner of the poll
+    await new_poll.add_policy(member, Permissions.POLL_ALL_PERMISSIONS)
 
     # Add the poll to the workspace
     workspace.polls.append(new_poll)  # type: ignore
