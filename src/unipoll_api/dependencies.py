@@ -101,7 +101,7 @@ async def get_poll(poll_id: ResourceID) -> Poll:
     poll = await Poll.get(poll_id, fetch_links=True)
     if poll:
         return poll
-    raise Exceptions.GroupExceptions.GroupNotFound(poll_id)
+    raise Exceptions.PollExceptions.PollNotFound(poll_id)
 
 
 # Dependency to get a policy by id and verify it exists
