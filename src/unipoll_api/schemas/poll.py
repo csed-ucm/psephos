@@ -73,6 +73,18 @@ class CreatePollRequest(BaseModel):
     public: bool
     published: bool
     questions: list[Question]
+    
+    @model_validator(mode='after')
+    def validate_questions(self) -> 'CreatePollRequest':
+        if len(self.questions) == 0 and self.published:
+            raise ValueError('Poll must have at least one question')
+        if self.questions:
+            for question in self.questions:
+                if question.id > len(self.questions):
+                    raise ValueError('Question ID cannot be greater than the number of questions')
+            if len(self.questions) != len(set([question.id for question in self.questions])):
+                raise ValueError('Question IDs must be unique')
+        return self
 
 
 class UpdatePollRequest(BaseModel):
