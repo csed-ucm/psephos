@@ -1,13 +1,15 @@
 from typing import Optional, Any
-from pydantic import ConfigDict, BaseModel
+from pydantic import ConfigDict, BaseModel, model_validator
 from unipoll_api.documents import ResourceID
+from unipoll_api.schemas import question
 from unipoll_api.schemas.question import Question
+from unipoll_api.schemas.workspace import Workspace
+from unipoll_api.schemas.policy import Policy
 
 
 class PollResponse(BaseModel):
-    id: Optional[ResourceID] = None
-    # workspace: Optional[Union['Workspace', 'WorkspaceShort']]
-    workspace: Optional[Any] = None
+    id: ResourceID
+    workspace: Any 
     name: str
     description: str
     public: bool
@@ -66,7 +68,7 @@ class PollList(BaseModel):
 
 class CreatePollRequest(BaseModel):
     name: str
-    workspace: ResourceID
+    workspace: Optional[ResourceID] = None
     description: str
     public: bool
     published: bool
