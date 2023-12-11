@@ -85,7 +85,7 @@ async def get_poll(poll: Poll,
         await Permissions.check_permissions(poll, "get_poll", check_permissions)
 
     # Fetch the resources if the user has the required permissions
-    questions = (await get_poll_questions(poll)).questions if include_questions else None
+    questions = (await get_poll_questions(poll, check_permissions)).questions if include_questions else None
     policies = (await actions.PolicyActions.get_policies(resource=poll)).policies if include_policies else None
 
     workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
@@ -116,7 +116,13 @@ async def get_poll_questions(poll: Poll,
     return QuestionSchemas.QuestionList(questions=question_list)
 
 
-async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSchemas.PollResponse:
+async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest, check_permissions: bool = True) -> PollSchemas.PollResponse:
+    await Permissions.check_permissions(poll, "update_poll", check_permissions)
+    
+    # BUG: After updating the poll, the workspace turns into a Link
+    # HACK: Save the workspace before updating the poll
+    workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
+    
     # Update the poll
     if data.name:
         poll.name = data.name
@@ -131,7 +137,15 @@ async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSc
 
     # Save the updated poll
     await Poll.save(poll)
-    return await get_poll(poll, include_questions=True)
+
+    # Return the workspace with the fetched resources
+    return PollSchemas.PollResponse(id=poll.id,
+                                    name=poll.name,
+                                    description=poll.description,
+                                    public=poll.public,
+                                    published=poll.published,
+                                    workspace=workspace,
+                                    questions=poll.questions)
 
 
 async def delete_poll(poll: Poll):
