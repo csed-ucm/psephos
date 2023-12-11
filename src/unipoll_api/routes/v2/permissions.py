@@ -35,15 +35,19 @@ async def get_group_permissions():
 
 @router.get("/members/{member_id}",
             response_description="List of all member permissions")
-async def get_member_permissions(member: Member = Depends(Dependencies.get_member),
-                                 workspace: Workspace = Depends(Dependencies.get_workspace)):
+async def get_member_permissions(member: Member = Depends(Dependencies.get_member)):
     try:
-        # await member.fetch_all_links()
+        
+        await member.fetch_all_links()        
+        workspace = member.workspace
         
         workspace_permissions = await Permissions.get_all_permissions(workspace, member)
         group_permissions = {}
+        poll_permissions = {}
         for group in workspace.groups:
             group_permissions[group.id] = await Permissions.get_all_permissions(group, member)
+        for poll in workspace.polls:
+            poll_permissions[poll.id] = await Permissions.get_all_permissions(poll, member)
         
         return {
             "permissions": {
@@ -55,6 +59,11 @@ async def get_member_permissions(member: Member = Depends(Dependencies.get_membe
                         "id": str(group_id),
                         "permissions": Permissions.convert_permission_to_string(permissions, "Group")
                     } for group_id, permissions in group_permissions.items() 
+                ],
+                "polls": [ {
+                        "id": str(poll_id),
+                        "permissions": Permissions.convert_permission_to_string(permissions, "Poll")
+                    } for poll_id, permissions in poll_permissions.items() 
                 ]
             }
         }
