@@ -1,7 +1,7 @@
-from click import group
 from fastapi import APIRouter, HTTPException, Depends
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.documents import Account, Workspace, Member
+from unipoll_api.account_manager import active_user
+from unipoll_api.documents import Account, Workspace, Member, Group
 from unipoll_api.schemas import PolicySchemas
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.actions import PermissionsActions
@@ -22,6 +22,18 @@ async def get_workspace_permissions():
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
+@router.get("/workspaces/{workspace_id}",
+            response_description="List of all member permissions in the workspace")
+async def get_workspace_member_permissions(workspace: Workspace = Depends(Dependencies.get_workspace)):
+    try:
+        account = active_user.get()
+        member = await Dependencies.get_member_by_account(account, workspace)
+        workspace_permissions = await Permissions.get_all_permissions(workspace, member)
+        return Permissions.convert_permission_to_string(workspace_permissions, "Workspace")
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
 # Get All Group Permissions
 @router.get("/groups",
             response_description="List of all Group permissions",
@@ -29,6 +41,18 @@ async def get_workspace_permissions():
 async def get_group_permissions():
     try:
         return await PermissionsActions.get_group_permissions()
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+    
+
+@router.get("/groups/{group_id}",
+            response_description="List of all member permissions in the workspace")
+async def get_group_member_permissions(group: Group = Depends(Dependencies.get_group)):
+    try:
+        account = active_user.get()
+        member = await Dependencies.get_member_by_account(account, group.workspace)
+        group_permissions = await Permissions.get_all_permissions(group, member)
+        return Permissions.convert_permission_to_string(group_permissions, "Group")
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
