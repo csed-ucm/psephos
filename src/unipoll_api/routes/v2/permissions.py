@@ -50,7 +50,7 @@ async def get_member_permissions(member: Member = Depends(Dependencies.get_membe
             poll_permissions[poll.id] = await Permissions.get_all_permissions(poll, member)
         
         return {
-            "permissions": {
+            # "permissions": {
                 "workspace": {
                     "id": str(workspace.id),
                     "permissions": Permissions.convert_permission_to_string(workspace_permissions, "Workspace"),
@@ -65,7 +65,7 @@ async def get_member_permissions(member: Member = Depends(Dependencies.get_membe
                         "permissions": Permissions.convert_permission_to_string(permissions, "Poll")
                     } for poll_id, permissions in poll_permissions.items() 
                 ]
-            }
+            # }
         }
         
     except APIException as e:
