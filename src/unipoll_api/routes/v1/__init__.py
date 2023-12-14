@@ -6,6 +6,7 @@ from . import account as AccountRoutes
 from . import authentication as AuthenticationRoutes
 from . import group as GroupRoutes
 from . import workspace as WorkspaceRoutes
+from . import poll as PollRoutes
 
 # Create main router
 router: APIRouter = APIRouter()
@@ -22,6 +23,6 @@ router.include_router(WorkspaceRoutes.router,
                       prefix="/workspaces",
                       dependencies=[Depends(Dependencies.set_active_user)])
 router.include_router(GroupRoutes.router,
-                      prefix="/workspaces/{workspace_id}/groups",
-                      dependencies=[Depends(Dependencies.set_active_user),
-                                    Depends(Dependencies.get_workspace)])
+                      dependencies=[Depends(Dependencies.set_active_user)])
+router.include_router(PollRoutes.router,
+                      dependencies=[Depends(Dependencies.set_active_user)])
