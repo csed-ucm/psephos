@@ -19,10 +19,11 @@ async def get_polls(workspace: Workspace | None = None,
         except ResourceExceptions.UserNotAuthorized:
             poll: Poll
             for poll in workspace.polls:  # type: ignore
-                if poll.public:
-                    polls.append(poll)
-                else:
+                try:
                     polls.append(await get_poll(poll, check_permissions))  # type: ignore
+                except ResourceExceptions.UserNotAuthorized:
+                    continue
+                
 
     poll_list = []
     # Build poll list and return the result
