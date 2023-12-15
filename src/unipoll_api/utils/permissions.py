@@ -133,6 +133,8 @@ async def get_all_permissions(resource, member) -> Permissions:
 
 def convert_permission_to_string(permissions: Permissions, resource_type: str) -> list[str]:
     permission_type = PermissionTypes[resource_type]
+    if permissions == permission_type(0):
+        return []
     return permission_type(permissions).name.split('|')  # type: ignore
 
 
