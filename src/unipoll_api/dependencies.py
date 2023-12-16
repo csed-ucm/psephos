@@ -50,7 +50,7 @@ async def get_member_by_account(account: Account, resource: Workspace | Group) -
     for member in resource.members:
         if member.account.id == account.id:  # type: ignore
             return member  # type: ignore
-    raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
+    raise Exceptions.ResourceExceptions.UserNotMember(resource, account)
 
 
 async def websocket_auth(websocket: WebSocket,
