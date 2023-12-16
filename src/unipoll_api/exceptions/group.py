@@ -1,4 +1,4 @@
-from unipoll_api.documents import ResourceID, Account, Group
+from unipoll_api.documents import Member, ResourceID, Account, Group
 from unipoll_api.exceptions import resource
 
 
@@ -52,5 +52,5 @@ class UserNotMember(resource.UserNotMember):
 
 # Error while removing a member
 class ErrorWhileRemovingMember(resource.ErrorWhileRemovingMember):
-    def __init__(self, group: Group, user: Account):
-        super().__init__(group, user)
+    def __init__(self, group: Group, member: Member):
+        super().__init__(group, member)
