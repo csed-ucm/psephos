@@ -160,10 +160,14 @@ async def check_permissions(resource: "Resource",
     if permission_check and required_permissions:
         account = unipoll_api.AccountManager.active_user.get()  # Get the active user
 
-        if resource.get_document_type() == "Poll":
-            member = await unipoll_api.Dependencies.get_member_by_account(account, resource.workspace)
-        else:
-            member = await unipoll_api.Dependencies.get_member_by_account(account, resource)  # type: ignore
+        try:
+            if resource.get_document_type() == "Poll":
+                member = await unipoll_api.Dependencies.get_member_by_account(account, resource.workspace)
+            else:
+                member = await unipoll_api.Dependencies.get_member_by_account(account, resource)  # type: ignore
+        except exceptions.ResourceExceptions.UserNotMember:
+            actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
+            raise exceptions.ResourceExceptions.UserNotAuthorized(account, resource, actions)
 
         user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
         if isinstance(required_permissions, str):  # If only one permission is required
@@ -174,8 +178,6 @@ async def check_permissions(resource: "Resource",
 
         if not compare_permissions(user_permissions, required_permission):
             actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
-            raise exceptions.ResourceExceptions.UserNotAuthorized(account,
-                                                                  f"{resource.get_document_type()} {resource.id}",
-                                                                  actions)
+            raise exceptions.ResourceExceptions.UserNotAuthorized(account, resource, actions)
 
 # Resource = Pydantic.update_model()
