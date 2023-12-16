@@ -23,7 +23,7 @@ class GroupNotFound(resource.ResourceNotFound):
 # Not authorized
 class UserNotAuthorized(resource.UserNotAuthorized):
     def __init__(self, account: Account, group: Group, action: str):
-        super().__init__(account, f'group {group.name}', action)
+        super().__init__(account, group, action)
 
 
 # Exception for when a Group was not deleted successfully

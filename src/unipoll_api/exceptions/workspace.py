@@ -41,7 +41,7 @@ class UserNotMember(resource.UserNotMember):
 # Not authorized
 class UserNotAuthorized(resource.UserNotAuthorized):
     def __init__(self, account: Account, workspace: Workspace, action: str = "perform this action in"):
-        super().__init__(account, f"workspace {workspace.name}", action)
+        super().__init__(account, workspace, action)
 
 
 # Action not found
