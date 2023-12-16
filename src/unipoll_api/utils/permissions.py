@@ -160,6 +160,9 @@ async def check_permissions(resource: "Resource",
     if permission_check and required_permissions:
         account = unipoll_api.AccountManager.active_user.get()  # Get the active user
 
+        if isinstance(required_permissions, str):  # If only one permission is required
+            required_permissions = [required_permissions]
+
         try:
             if resource.get_document_type() == "Poll":
                 member = await unipoll_api.Dependencies.get_member_by_account(account, resource.workspace)
@@ -170,8 +173,6 @@ async def check_permissions(resource: "Resource",
             raise exceptions.ResourceExceptions.UserNotAuthorized(account, resource, actions)
 
         user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
-        if isinstance(required_permissions, str):  # If only one permission is required
-            required_permissions = [required_permissions]
 
         permissions_list = [convert_string_to_permission(resource.get_document_type(), p) for p in required_permissions]
         required_permission = eval(resource.get_document_type() + "Permissions")(sum(permissions_list))
