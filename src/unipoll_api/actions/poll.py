@@ -23,8 +23,6 @@ async def get_polls(workspace: Workspace | None = None,
                     polls.append(await get_poll(poll, check_permissions))  # type: ignore
                 except ResourceExceptions.UserNotAuthorized:
                     continue
-                
-
     poll_list = []
     # Build poll list and return the result
     for poll in polls:  # type: ignore
@@ -83,10 +81,14 @@ async def get_poll(poll: Poll,
                    include_policies: bool = False,
                    check_permissions: bool = True) -> PollSchemas.PollResponse:
     if not poll.public:
-        await Permissions.check_permissions(poll, "get_poll", check_permissions)
+        # await Permissions.check_permissions(poll, "get_poll", check_permissions)
+        try:
+            await Permissions.check_permissions(poll.workspace, "get_polls", check_permissions)
+        except ResourceExceptions.UserNotAuthorized:
+            await Permissions.check_permissions(poll, "get_poll", check_permissions)
 
     # Fetch the resources if the user has the required permissions
-    questions = (await get_poll_questions(poll, check_permissions)).questions if include_questions else None
+    questions = (await get_poll_questions(poll, False)).questions if include_questions else None
     policies = (await actions.PolicyActions.get_policies(resource=poll)).policies if include_policies else None
 
     workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
