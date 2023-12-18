@@ -80,6 +80,7 @@ class WorkspaceCreateOutput(BaseModel):
     description: str = Field(title="Description")
     model_config = ConfigDict(json_schema_extra={
         "example": {
+            "id": "5eb7cf5a86d9755df3a6c593",
             "name": "Workspace 01",
             "description": "This is an example workspace",
         }
