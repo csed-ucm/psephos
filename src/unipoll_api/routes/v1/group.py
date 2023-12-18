@@ -12,7 +12,7 @@ from unipoll_api import AccountManager
 
 router = APIRouter()
 
-query_params = list[Literal["policies", "members", "all"]]
+query_params = list[Literal["workspace", "policies", "members", "all"]]
 
 
 # List all groups in the workspace
@@ -55,12 +55,15 @@ async def get_group(workspace: Workspace = Depends(Dependencies.get_workspace),
         params = {}
         if include:
             if "all" in include:
-                params = {"include_members": True, "include_policies": True}
+                # params = {"include_members": True, "include_policies": True}
+                params = {"include_" + param: True for param in ["members", "policies", "workspace"]}
             else:
                 if "members" in include:
                     params["include_members"] = True
                 if "policies" in include:
                     params["include_policies"] = True
+                if "workspaces" in include:
+                    params["include_workspaces"] = True
         return await GroupActions.get_group(group, **params)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
