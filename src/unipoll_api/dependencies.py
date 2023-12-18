@@ -46,7 +46,6 @@ async def get_member_by_account(account: Account, resource: Workspace | Group) -
     """
     Returns a member with the given id.
     """
-
     for member in resource.members:
         if member.account.id == account.id:  # type: ignore
             return member  # type: ignore
