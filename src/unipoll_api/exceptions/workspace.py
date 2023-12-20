@@ -1,4 +1,4 @@
-from unipoll_api.documents import ResourceID, Workspace, Account
+from unipoll_api.documents import Member, ResourceID, Workspace, Account
 from unipoll_api.exceptions import resource
 
 
@@ -41,7 +41,7 @@ class UserNotMember(resource.UserNotMember):
 # Not authorized
 class UserNotAuthorized(resource.UserNotAuthorized):
     def __init__(self, account: Account, workspace: Workspace, action: str = "perform this action in"):
-        super().__init__(account, f"workspace {workspace.name}", action)
+        super().__init__(account, workspace, action)
 
 
 # Action not found
@@ -52,5 +52,5 @@ class ActionNotFound(resource.ActionNotFound):
 
 # Error while removing member
 class ErrorWhileRemovingMember(resource.ErrorWhileRemovingMember):
-    def __init__(self, workspace: Workspace, user: Account):
-        super().__init__(workspace, user)
+    def __init__(self, workspace: Workspace, member: Member):
+        super().__init__(workspace, member)

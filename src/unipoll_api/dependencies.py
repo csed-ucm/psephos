@@ -32,15 +32,25 @@ async def get_account(account_id: ResourceID) -> Account:
     return account
 
 
-async def get_member(account: Account, resource: Workspace | Group) -> Member:
+@http_dependency
+async def get_member(member_id: ResourceID) -> Member:
     """
     Returns a member with the given id.
     """
+    member = await Member.get(member_id)
+    if not member:
+        raise Exceptions.ResourceExceptions.ResourceNotFound("member", member_id)
+    return member
 
+
+async def get_member_by_account(account: Account, resource: Workspace | Group) -> Member:
+    """
+    Returns a member with the given id.
+    """
     for member in resource.members:
         if member.account.id == account.id:  # type: ignore
             return member  # type: ignore
-    raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
+    raise Exceptions.ResourceExceptions.UserNotMember(resource, account)
 
 
 async def websocket_auth(session: Annotated[str | None, Cookie()] = None,
@@ -91,7 +101,7 @@ async def get_poll(poll_id: ResourceID) -> Poll:
     poll = await Poll.get(poll_id, fetch_links=True)
     if poll:
         return poll
-    raise Exceptions.GroupExceptions.GroupNotFound(poll_id)
+    raise Exceptions.PollExceptions.PollNotFound(poll_id)
 
 
 # Dependency to get a policy by id and verify it exists

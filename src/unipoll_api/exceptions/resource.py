@@ -22,7 +22,7 @@ class InternalServerError(APIException):
 
 class NonUniqueName(APIException):
     def __init__(self, resource: str, resource_name: str):
-        super().__init__(code=status.HTTP_400_BAD_REQUEST,
+        super().__init__(code=status.HTTP_409_CONFLICT,
                          detail=f"{resource} with name {resource_name} already exists")
 
 
@@ -46,9 +46,9 @@ class ErrorWhileDeleting(APIException):
 
 # Not authorized
 class UserNotAuthorized(APIException):
-    def __init__(self, account: Account, resource: str, action: str = "perform this action"):
+    def __init__(self, account: Account, resource: Resource, action: str = "perform this action"):
         super().__init__(code=status.HTTP_403_FORBIDDEN,
-                         detail=f"User {account.email} is not authorized to {action} in {resource}")
+                         detail=f"User {account.email} is not authorized to {action} in {resource.get_document_type()} {resource.name}")
 
 
 # Action not found

@@ -100,7 +100,7 @@ async def test_login(client_test: AsyncClient, new_user: TestAccount = new_user)
 async def test_get_account_info(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Getting new user's account information")
-    response = await client_test.get("/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
+    response = await client_test.get("/v1/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == 200
     response = response.json()
     assert response.get("id") == new_user.id
@@ -117,7 +117,7 @@ async def test_get_account_info(client_test: AsyncClient):
 async def test_delete_account(client_test: AsyncClient):
     print("\n")
     colored_dbg.test_info("Deleting new user's account")
-    response = await client_test.delete("/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
+    response = await client_test.delete("/v1/accounts/me", headers={"Authorization": "Bearer " + new_user.token})
     assert response.status_code == status.HTTP_204_NO_CONTENT
     colored_dbg.test_success("New user's account has been deleted")
 

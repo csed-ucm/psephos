@@ -1,12 +1,13 @@
 import asyncio
 from bson import DBRef
+from beanie.odm.bulk import BulkWriter
 from unipoll_api import AccountManager
 from unipoll_api import actions
 from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions, events
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
-# from unipoll_api.dependencies import get_member
+# from unipoll_api.dependencies import get_member_by_account
 
 
 # Get a list of workspaces where the account is a owner/member
@@ -102,16 +103,35 @@ async def update_workspace(workspace: Workspace,
 async def delete_workspace(workspace: Workspace, check_permissions: bool = True):
     await Permissions.check_permissions(workspace, "delete_workspace", check_permissions)
 
-    workspace_ref = DBRef(collection="Workspace", id=workspace.id)
+    # workspace_ref = DBRef(collection="Workspace", id=workspace.id)
 
     # Delete all groups in the workspace
-    for group in workspace.groups:
-        await actions.GroupActions.delete_group(group)  # type: ignore
+    # for group in workspace.groups:
+        # await actions.GroupActions.delete_group(group)  # type: ignore
 
     # TODO: Delete all polls in the workspace
 
     # Delete Workspace
+
+    # BUG: Deleting workspace also deletes account
+    # TODO: Find a way to keep the account 
+    # from beanie import DeleteRules
+    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
+
+    # await Workspace.delete(workspace)
+
+    # if await workspace.get(workspace.id):
+    #     raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
+    
+    # await Policy.find({"parent_resource": workspace_ref}).delete()
+    # mems = await Member.find(Member.workspace.id == workspace.id, fetch_links=True).delete()
+
+    async with BulkWriter() as writer:
+        for member in workspace.members:
+            await Member.delete(member, bulk_writer=writer)
+    
+    async with BulkWriter() as writer:
+        for policy in workspace.policies:
+            await Policy.delete(policy, bulk_writer=writer)
+    
     await Workspace.delete(workspace)
-    if await workspace.get(workspace.id):
-        raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    await Policy.find({"parent_resource": workspace_ref}).delete()

@@ -1,29 +1,31 @@
 from beanie import WriteRules
-from unipoll_api.documents import Poll, Workspace
+from unipoll_api.account_manager import active_user
+from unipoll_api.documents import Member, Poll, Workspace
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, WorkspaceSchemas
 from unipoll_api.utils import Permissions
 from unipoll_api.exceptions import ResourceExceptions, PollExceptions
-from unipoll_api import actions
+from unipoll_api import actions, dependencies
 
 
 async def get_polls(workspace: Workspace | None = None,
                     check_permissions: bool = True) -> PollSchemas.PollList:
     all_workspaces = [workspace] if workspace else await Workspace.find(fetch_links=True).to_list()
 
-    poll_list = []
+    polls = []
     for workspace in all_workspaces:
         try:
             await Permissions.check_permissions(workspace, "get_polls", check_permissions)
-            poll_list += workspace.polls  # type: ignore
+            polls += workspace.polls  # type: ignore
         except ResourceExceptions.UserNotAuthorized:
             poll: Poll
             for poll in workspace.polls:  # type: ignore
-                if poll.public:
-                    poll_list.append(poll)
-                else:
-                    poll_list.append(await get_poll(poll, check_permissions))  # type: ignore
+                try:
+                    polls.append(await get_poll(poll, check_permissions))  # type: ignore
+                except ResourceExceptions.UserNotAuthorized:
+                    continue
+    poll_list = []
     # Build poll list and return the result
-    for poll in poll_list:  # type: ignore
+    for poll in polls:  # type: ignore
         poll_list.append(PollSchemas.PollShort(**poll.model_dump()))  # type: ignore
     return PollSchemas.PollList(polls=poll_list)
 
@@ -35,6 +37,8 @@ async def create_poll(workspace: Workspace,
     # Check if the user has permission to create polls
     await Permissions.check_permissions(workspace, "create_polls", check_permissions)
 
+    member: Member = await dependencies.get_member_by_account(active_user.get(), workspace)
+
     # Check if poll name is unique
     poll: Poll  # For type hinting, until Link type is supported
     for poll in workspace.polls:  # type: ignore
@@ -42,24 +46,34 @@ async def create_poll(workspace: Workspace,
             raise PollExceptions.NonUniqueName(poll)
 
     # Create a new poll
-    new_poll = Poll(name=input_data.name,
-                    description=input_data.description,
-                    workspace=workspace,  # type: ignore
-                    public=input_data.public,
-                    published=input_data.published,
-                    questions=input_data.questions,
-                    policies=[])
+    new_poll: Poll = Poll(name=input_data.name,
+                          description=input_data.description,
+                          workspace=workspace,  # type: ignore
+                          public=input_data.public,
+                          published=input_data.published,
+                          questions=input_data.questions,
+                          policies=[])
 
     # Check if poll was created
     if not new_poll:
         raise PollExceptions.ErrorWhileCreating(new_poll)
+    
+    # Add the user as the owner of the poll
+    await new_poll.add_policy(member, Permissions.POLL_ALL_PERMISSIONS)
 
     # Add the poll to the workspace
     workspace.polls.append(new_poll)  # type: ignore
     await Workspace.save(workspace, link_rule=WriteRules.WRITE)
 
     # Return the new poll
-    return PollSchemas.PollResponse(**new_poll.model_dump())
+    return PollSchemas.PollResponse(id=new_poll.id,
+                                    name=new_poll.name,
+                                    description=new_poll.description,
+                                    public=new_poll.public,
+                                    published=new_poll.published,
+                                    workspace=WorkspaceSchemas.WorkspaceShort(**workspace.model_dump()),
+                                    questions=new_poll.questions,
+                                    policies=new_poll.policies)
 
 
 async def get_poll(poll: Poll,
@@ -67,10 +81,14 @@ async def get_poll(poll: Poll,
                    include_policies: bool = False,
                    check_permissions: bool = True) -> PollSchemas.PollResponse:
     if not poll.public:
-        await Permissions.check_permissions(poll, "get_poll", check_permissions)
+        # await Permissions.check_permissions(poll, "get_poll", check_permissions)
+        try:
+            await Permissions.check_permissions(poll.workspace, "get_polls", check_permissions)
+        except ResourceExceptions.UserNotAuthorized:
+            await Permissions.check_permissions(poll, "get_poll", check_permissions)
 
     # Fetch the resources if the user has the required permissions
-    questions = (await get_poll_questions(poll)).questions if include_questions else None
+    questions = (await get_poll_questions(poll, False)).questions if include_questions else None
     policies = (await actions.PolicyActions.get_policies(resource=poll)).policies if include_policies else None
 
     workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
@@ -101,7 +119,13 @@ async def get_poll_questions(poll: Poll,
     return QuestionSchemas.QuestionList(questions=question_list)
 
 
-async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSchemas.PollResponse:
+async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest, check_permissions: bool = True) -> PollSchemas.PollResponse:
+    await Permissions.check_permissions(poll, "update_poll", check_permissions)
+    
+    # BUG: After updating the poll, the workspace turns into a Link
+    # HACK: Save the workspace before updating the poll
+    workspace = WorkspaceSchemas.WorkspaceShort(**poll.workspace.model_dump())  # type: ignore
+    
     # Update the poll
     if data.name:
         poll.name = data.name
@@ -116,7 +140,15 @@ async def update_poll(poll: Poll, data: PollSchemas.UpdatePollRequest) -> PollSc
 
     # Save the updated poll
     await Poll.save(poll)
-    return await get_poll(poll, include_questions=True)
+
+    # Return the workspace with the fetched resources
+    return PollSchemas.PollResponse(id=poll.id,
+                                    name=poll.name,
+                                    description=poll.description,
+                                    public=poll.public,
+                                    published=poll.published,
+                                    workspace=workspace,
+                                    questions=poll.questions)
 
 
 async def delete_poll(poll: Poll):

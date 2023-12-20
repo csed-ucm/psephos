@@ -1,10 +1,11 @@
 from enum import IntFlag
+from typing import TYPE_CHECKING
 import unipoll_api
 from unipoll_api import exceptions
+# from unipoll_api.dependencies import get_member_by_account
 
-# import functools
-# import ast
-# from pathlib import Path
+if TYPE_CHECKING:
+    from unipoll_api.documents import Resource
 
 
 # Define the permissions base class as an IntFlag Enum
@@ -130,6 +131,13 @@ async def get_all_permissions(resource, member) -> Permissions:
     return permission_sum  # type: ignore
 
 
+def convert_permission_to_string(permissions: Permissions, resource_type: str) -> list[str]:
+    permission_type = PermissionTypes[resource_type]
+    if permissions == permission_type(0):
+        return []
+    return permission_type(permissions).name.split('|')  # type: ignore
+
+
 def convert_string_to_permission(resource_type: str, string: str):
     try:
         # return eval(get_document_type().capitalize() + "Permissions")[string]
@@ -146,22 +154,31 @@ def convert_string_to_permission(resource_type: str, string: str):
         raise ValueError("Invalid permission string")
 
 
-async def check_permissions(resource, required_permissions: str | list[str] | None = None, permission_check=True):
+async def check_permissions(resource: "Resource",
+                            required_permissions: str | list[str] | None = None, 
+                            permission_check=True):
     if permission_check and required_permissions:
-        account = unipoll_api.AccountManager.active_user.get()           # Get the active user
+        account = unipoll_api.AccountManager.active_user.get()  # Get the active user
 
-        from unipoll_api.dependencies import get_member
-        member = await get_member(account, resource)
-
-        user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
         if isinstance(required_permissions, str):  # If only one permission is required
             required_permissions = [required_permissions]
+
+        try:
+            if resource.get_document_type() == "Poll":
+                member = await unipoll_api.Dependencies.get_member_by_account(account, resource.workspace)
+            else:
+                member = await unipoll_api.Dependencies.get_member_by_account(account, resource)  # type: ignore
+        except exceptions.ResourceExceptions.UserNotMember:
+            actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
+            raise exceptions.ResourceExceptions.UserNotAuthorized(account, resource, actions)
+
+        user_permissions = await get_all_permissions(resource, member)  # Get the user permissions
 
         permissions_list = [convert_string_to_permission(resource.get_document_type(), p) for p in required_permissions]
         required_permission = eval(resource.get_document_type() + "Permissions")(sum(permissions_list))
 
         if not compare_permissions(user_permissions, required_permission):
             actions = ", ".join([" ".join([j.capitalize() for j in i.split("_")]) for i in required_permissions])
-            raise exceptions.ResourceExceptions.UserNotAuthorized(account,
-                                                                  f"{resource.get_document_type()} {resource.id}",
-                                                                  actions)
+            raise exceptions.ResourceExceptions.UserNotAuthorized(account, resource, actions)
+
+# Resource = Pydantic.update_model()

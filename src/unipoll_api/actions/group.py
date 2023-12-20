@@ -3,12 +3,13 @@ from beanie.operators import Or
 from bson import DBRef
 
 from unipoll_api import AccountManager
+from unipoll_api.actions import workspace
 from unipoll_api.documents import Policy, Workspace, Group, Account
 from unipoll_api import actions
 from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
 from unipoll_api.exceptions import GroupExceptions, WorkspaceExceptions, ResourceExceptions
 from unipoll_api.utils import Permissions
-from unipoll_api.dependencies import get_member
+from unipoll_api.dependencies import get_member_by_account
 
 
 # Get list of groups
@@ -48,7 +49,7 @@ async def create_group(workspace: Workspace,
     await Permissions.check_permissions(workspace, "add_groups", check_permissions)
     account = AccountManager.active_user.get()
 
-    member = await get_member(account, workspace)
+    member = await get_member_by_account(account, workspace)
 
     # Check if group name is unique
     group: Group  # For type hinting, until Link type is supported
@@ -81,6 +82,7 @@ async def create_group(workspace: Workspace,
 async def get_group(group: Group,
                     include_members: bool = False,
                     include_policies: bool = False,
+                    include_workspace: bool = False,
                     check_permissions: bool = True) -> GroupSchemas.Group:
     try:
         await Permissions.check_permissions(group.workspace, "get_groups", check_permissions)
@@ -89,9 +91,9 @@ async def get_group(group: Group,
 
     members = (await actions.MembersActions.get_members(group)).members if include_members else None
     policies = (await actions.PolicyActions.get_policies(resource=group)).policies if include_policies else None
-    workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(exclude={"members",  # type: ignore
-                                                                                 "policies",
-                                                                                 "groups"}))
+    # workspace = (await actions.WorkspaceActions.get_workspace(group.workspace, True, True, True, True)) if include_workspace else None
+    workspace = WorkspaceSchemas.Workspace(**group.workspace.model_dump(include={'id', 'name', 'description'})) if include_workspace else None
+
     # Return the workspace with the fetched resources
     return GroupSchemas.Group(id=group.id,
                               name=group.name,
