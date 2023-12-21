@@ -70,7 +70,8 @@ async def redis_push(user: Account = Depends(get_current_active_user),
 
 
 # Endpoint to user notifications
-@router.get("/redis/subscribe")
+# @router.get("/redis/subscribe")
+@router.get("/subscribe")
 async def redis_subscribe(user: Account = Depends(get_current_active_user)):
     try:
         return EventSourceResponse(listen_to_channel(str(user.id)))
