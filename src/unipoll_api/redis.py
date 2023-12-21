@@ -42,6 +42,6 @@ async def listen_to_channel(user_id: str):
                     message = json.loads(message["data"])
                     # Checking, if the user is recipient of the message
                     if user_id == message.get("recipient_id"):
-                        yield {"data": message}
+                        yield {"data": json.dumps(message)}
     except redis.exceptions.ConnectionError as e:
         print("Connection error:", e)
