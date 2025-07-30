@@ -3,12 +3,14 @@ from beanie.operators import In
 from unipoll_api.documents import Account, Group, ResourceID, Workspace, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import MemberSchemas
-# from unipoll_api import AccountManager
+from unipoll_api import AccountManager
 from unipoll_api.exceptions import ResourceExceptions
-from unipoll_api.dependencies import get_member
+from unipoll_api.dependencies import get_member_by_account
+from unipoll_api.account_manager import active_user
 
 
-async def get_members(resource: Workspace | Group, check_permissions: bool = True) -> MemberSchemas.MemberList:
+async def get_members(resource: Workspace | Group,
+                      check_permissions: bool = True) -> MemberSchemas.MemberList:
     # Check if the user has permission to add members
     await Permissions.check_permissions(resource, "get_members", check_permissions)
 
@@ -45,11 +47,11 @@ async def add_members(resource: Workspace | Group,
     for account in account_list:
         default_permissions = eval("Permissions." + resource.get_document_type().upper() + "_BASIC_PERMISSIONS")
         if resource.get_document_type() == "Group":
-            member = await get_member(account, resource.workspace)  # type: ignore
-            new_member = await resource.add_member(member, default_permissions, save=False)
+            member = await get_member_by_account(account, resource.workspace)  # type: ignore
+            new_member = await resource.add_member(member, default_permissions, save=False)  # type: ignore
             new_members.append(new_member)
         elif resource.get_document_type() == "Workspace":
-            new_member = await resource.add_member(account, default_permissions, save=False)
+            new_member = await resource.add_member(account, default_permissions, save=False)  # type: ignore
             new_members.append(new_member)
     await resource.save(link_rule=WriteRules.WRITE)  # type: ignore
 
@@ -64,6 +66,27 @@ async def add_members(resource: Workspace | Group,
 
     # Return the list of members added to the group
     return MemberSchemas.MemberList(members=member_list)
+
+
+# Get member info
+async def get_member(member: Member,
+                     group: Group | None = None,
+                     permission_check: bool = True) -> MemberSchemas.Member:
+    # Check if current user is the member
+    active_user = AccountManager.active_user.get()
+    # await member.fetch_link("account")
+    # print(member.account)
+    await member.fetch_all_links()
+    if member.account.id is not active_user.id:  # type: ignore
+        # Check if the user has permission to get members
+        await Permissions.check_permissions(member.workspace, "get_members", permission_check)
+    
+    account: Account = member.account  # type: ignore
+    return MemberSchemas.Member(id=member.id,
+                                account_id=account.id,
+                                first_name=account.first_name,
+                                last_name=account.last_name,
+                                email=account.email) 
 
 
 # Remove a member from a workspace

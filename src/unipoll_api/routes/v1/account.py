@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from unipoll_api.account_manager import fastapi_users
-from unipoll_api.actions import AccountActions
+from unipoll_api.actions.__interface__ import AccountActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Account
 from unipoll_api.dependencies import get_account
@@ -12,16 +12,18 @@ router: APIRouter = APIRouter()
 
 
 @router.get("",
-            response_model=AccountSchemas.AccountList)
+            response_model=AccountSchemas.AccountListResponse)
 async def get_all_accounts():
     try:
-        accounts = [AccountSchemas.AccountShort(**a.model_dump()) for a in await Account.find_all().to_list()]
-        return AccountSchemas.AccountList(accounts=accounts)
+        accounts = [AccountSchemas.AccountResponse(**a.model_dump()) for a in await Account.find_all().to_list()]
+        return AccountSchemas.AccountListResponse(accounts=accounts)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
 # Delete current user account
+
+
 @router.delete("/me",
                status_code=status.HTTP_204_NO_CONTENT)
 async def delete_my_account():
@@ -68,4 +70,4 @@ async def delete_user(account: Account = Depends(get_account)):
 
 
 # Update current user account
-router.include_router(fastapi_users.get_users_router(AccountSchemas.Account, AccountSchemas.UpdateAccount))
+router.include_router(fastapi_users.get_users_router(AccountSchemas.Account, AccountSchemas.UpdateAccountRequest))

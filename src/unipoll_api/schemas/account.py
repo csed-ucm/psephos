@@ -26,18 +26,18 @@ class Account(schemas.BaseUser[ResourceID]):
     })
 
 
-class AccountShort(BaseModel):
+class AccountResponse(BaseModel):
     id: ResourceID
     email: EmailStr
     first_name: str
     last_name: str
 
 
-class AccountList(BaseModel):
-    accounts: list[AccountShort]
+class AccountListResponse(BaseModel):
+    accounts: list[AccountResponse]
 
 
-class CreateAccount(schemas.BaseUserCreate):
+class CreateAccountRequest(schemas.BaseUserCreate):
     email: EmailStr = Field(...)
     first_name: str = Field(
         default_factory=str,
@@ -59,7 +59,7 @@ class CreateAccount(schemas.BaseUserCreate):
     })
 
 
-class UpdateAccount(schemas.BaseUserUpdate):
+class UpdateAccountRequest(schemas.BaseUserUpdate):
     email: EmailStr = Field(...)
     first_name: str = Field(
         default_factory=str,

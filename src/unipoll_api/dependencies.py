@@ -1,10 +1,12 @@
 from typing import Annotated
 from functools import wraps
 # from bson import DBRef
-from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
+from fastapi import Cookie, Depends, Query, HTTPException
 from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
+from unipoll_api.account_manager import get_access_token_db, get_database_strategy
+from datetime import timedelta, timezone, datetime
 
 
 # Wrapper to handle exceptions and raise HTTPException
@@ -30,7 +32,18 @@ async def get_account(account_id: ResourceID) -> Account:
     return account
 
 
-async def get_member(account: Account, resource: Workspace | Group) -> Member:
+@http_dependency
+async def get_member(member_id: ResourceID) -> Member:
+    """
+    Returns a member with the given id.
+    """
+    member = await Member.get(member_id)
+    if not member:
+        raise Exceptions.ResourceExceptions.ResourceNotFound("member", member_id)
+    return member
+
+
+async def get_member_by_account(account: Account, resource: Workspace | Group) -> Member:
     """
     Returns a member with the given id.
     """
@@ -41,10 +54,19 @@ async def get_member(account: Account, resource: Workspace | Group) -> Member:
     raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
 
 
-async def websocket_auth(websocket: WebSocket,
-                         session: Annotated[str | None, Cookie()] = None,
-                         token: Annotated[str | None, Query()] = None) -> dict:
-    return {"cookie": session, "token": token}
+async def websocket_auth(session: Annotated[str | None, Cookie()] = None,
+                         token: Annotated[str | None, Query()] = None,
+                         token_db=Depends(get_access_token_db),
+                         strategy=Depends(get_database_strategy)
+                         ) -> Account:
+    user = None
+
+    if token:
+        max_age = datetime.now(timezone.utc) - timedelta(seconds=strategy.lifetime_seconds)
+        token_data = await token_db.get_by_token(token, max_age)
+        if token_data:
+            user = await Account.get(token_data.user_id)
+    return user
 
 
 # Dependency for getting a workspace with the given id

@@ -1,11 +1,12 @@
 from bson import DBRef
+from beanie.odm.bulk import BulkWriter
 from unipoll_api import AccountManager
-from unipoll_api import actions
+from . import plugins, group as GroupActions, policy as PolicyActions, poll as PollActions, members as MembersActions
 from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
-# from unipoll_api.dependencies import get_member
+# from unipoll_api.dependencies import get_member_by_account
 
 
 # Get a list of workspaces where the account is a owner/member
@@ -45,6 +46,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
+@plugins
 async def get_workspace(workspace: Workspace,
                         include_groups: bool = False,
                         include_policies: bool = False,
@@ -52,10 +54,10 @@ async def get_workspace(workspace: Workspace,
                         include_polls: bool = False,
                         check_permissions: bool = True) -> WorkspaceSchemas.Workspace:
     await Permissions.check_permissions(workspace, "get_workspace", check_permissions)
-    groups = (await actions.GroupActions.get_groups(workspace)).groups if include_groups else None
-    members = (await actions.MembersActions.get_members(workspace)).members if include_members else None
-    policies = (await actions.PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
-    polls = (await actions.PollActions.get_polls(workspace)).polls if include_polls else None
+    groups = (await GroupActions.get_groups(workspace)).groups if include_groups else None
+    members = (await MembersActions.get_members(workspace)).members if include_members else None
+    policies = (await PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
+    polls = (await PollActions.get_polls(workspace)).polls if include_polls else None
     # Return the workspace with the fetched resources
     return WorkspaceSchemas.Workspace(id=workspace.id,
                                       name=workspace.name,
@@ -95,16 +97,35 @@ async def update_workspace(workspace: Workspace,
 async def delete_workspace(workspace: Workspace, check_permissions: bool = True):
     await Permissions.check_permissions(workspace, "delete_workspace", check_permissions)
 
-    workspace_ref = DBRef(collection="Workspace", id=workspace.id)
+    # workspace_ref = DBRef(collection="Workspace", id=workspace.id)
 
     # Delete all groups in the workspace
-    for group in workspace.groups:
-        await actions.GroupActions.delete_group(group)  # type: ignore
+    # for group in workspace.groups:
+        # await actions.GroupActions.delete_group(group)  # type: ignore
 
     # TODO: Delete all polls in the workspace
 
     # Delete Workspace
+
+    # BUG: Deleting workspace also deletes account
+    # TODO: Find a way to keep the account 
+    # from beanie import DeleteRules
+    # await Workspace.delete(workspace, link_rule=DeleteRules.DELETE_LINKS)
+
+    # await Workspace.delete(workspace)
+
+    # if await workspace.get(workspace.id):
+    #     raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
+    
+    # await Policy.find({"parent_resource": workspace_ref}).delete()
+    # mems = await Member.find(Member.workspace.id == workspace.id, fetch_links=True).delete()
+
+    async with BulkWriter() as writer:
+        for member in workspace.members:
+            await Member.delete(member, bulk_writer=writer)
+    
+    async with BulkWriter() as writer:
+        for policy in workspace.policies:
+            await Policy.delete(policy, bulk_writer=writer)
+    
     await Workspace.delete(workspace)
-    if await workspace.get(workspace.id):
-        raise WorkspaceExceptions.ErrorWhileDeleting(workspace.id)
-    await Policy.find({"parent_resource": workspace_ref}).delete()

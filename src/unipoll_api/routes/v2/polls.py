@@ -1,11 +1,10 @@
 # APIRouter creates path operations for user module
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, Query, HTTPException
-
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.documents import Poll
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.actions import PollActions
+from unipoll_api.actions.__interface__ import PollActions, PolicyActions
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas
 from unipoll_api import actions
 
@@ -17,6 +16,7 @@ query_params = list[Literal["all", "questions", "policies"]]
 
 
 # Get poll by id
+
 @router.get("/{poll_id}",
             response_description="Poll details",
             response_model=PollSchemas.PollResponse,
@@ -39,6 +39,7 @@ async def get_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Update poll details
+
 @router.patch("/{poll_id}",
               response_description="Update Poll detail",
               response_model=PollSchemas.PollResponse,
@@ -52,6 +53,7 @@ async def update_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Delete poll by id
+
 @router.delete("/{poll_id}",
                response_description="Result of delete operation",
                status_code=204)
@@ -82,6 +84,6 @@ async def get_questions(poll: Poll = Depends(Dependencies.get_poll),
 async def get_policies(poll: Poll = Depends(Dependencies.get_poll),
                        include: Annotated[query_params | None, Query()] = None):
     try:
-        return await actions.PolicyActions.get_policies(resource=poll)
+        return await PolicyActions.get_policies(resource=poll)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
