@@ -2,18 +2,14 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions.__interface__ import WorkspaceActions, MembersActions, PolicyActions, GroupActions, PermissionsActions, PollActions
+from unipoll_api import actions, AccountManager
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Workspace, ResourceID, Policy, Member
-from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
+from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas
+from unipoll_api.utils import Permissions
 
 
 router: APIRouter = APIRouter()
-workspace_router: APIRouter = APIRouter(tags=["Workspaces"])
-workspace_groups_router: APIRouter = APIRouter(tags=["Workspace Groups"])
-workspace_members_router: APIRouter = APIRouter(tags=["Workspace Members"])
-workspace_policies_router: APIRouter = APIRouter(tags=["Workspace Policies"])
-workspace_polls_router: APIRouter = APIRouter(tags=["Workspace Polls"])
 
 
 # TODO: Move to open router to a separate file
@@ -242,11 +238,20 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-# Get All Workspace Permissions
-@router.get("/permissions",
-            tags=["Workspaces"],
-            response_description="List of all workspace permissions",
+# Get Member Permissions in the workspace
+@router.get("/{workspace_id}/permissions",
+            tags=["Workspace Permissions"],
+            response_description="List of all member permissions in the workspace",
             response_model=PolicySchemas.PermissionList)
+
+async def get_workspace_member_permissions(workspace: Workspace = Depends(Dependencies.get_workspace)):
+    try:
+        #TODO: Create an action
+        account = AccountManager.active_user.get()
+        member = await Dependencies.get_member_by_account(account, workspace)
+        workspace_permissions = await Permissions.get_all_permissions(workspace, member)
+        return PolicySchemas.PermissionList(permissions=Permissions.convert_permission_to_string(workspace_permissions, "Workspace"))
+
 async def get_workspace_permissions():
     try:
         return await PermissionsActions.get_workspace_permissions()

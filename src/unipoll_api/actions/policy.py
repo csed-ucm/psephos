@@ -17,7 +17,10 @@ async def get_policies_from_resource(resource: Resource) -> list[Policy]:
     except ResourceExceptions.UserNotAuthorized:
         print("User not authorized")
         account = AccountManager.active_user.get()
-        member = await get_member_by_account(account, resource)
+        if resource.get_document_type() == "Poll":
+            member = await get_member_by_account(account, resource.workspace)
+        else:
+            member = await get_member_by_account(account, resource)
         for policy in resource.policies:
             if policy.policy_holder.ref.id == member.id:  # type: ignore
                 policies.append(policy)  # type: ignore

@@ -35,7 +35,7 @@ async def create_group(input_data: GroupSchemas.GroupCreateRequest = Body(...)):
         raise HTTPException(status_code=e.code, detail=str(e))
 
 
-query_params = list[Literal["policies", "members", "all"]]
+query_params = list[Literal["workspace", "policies", "members", "all"]]
 
 
 # Get group info by id
@@ -50,7 +50,8 @@ async def get_group(group: Group = Depends(Dependencies.get_group),
         params = {}
         if include:
             if "all" in include:
-                params = {"include_members": True, "include_policies": True}
+                # params = {"include_members": True, "include_policies": True}
+                params = {"include_" + param: True for param in ["members", "policies", "workspace"]}
             else:
                 if "members" in include:
                     params["include_members"] = True

@@ -23,7 +23,7 @@ class PollNotFound(resource.ResourceNotFound):
 # Not authorized
 class UserNotAuthorized(resource.UserNotAuthorized):
     def __init__(self, account: Account, poll: Poll, action: str):
-        super().__init__(account, f'poll {poll.name}', action)
+        super().__init__(account, poll, action)
 
 
 # Action not found

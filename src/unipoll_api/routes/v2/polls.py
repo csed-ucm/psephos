@@ -30,9 +30,9 @@ async def get_poll(poll: Poll = Depends(Dependencies.get_poll),
                 params = {"include_questions": True, "include_policies": True}
             else:
                 if "questions" in include:
-                    params = {"include_questions": True}
+                    params["include_questions"] = True
                 if "policies" in include:
-                    params = {"include_policies": True}
+                    params["include_policies"] = True
         return await PollActions.get_poll(poll, **params)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

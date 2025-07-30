@@ -61,8 +61,8 @@ class WorkspaceList(BaseModel):
 
 # Schema for the request to create a workspace
 class WorkspaceCreateInput(BaseModel):
-    name: str = Field(title="Name")
-    description: str = Field(title="Description")
+    name: str = Field(title="Name", description="Name of the resource", min_length=3, max_length=50)
+    description: str = Field(default="", title="Description", max_length=1000)
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "name": "Workspace 01",
@@ -73,8 +73,8 @@ class WorkspaceCreateInput(BaseModel):
 
 # Schema for the request to update a workspace
 class WorkspaceUpdateRequest(BaseModel):
-    name: Optional[str] = Field(None, title="Name")
-    description: Optional[str] = Field(None, title="Description")
+    name: Optional[str] = Field(default=None, title="Name", description="Name of the resource", min_length=3, max_length=50)
+    description: Optional[str] = Field(default=None, title="Description", max_length=1000)
     model_config = ConfigDict(json_schema_extra={
         "example": {
             "name": "Workspace 01",
@@ -90,6 +90,7 @@ class WorkspaceCreateOutput(BaseModel):
     description: str = Field(title="Description")
     model_config = ConfigDict(json_schema_extra={
         "example": {
+            "id": "5eb7cf5a86d9755df3a6c593",
             "name": "Workspace 01",
             "description": "This is an example workspace",
         }
