@@ -2,7 +2,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api import actions
+from unipoll_api.actions.__interface__ import WorkspaceActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Account, Workspace, ResourceID, Policy
 from unipoll_api.schemas import WorkspaceSchemas, PolicySchemas, GroupSchemas, MemberSchemas, PollSchemas
@@ -21,7 +21,7 @@ async def get_workspaces():
     The request does not accept any query parameters.
     """
     try:
-        return await actions.WorkspaceActions.get_workspaces()
+        return await WorkspaceActions.get_workspaces()
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -41,7 +41,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = B
     Returns the created workspace information.
     """
     try:
-        return await actions.WorkspaceActions.create_workspace(input_data=input_data)
+        return await WorkspaceActions.create_workspace(input_data=input_data)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -104,7 +104,7 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
                     params["include_policies"] = True
                 if "polls" in include:
                     params["include_polls"] = True
-        return await actions.WorkspaceActions.get_workspace(workspace, **params)
+        return await WorkspaceActions.get_workspace(workspace, **params)
 
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
@@ -128,7 +128,7 @@ async def update_workspace(workspace: Workspace = Depends(Dependencies.get_works
     Returns the updated workspace.
     """
     try:
-        return await actions.WorkspaceActions.update_workspace(workspace, input_data)
+        return await WorkspaceActions.update_workspace(workspace, input_data)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -147,7 +147,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
     Response has no detail.
     """
     try:
-        await actions.WorkspaceActions.delete_workspace(workspace)
+        await WorkspaceActions.delete_workspace(workspace)
         return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

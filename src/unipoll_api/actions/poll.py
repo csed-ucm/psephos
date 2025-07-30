@@ -23,6 +23,11 @@ async def get_polls(workspace: Workspace | None = None,
                     polls.append(await get_poll(poll, check_permissions))  # type: ignore
                 except ResourceExceptions.UserNotAuthorized:
                     continue
+
+                if poll.public:
+                    polls.append(poll)
+                else:
+                    polls.append(await get_poll(poll, check_permissions))  # type: ignore
     poll_list = []
     # Build poll list and return the result
     for poll in polls:  # type: ignore
@@ -46,13 +51,13 @@ async def create_poll(workspace: Workspace,
             raise PollExceptions.NonUniqueName(poll)
 
     # Create a new poll
-    new_poll: Poll = Poll(name=input_data.name,
+    new_poll = await Poll(name=input_data.name,
                           description=input_data.description,
                           workspace=workspace,  # type: ignore
                           public=input_data.public,
                           published=input_data.published,
                           questions=input_data.questions,
-                          policies=[])
+                          policies=[]).save()
 
     # Check if poll was created
     if not new_poll:

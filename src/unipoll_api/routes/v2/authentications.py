@@ -9,7 +9,7 @@ from fastapi_users.authentication import Strategy
 from unipoll_api import account_manager as AccountManager
 
 # import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
-from unipoll_api.actions import authentication as AuthActions
+from unipoll_api.actions.__interface__ import AuthActions
 # from unipoll_api.schemas import authentication as AuthSchemas
 from unipoll_api.schemas import account as AccountSchemas
 from unipoll_api.exceptions.resource import APIException

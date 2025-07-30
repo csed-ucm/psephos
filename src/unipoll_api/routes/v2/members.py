@@ -1,7 +1,7 @@
 
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
-from unipoll_api import actions as Actions
+from unipoll_api.actions import __interface__ as Actions
 from unipoll_api import documents as Documents
 from unipoll_api import schemas as Schemas
 from unipoll_api import dependencies as Dependencies

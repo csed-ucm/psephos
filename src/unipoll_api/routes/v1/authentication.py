@@ -1,5 +1,5 @@
-from typing import Annotated
-from fastapi import APIRouter, Body, Depends, HTTPException, Header, status
+from typing import Annotated, Literal
+from fastapi import APIRouter, Body, Depends, Form, HTTPException, Header, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import BaseUserManager, models
 from fastapi_users.openapi import OpenAPIResponseType
@@ -10,7 +10,7 @@ from unipoll_api import account_manager as AccountManager
 
 # import fastapi_users, get_user_manager, jwt_backend, get_database_strategy, get_access_token_db
 from unipoll_api.actions import authentication as AuthActions
-# from unipoll_api.schemas import authentication as AuthSchemas
+from unipoll_api.schemas import authentication as AuthSchemas
 from unipoll_api.schemas import account as AccountSchemas
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.utils.token_db import BeanieAccessTokenDatabase
@@ -90,7 +90,8 @@ async def refresh_jwt(authorization: Annotated[str, Header(...)],
 
 @router.post("/jwt/postman_refresh", responses=login_responses, response_model_exclude_unset=True)
 async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
-                                     body: Annotated[str, Body(...)],
+                                     refresh_token: Annotated[str, Form(...)],
+                                     grant_type: Literal["refresh_token"] = Form(...),
                                      token_db: BeanieAccessTokenDatabase = Depends(AccountManager.get_access_token_db),
                                      strategy: Strategy = Depends(AccountManager.get_database_strategy)):
     """Refresh the access token using the refresh token.
@@ -99,14 +100,10 @@ async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
         authorization: `Authorization` header with the access token
     Body:
         refresh_token: `Refresh-Token` header with the refresh token
+        grant_type: `grant_type` header with the grant type (refresh_token)
     """
     try:
-        # import json
-        # print(body.decode('utf-8'))
-        # body = json.loads(body.decode('utf-8'))
-        # print(body)
-        # AuthSchemas.PostmanRefreshTokenRequest(**body)
-        return await AuthActions.refresh_token_with_clientID(authorization, body, token_db, strategy)
+        return await AuthActions.refresh_token_with_clientID(authorization, refresh_token, token_db, strategy)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=e.detail)
 
