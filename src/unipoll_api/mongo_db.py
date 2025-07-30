@@ -20,5 +20,6 @@ documentModels = [
     Documents.Group,
     Documents.Workspace,
     Documents.Policy,
-    Documents.Poll
+    Documents.Poll,
+    Documents.Event
 ]

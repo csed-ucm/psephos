@@ -1,4 +1,5 @@
 # from typing import ForwardRef, NewType, TypeAlias, Optional
+from datetime import datetime
 from typing import Literal
 from bson import DBRef
 from beanie import Document as BeanieDocument
@@ -9,7 +10,9 @@ from beanie import (
     Insert,
     Link,
     PydanticObjectId,
-)  # BackLink
+    TimeSeriesConfig,
+    Granularity,
+)
 from fastapi_users_db_beanie import BeanieBaseUser
 from pydantic import Field
 from unipoll_api.utils import colored_dbg as Debug
@@ -89,6 +92,10 @@ class Resource(Document):
                 self.policies.remove(policy)
                 if save:
                     await self.save(link_rule=WriteRules.WRITE)  # type: ignore
+
+    async def log_event(self, data: dict) -> "Event":
+        new_event = await Event(resource_id=str(self.id), data=data).create()  # type: ignore
+        return new_event
 
 
 class Account(BeanieBaseUser, Document):  # type: ignore
@@ -233,3 +240,21 @@ class Member(Document):
     workspace: BackLink[Workspace] = Field(original_field="members")  # type: ignore
     groups: list[BackLink[Group]] = Field(original_field="members")  # type: ignore
     policies: list[Link[Policy]] = []
+
+
+# https://docs.mongodb.com/manual/core/timeseries-collections
+class Event(Document):
+    ts: datetime = Field(default_factory=datetime.now)
+    # resource: BackLink[Resource] = Field(original_field="event_log")
+    resource_id: str = Field(default_factory=str)
+    data: dict
+
+    # @after_event(Insert)
+    # def 
+
+    class Settings:
+        timeseries = TimeSeriesConfig(
+            time_field="ts",
+            meta_field="resource_id",
+            # expire_after_seconds=60 * 60 * 24  # 24 hours
+            )

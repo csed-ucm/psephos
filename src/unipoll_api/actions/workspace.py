@@ -1,9 +1,10 @@
+import asyncio
 from bson import DBRef
 from beanie.odm.bulk import BulkWriter
 from unipoll_api import AccountManager
 from . import plugins, group as GroupActions, policy as PolicyActions, poll as PollActions, members as MembersActions
 from unipoll_api.documents import Workspace, Account, Policy, Member
-from unipoll_api.utils import Permissions
+from unipoll_api.utils import Permissions, events
 from unipoll_api.schemas import WorkspaceSchemas
 from unipoll_api.exceptions import WorkspaceExceptions
 # from unipoll_api.dependencies import get_member_by_account
@@ -89,6 +90,12 @@ async def update_workspace(workspace: Workspace,
     # Save the updated workspace
     if save_changes:
         await Workspace.save(workspace)
+
+        # Log the event
+        await workspace.log_event(data={"message": "Workspace updated"})
+        asyncio.create_task(events.notify_members(workspace, {"message": "Workspace updated"}))
+        # BackgroundTasks.add_task(events.notify_members, workspace, {"message": "Workspace updated"})
+
     # Return the updated workspace
     return WorkspaceSchemas.Workspace(**workspace.model_dump(include={'id', 'name', 'description'}))
 

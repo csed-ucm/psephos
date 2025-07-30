@@ -59,7 +59,6 @@ async def websocket_auth(session: Annotated[str | None, Cookie()] = None,
                          strategy=Depends(get_database_strategy)
                          ) -> Account:
     user = None
-
     if token:
         max_age = datetime.now(timezone.utc) - timedelta(seconds=strategy.lifetime_seconds)
         token_data = await token_db.get_by_token(token, max_age)

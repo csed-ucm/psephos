@@ -1,4 +1,9 @@
-from fastapi import FastAPI
+from datetime import datetime
+import json
+import uvicorn
+import os
+import argparse
+from fastapi import FastAPI, APIRouter
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from beanie import init_beanie
@@ -7,6 +12,9 @@ from unipoll_api.routes import create_router, v1_router, v2_router
 from unipoll_api.mongo_db import mainDB, documentModels
 from unipoll_api.config import get_settings
 
+
+# Application start time
+start_time = datetime.now()
 
 # Apply setting from configuration file
 settings = get_settings()
@@ -42,9 +50,9 @@ app.add_middleware(
 async def on_startup() -> None:
     # Simplify operation IDs so that generated API clients have simpler function names
     # Each route will have its operation ID set to the method name
-    for route in app.routes:
-        if isinstance(route, APIRoute):
-            route.operation_id = route.name
+    # for route in app.routes:
+    #     if isinstance(route, APIRoute):
+    #         route.operation_id = route.name
 
     await init_beanie(
         database=mainDB,  # type: ignore
