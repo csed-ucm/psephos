@@ -2,7 +2,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import GroupActions, PermissionsActions, MembersActions, PolicyActions
+from unipoll_api.actions.__interface__ import GroupActions, PermissionsActions, MembersActions, PolicyActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
 from unipoll_api.documents import Group, Policy, ResourceID, Member, Workspace

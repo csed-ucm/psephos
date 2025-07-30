@@ -7,7 +7,6 @@ from unipoll_api.exceptions.resource import APIException
 from unipoll_api.actions import PermissionsActions
 from unipoll_api.utils import Permissions
 
-
 router = APIRouter()
 
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from unipoll_api.account_manager import fastapi_users
-from unipoll_api.actions import AccountActions
+from unipoll_api.actions.__interface__ import AccountActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.documents import Account
 from unipoll_api.dependencies import get_account

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends, Query, HTTPException
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.documents import Poll
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.actions import PollActions
+from unipoll_api.actions.__interface__ import PollActions, PolicyActions
 from unipoll_api.schemas import PollSchemas, QuestionSchemas, PolicySchemas
 from unipoll_api import actions
 
@@ -84,6 +84,6 @@ async def get_questions(poll: Poll = Depends(Dependencies.get_poll),
 async def get_policies(poll: Poll = Depends(Dependencies.get_poll),
                        include: Annotated[query_params | None, Query()] = None):
     try:
-        return await actions.PolicyActions.get_policies(resource=poll)
+        return await PolicyActions.get_policies(resource=poll)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

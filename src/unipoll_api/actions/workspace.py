@@ -1,7 +1,7 @@
 from bson import DBRef
 from beanie.odm.bulk import BulkWriter
 from unipoll_api import AccountManager
-from unipoll_api import actions
+from . import plugins, group as GroupActions, policy as PolicyActions, poll as PollActions, members as MembersActions
 from unipoll_api.documents import Workspace, Account, Policy, Member
 from unipoll_api.utils import Permissions
 from unipoll_api.schemas import WorkspaceSchemas
@@ -46,6 +46,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput) ->
 
 
 # Get a workspace
+@plugins
 async def get_workspace(workspace: Workspace,
                         include_groups: bool = False,
                         include_policies: bool = False,
@@ -53,10 +54,10 @@ async def get_workspace(workspace: Workspace,
                         include_polls: bool = False,
                         check_permissions: bool = True) -> WorkspaceSchemas.Workspace:
     await Permissions.check_permissions(workspace, "get_workspace", check_permissions)
-    groups = (await actions.GroupActions.get_groups(workspace)).groups if include_groups else None
-    members = (await actions.MembersActions.get_members(workspace)).members if include_members else None
-    policies = (await actions.PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
-    polls = (await actions.PollActions.get_polls(workspace)).polls if include_polls else None
+    groups = (await GroupActions.get_groups(workspace)).groups if include_groups else None
+    members = (await MembersActions.get_members(workspace)).members if include_members else None
+    policies = (await PolicyActions.get_policies(resource=workspace)).policies if include_policies else None
+    polls = (await PollActions.get_polls(workspace)).polls if include_polls else None
     # Return the workspace with the fetched resources
     return WorkspaceSchemas.Workspace(id=workspace.id,
                                       name=workspace.name,

@@ -3,6 +3,16 @@ from typing import Optional
 from unipoll_api.documents import ResourceID
 
 
+# class UpdatableModel(BaseModel):
+    
+#     @classmethod
+#     def add_field(cls, field_name, field_type, default=None):
+#         cls.model_fields[field_name] = Field(default=default, title=field_name)
+#         cls.model_fields[field_name].default = default
+#         cls.model_fields[field_name].annotation = field_type
+#         return cls
+
+
 # Schema for the response with basic workspace info (name and role)
 class Workspace(BaseModel):
     id: Optional[ResourceID] = None

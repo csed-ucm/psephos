@@ -24,7 +24,7 @@ async def get_workspaces():
     The request does not accept any query parameters.
     """
     try:
-        return await actions.WorkspaceActions.get_workspaces()
+        return await WorkspaceActions.get_workspaces()
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -45,7 +45,7 @@ async def create_workspace(input_data: WorkspaceSchemas.WorkspaceCreateInput = B
     Returns the created workspace information.
     """
     try:
-        return await actions.WorkspaceActions.create_workspace(input_data=input_data)
+        return await WorkspaceActions.create_workspace(input_data=input_data)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -109,7 +109,7 @@ async def get_workspace(workspace: Workspace = Depends(Dependencies.get_workspac
                     params["include_policies"] = True
                 if "polls" in include:
                     params["include_polls"] = True
-        return await actions.WorkspaceActions.get_workspace(workspace, **params)
+        return await WorkspaceActions.get_workspace(workspace, **params)
 
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
@@ -134,7 +134,7 @@ async def update_workspace(workspace: Workspace = Depends(Dependencies.get_works
     Returns the updated workspace.
     """
     try:
-        return await actions.WorkspaceActions.update_workspace(workspace, input_data)
+        return await WorkspaceActions.update_workspace(workspace, input_data)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -154,7 +154,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
     Response has no detail.
     """
     try:
-        await actions.WorkspaceActions.delete_workspace(workspace)
+        await WorkspaceActions.delete_workspace(workspace)
         return status.HTTP_204_NO_CONTENT
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
@@ -168,7 +168,7 @@ async def delete_workspace(workspace: Workspace = Depends(Dependencies.get_works
             response_model_exclude_unset=True)
 async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
-        return await actions.MembersActions.get_members(workspace)
+        return await MembersActions.get_members(workspace)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -181,7 +181,7 @@ async def get_workspace_members(workspace: Workspace = Depends(Dependencies.get_
 async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_workspace),
                                 member_data: MemberSchemas.AddMembers = Body(...)):
     try:
-        return await actions.MembersActions.add_members(workspace, member_data.accounts)
+        return await MembersActions.add_members(workspace, member_data.accounts)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -194,7 +194,7 @@ async def add_workspace_members(workspace: Workspace = Depends(Dependencies.get_
 async def remove_workspace_member(workspace: Workspace = Depends(Dependencies.get_workspace),
                                   member: Member = Depends(Dependencies.get_member)):
     try:
-        return await actions.MembersActions.remove_member(workspace, member)
+        return await MembersActions.remove_member(workspace, member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -209,7 +209,7 @@ async def get_workspace_policies(workspace: Workspace = Depends(Dependencies.get
     try:
         account = await Dependencies.get_account(account_id) if account_id else None
         member = await Dependencies.get_member_by_account(account, workspace) if account else None
-        return await actions.PolicyActions.get_policies(resource=workspace, policy_holder=member)
+        return await PolicyActions.get_policies(resource=workspace, policy_holder=member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -233,7 +233,7 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
     Returns the updated workspace.
     """
     try:
-        return await actions.PolicyActions.update_policy(policy, new_permissions=permissions.permissions)
+        return await PolicyActions.update_policy(policy, new_permissions=permissions.permissions)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -243,6 +243,7 @@ async def set_workspace_policy(workspace: Workspace = Depends(Dependencies.get_w
             tags=["Workspace Permissions"],
             response_description="List of all member permissions in the workspace",
             response_model=PolicySchemas.PermissionList)
+
 async def get_workspace_member_permissions(workspace: Workspace = Depends(Dependencies.get_workspace)):
     try:
         #TODO: Create an action
@@ -250,5 +251,62 @@ async def get_workspace_member_permissions(workspace: Workspace = Depends(Depend
         member = await Dependencies.get_member_by_account(account, workspace)
         workspace_permissions = await Permissions.get_all_permissions(workspace, member)
         return PolicySchemas.PermissionList(permissions=Permissions.convert_permission_to_string(workspace_permissions, "Workspace"))
+
+async def get_workspace_permissions():
+    try:
+        return await PermissionsActions.get_workspace_permissions()
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Get Workspace Polls
+@router.get("/{workspace_id}/polls",
+            tags=["Polls"],
+            response_description="List of all polls in the workspace",
+            response_model=PollSchemas.PollList,
+            response_model_exclude_none=True)
+async def get_polls(workspace: Workspace = Depends(Dependencies.get_workspace)):
+    try:
+        return await PollActions.get_polls(workspace)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# Create a new poll in the workspace
+@router.post("/{workspace_id}/polls",
+             tags=["Polls"],
+             response_description="Created poll",
+             status_code=201,
+             response_model=PollSchemas.PollResponse)
+async def create_poll(workspace: Workspace = Depends(Dependencies.get_workspace),
+                      input_data: PollSchemas.CreatePollRequest = Body(...)):
+    try:
+        return await PollActions.create_poll(workspace, input_data)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# List all groups in the workspace
+@router.get("/{workspace_id}/groups",
+            tags=["Groups"],
+            response_description="List of all groups",
+            response_model=GroupSchemas.GroupList)
+async def get_groups(workspace: Workspace = Depends(Dependencies.get_workspace)):
+    try:
+        return await GroupActions.get_groups(workspace)
+    except APIException as e:
+        raise HTTPException(status_code=e.code, detail=str(e))
+
+
+# List all groups in the workspace
+@router.post("/{workspace_id}/groups",
+             status_code=201,
+             tags=["Groups"],
+             response_description="Created Group",
+             response_model=GroupSchemas.GroupCreateOutput)
+async def create_group(workspace: Workspace = Depends(Dependencies.get_workspace),
+                       input_data: GroupSchemas.GroupCreateInput = Body(...)):
+    try:
+        return await GroupActions.create_group(workspace, input_data.name, input_data.description)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

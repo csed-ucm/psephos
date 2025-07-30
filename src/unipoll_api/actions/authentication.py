@@ -52,13 +52,12 @@ async def refresh_token(authorization: str,
 
 
 async def refresh_token_with_clientID(authorization: str,
-                                      body: str,
+                                      refresh_token: str,
                                       token_db=Depends(get_access_token_db),
                                       strategy=Depends(get_database_strategy)):
     # Make sure the Authorization header is valid and extract the access token
     try:
         client_id = re.match(r'^Basic (\S+)$', authorization).group(1)  # type: ignore
-        refresh_token = re.match(r'^refresh_token=(\S+)&grant_type=refresh_token$', body).group(1)  # type: ignore
     except Exception as e:
         Debug.print_error(str(e))
         raise AuthExceptions.InvalidAuthorizationHeader()
@@ -68,7 +67,7 @@ async def refresh_token_with_clientID(authorization: str,
 
     # Make sure the access token exists in the database
     if token_data is None:
-        raise AuthExceptions.InvalidAccessToken()
+        raise AuthExceptions.InvalidAccessToken
 
     # Get the user from the database using the user ID in the token data
     user = await Account.get(token_data.user_id)
@@ -78,14 +77,14 @@ async def refresh_token_with_clientID(authorization: str,
     # Decode the client ID and make sure it matches account ID
     client_id = base64.b64decode(client_id)
     if PydanticObjectId(str(client_id, "utf-8")[:-1]) != user.id:
-        raise AuthExceptions.InvalidClientID()
+        raise AuthExceptions.InvalidClientID
 
     # Check if the refresh token is the most recent one
     all_tokens = await token_db.get_token_family_by_user_id(user.id)
     if (await all_tokens.to_list())[0].refresh_token != refresh_token:
         # If not, delete all tokens associated with the user and return an error
         await strategy.destroy_token_family(user)
-        raise AuthExceptions.refreshTokenExpired()
+        raise AuthExceptions.refreshTokenExpired
 
     # Login the user using the supplied strategy
     # Generate new pair of access and refresh tokens

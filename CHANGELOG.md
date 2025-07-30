@@ -2,6 +2,63 @@
 
 
 
+## v0.12.2 (2023-12-08)
+
+### Chore
+
+* chore: Fixed mypy linting ([`42e6e4a`](https://github.com/unipoll/api/commit/42e6e4a548e7be5ae13c54012aa054caf43d5df0))
+
+### Ci
+
+* ci: Fixed file name ([`66b2835`](https://github.com/unipoll/api/commit/66b28353594530e0c079a2ad09c07ac197a3bda6))
+
+* ci: Changed artifact download path ([`15c2f41`](https://github.com/unipoll/api/commit/15c2f41e6de1dec36ab8d3dec71d02bcd1fc2c10))
+
+* ci: Added trigger on changelog update ([`3197245`](https://github.com/unipoll/api/commit/3197245d4784d83ea482f3b10edf6bf0a43d6e1b))
+
+* ci: Updated changelog workflow ([`4c98e25`](https://github.com/unipoll/api/commit/4c98e2549b40055d29bb3ab1817edc3760fa4810))
+
+* ci: update ([`f8cd7b3`](https://github.com/unipoll/api/commit/f8cd7b31910e99db4d58a87ee76f28832da5bc63))
+
+* ci: update ([`7d897f9`](https://github.com/unipoll/api/commit/7d897f9b489b3c162a9ed52dac46b46239e423cc))
+
+* ci: updated git installation step ([`04f002c`](https://github.com/unipoll/api/commit/04f002cc70f914b7b3f04f39aecef32741e994f5))
+
+* ci: fixed needs ([`4f552fb`](https://github.com/unipoll/api/commit/4f552fb8a8ed088a7f3bfd49ae6855869c6b4e9d))
+
+* ci: Changed test ci ([`acd9969`](https://github.com/unipoll/api/commit/acd9969f83cb8d8cbdd1a4671166e2923642bad1))
+
+* ci: Changed workflow name ([`1c6a2e6`](https://github.com/unipoll/api/commit/1c6a2e607b2c2383c5336124986a4e1afce5ff00))
+
+* ci: Added workflow to test ([`442fa8f`](https://github.com/unipoll/api/commit/442fa8fa386fd9e3c8972aecfd6212eaf082aa49))
+
+* ci: Update docs job ([`73f6975`](https://github.com/unipoll/api/commit/73f6975b4f5b6e283a1617d5bc0639c5ad3f48ef))
+
+* ci: app_id and private_key deprecated ([`3e3692d`](https://github.com/unipoll/api/commit/3e3692ddcb1aea17dfdf9e378653f6a3350f4c9c))
+
+### Fix
+
+* fix: Fixed get and create polls actions ([`b9bdc72`](https://github.com/unipoll/api/commit/b9bdc72a52013a4797ad1803da875a26dc01b7e7))
+
+### Refactor
+
+* refactor: Resolved mypy issues caused by original_field ([`73aa72b`](https://github.com/unipoll/api/commit/73aa72bed31dc58a5bd31855761b87e085231b17))
+
+* refactor: Changed Poll document
+
+Replace workspace Link with BackLink, removed redundant declarations ([`394a16e`](https://github.com/unipoll/api/commit/394a16ef01b9dd1007d01199cc64f1faf45a56b5))
+
+### Style
+
+* style: Fixed flake8 errors ([`5390021`](https://github.com/unipoll/api/commit/5390021c65cf54a6e4164839c916fecef5a470c1))
+
+* style: Removed extra spaces ([`1531b13`](https://github.com/unipoll/api/commit/1531b13cfec14c72da80f1cebbae053f9d804511))
+
+### Unknown
+
+* Merge branch &#39;main&#39; of github.com:unipoll/API ([`ff0de73`](https://github.com/unipoll/api/commit/ff0de7356f2d4d29661c63521c6e618502639e05))
+
+
 ## v0.12.1 (2023-10-23)
 
 ### Fix
