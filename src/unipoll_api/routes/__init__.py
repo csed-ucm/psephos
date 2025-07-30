@@ -5,6 +5,7 @@ from .v1 import router as v1_router
 from .v2 import router as v2_router
 from .swagger_docs import create_doc_router
 from .websocket import router as websocket_router
+from .streams import router as streams_router
 
 
 API_VERSIONS = {
@@ -33,6 +34,7 @@ def create_router(app, default_version):
     # Default API version
     router.include_router(endpoints[default_version])
     router.include_router(websocket_router, prefix="/ws", tags=["WebSocket"])
+    router.include_router(streams_router, tags=["Streams"])
 
     # Add API v1 endpoints to the main router
     router.include_router(v1_router,

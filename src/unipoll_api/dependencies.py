@@ -1,11 +1,12 @@
 from typing import Annotated
 from functools import wraps
 # from bson import DBRef
-from fastapi import Cookie, Depends, Query, HTTPException, WebSocket
+from fastapi import Cookie, Depends, Query, HTTPException
 from unipoll_api.account_manager import active_user, get_current_active_user
 from unipoll_api.documents import ResourceID, Workspace, Group, Account, Poll, Policy, Member
 from unipoll_api import exceptions as Exceptions
-from unipoll_api.account_manager import get_access_token_db
+from unipoll_api.account_manager import get_access_token_db, get_database_strategy
+from datetime import timedelta, timezone, datetime
 
 
 # Wrapper to handle exceptions and raise HTTPException
@@ -53,18 +54,19 @@ async def get_member_by_account(account: Account, resource: Workspace | Group) -
     raise Exceptions.ResourceExceptions.ResourceNotFound("member", account.id)
 
 
-async def websocket_auth(websocket: WebSocket,
-                         session: Annotated[str | None, Cookie()] = None,
+async def websocket_auth(session: Annotated[str | None, Cookie()] = None,
                          token: Annotated[str | None, Query()] = None,
-                         token_db=Depends(get_access_token_db)
+                         token_db=Depends(get_access_token_db),
+                         strategy=Depends(get_database_strategy)
                          ) -> Account:
+    user = None
 
     if token:
-        token_data = await token_db.get_by_token(token)
-        user = await get_account(token_data.user_id)
-        return user
-
-    raise HTTPException(status_code=401, detail="Unauthorized")
+        max_age = datetime.now(timezone.utc) - timedelta(seconds=strategy.lifetime_seconds)
+        token_data = await token_db.get_by_token(token, max_age)
+        if token_data:
+            user = await Account.get(token_data.user_id)
+    return user
 
 
 # Dependency for getting a workspace with the given id

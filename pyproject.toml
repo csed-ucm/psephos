@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unipoll-api"
-version = "0.12.1"
+version = "0.12.2"
 description = "Unipoll API"
 authors = [{email = "help@unipoll.cc"}, {name = "University Polling"}]
 readme = "README.md"
@@ -21,6 +21,7 @@ dependencies = [
     'fastapi-users[beanie]',
     'pydantic-settings',
     'uvicorn[standard]',
+    'sse-starlette'
 ]
 
 [project.scripts]
