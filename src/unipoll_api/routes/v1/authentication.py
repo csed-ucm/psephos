@@ -66,6 +66,8 @@ async def login(credentials: OAuth2PasswordRequestForm = Depends(),
 
 
 # Refresh the access token using the refresh token
+
+
 @router.post("/jwt/refresh", responses=login_responses, response_model_exclude_unset=True)
 async def refresh_jwt(authorization: Annotated[str, Header(...)],
                       refresh_token: Annotated[str, Header(...)],
@@ -84,6 +86,8 @@ async def refresh_jwt(authorization: Annotated[str, Header(...)],
 
 
 # Refresh the access token using the refresh token and Client ID
+
+
 @router.post("/jwt/postman_refresh", responses=login_responses, response_model_exclude_unset=True)
 async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
                                      body: Annotated[str, Body(...)],

@@ -1,7 +1,6 @@
 # APIRouter creates path operations for user module
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, Query, HTTPException
-
 from unipoll_api import dependencies as Dependencies
 from unipoll_api.documents import Poll
 from unipoll_api.exceptions.resource import APIException
@@ -17,6 +16,7 @@ query_params = list[Literal["all", "questions", "policies"]]
 
 
 # Get poll by id
+
 @router.get("/{poll_id}",
             response_description="Poll details",
             response_model=PollSchemas.PollResponse,
@@ -39,6 +39,7 @@ async def get_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Update poll details
+
 @router.patch("/{poll_id}",
               response_description="Update Poll detail",
               response_model=PollSchemas.PollResponse,
@@ -52,6 +53,7 @@ async def update_poll(poll: Poll = Depends(Dependencies.get_poll),
 
 
 # Delete poll by id
+
 @router.delete("/{poll_id}",
                response_description="Result of delete operation",
                status_code=204)

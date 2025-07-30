@@ -66,6 +66,7 @@ class PollList(BaseModel):
 
 class CreatePollRequest(BaseModel):
     name: str
+    workspace: ResourceID
     description: str
     public: bool
     published: bool
