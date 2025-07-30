@@ -38,6 +38,8 @@ def parse_args():
     run_parser.add_argument("--port", type=int, default=settings.port, help="Host port number")
 
     subparser.add_parser('setup', help="Setup the API server")
-    subparser.add_parser('get-openapi', help="Get the OpenAPI schema")
+    
+    get_openapi_parser = subparser.add_parser('get-openapi', help="Get the OpenAPI schema")
+    get_openapi_parser.add_argument('-v', "--version", type=int, nargs='*', default=[1, 2], help="API version")
 
     return parser.parse_args()

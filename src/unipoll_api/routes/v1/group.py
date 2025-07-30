@@ -2,7 +2,7 @@
 from typing import Annotated, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from unipoll_api import dependencies as Dependencies
-from unipoll_api.actions import GroupActions, PermissionsActions, MembersActions, PolicyActions
+from unipoll_api.actions.__interface__ import GroupActions, PermissionsActions, MembersActions, PolicyActions
 from unipoll_api.exceptions.resource import APIException
 from unipoll_api.schemas import GroupSchemas, PolicySchemas, MemberSchemas
 from unipoll_api.documents import Group, Policy, ResourceID, Member
@@ -103,7 +103,7 @@ async def add_group_members(member_data: MemberSchemas.AddMembers,
 async def remove_group_member(group: Group = Depends(Dependencies.get_group),
                               member: Member = Depends(Dependencies.get_member)):
     try:
-        return await MembersActions.remove_member(group, account)
+        return await MembersActions.remove_member(group, member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))
 
@@ -118,7 +118,7 @@ async def get_group_policies(group: Group = Depends(Dependencies.get_group),
                              account_id: ResourceID = Query(None)) -> PolicySchemas.PolicyList:
     try:
         account = await Dependencies.get_account(account_id) if account_id else None
-        member = await Dependencies.get_member(account, group) if account else None
+        member = await Dependencies.get_member_by_account(account, group) if account else None
         return await PolicyActions.get_policies(resource=group, policy_holder=member)
     except APIException as e:
         raise HTTPException(status_code=e.code, detail=str(e))

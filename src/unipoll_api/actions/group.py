@@ -8,7 +8,7 @@ from unipoll_api import actions
 from unipoll_api.schemas import GroupSchemas, WorkspaceSchemas
 from unipoll_api.exceptions import GroupExceptions, WorkspaceExceptions, ResourceExceptions
 from unipoll_api.utils import Permissions
-from unipoll_api.dependencies import get_member
+from unipoll_api.dependencies import get_member_by_account
 
 
 # Get list of groups
@@ -48,7 +48,7 @@ async def create_group(workspace: Workspace,
     await Permissions.check_permissions(workspace, "add_groups", check_permissions)
     account = AccountManager.active_user.get()
 
-    member = await get_member(account, workspace)
+    member = await get_member_by_account(account, workspace)
 
     # Check if group name is unique
     group: Group  # For type hinting, until Link type is supported

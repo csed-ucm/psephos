@@ -96,7 +96,7 @@ class Workspace(Resource):
     polls: list[Link["Poll"]] = []
 
     async def add_member(self, account: "Account", permissions, save: bool = True) -> "Member":
-        new_member = await Member(account=account, resource=(await create_link(self))).create()  # type: ignore
+        new_member = await Member(account=account, workspace=(await create_link(self))).create()  # type: ignore
         new_policy = await self.add_policy(new_member, permissions, save=False)  # type: ignore
         new_member.policies.append(new_policy)  # type: ignore
 

@@ -113,6 +113,6 @@ async def refresh_jwt_with_client_ID(authorization: Annotated[str, Header(...)],
 
 # Include prebuilt routes for authentication
 router.include_router(AccountManager.fastapi_users.get_register_router(
-    AccountSchemas.Account, AccountSchemas.CreateAccount))
+    AccountSchemas.Account, AccountSchemas.CreateAccountRequest))
 router.include_router(AccountManager.fastapi_users.get_reset_password_router())
 router.include_router(AccountManager.fastapi_users.get_verify_router(AccountSchemas.Account))

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from unipoll_api.schemas import PolicySchemas
 from unipoll_api.exceptions.resource import APIException
-from unipoll_api.actions import PermissionsActions
+from unipoll_api.actions.__interface__ import PermissionsActions
 
 router = APIRouter()
 
