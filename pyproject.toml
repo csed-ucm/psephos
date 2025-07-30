@@ -21,6 +21,7 @@ dependencies = [
     'fastapi-users[beanie]',
     'pydantic-settings',
     'uvicorn[standard]',
+    'sse-starlette'
 ]
 
 [project.scripts]
